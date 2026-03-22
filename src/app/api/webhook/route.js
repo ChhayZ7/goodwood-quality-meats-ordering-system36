@@ -1,5 +1,6 @@
 import { stripe } from '@/lib/stripe'
 
+// Stripe webhook - confirms payment, saves order
 export async function POST(req) {
   const body = await req.text()
   const sig = req.headers.get('stripe-signature')
