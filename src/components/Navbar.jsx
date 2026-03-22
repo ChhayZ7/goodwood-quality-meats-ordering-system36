@@ -1,0 +1,1 @@
+// Top navigation bar - logo, links, cart icon, auth state
