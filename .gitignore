@@ -39,3 +39,4 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+/Goodwood_Quality_Meats_Ordering_System36/.trunk
