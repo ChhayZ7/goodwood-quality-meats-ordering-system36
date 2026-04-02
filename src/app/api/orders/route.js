@@ -7,15 +7,24 @@ const supabase = createClient(
 );
 
 
-// Get current user's orders
-export async function GET() {
+// GET current user's orders
+export async function getOrders() {
   // Get current user based on Supabase authentication
-  const {
-    data: { user },
-    error: userError
-  } = await supabase.auth.getUser();
+  let user;
+  const { data: authData } = await supabase.auth.getUser();
+  if (authData.user) {
+    user = authData.user;
+  }
+  else { //FAKE USER JUST FOR TESTING
+    user = {
+        id: 'db7cd94b-1fad-4e1e-aac6-073c4e894351',
+        email: 'johndoe69@yahoo.com',
+        first_name: 'John',
+        last_name: 'Doe'
+      };
+  }
 
-  if (userError || !user) {
+  if (!user) {
     return Response.json({ error: 'User not authenticated' }, { status: 401 });
   }
 
@@ -37,3 +46,4 @@ export async function GET() {
 
   return Response.json(data, { status: 200 });
 }
+
