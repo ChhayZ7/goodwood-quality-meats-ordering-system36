@@ -84,8 +84,9 @@ export function withHandler(handler, options = {}) {
   }
 }
 
-// ── Reusable schemas ──────────────────────────────────────────
 
+
+// Reusable schemas to check attributes
 export const schemas = {
   createOrder: {
     required: ['customer_id', 'pickup_date', 'items'],
