@@ -1,5 +1,6 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import Footer from '@/components/Footer'
 
 // Root Layout Page - navbar, footer, font, cart provider
 
@@ -24,7 +25,17 @@ export default function RootLayout({ children }) {
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      
+      <body className="min-h-full flex flex-col bg-white">
+
+          <main className="flex-grow bg-white">
+            {children}
+          </main>
+          
+          <Footer />
+
+      </body>
+
     </html>
   );
 }

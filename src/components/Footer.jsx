@@ -28,20 +28,20 @@ export default function Footer() {
 
             {/* Instagram */}
             <a
-                href="https://www.instagram.com/goodwoodqualitymeats/"
+                href="https://www.instagram.com/goodwoodqualitymeats"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-12 h-12 flex items-center justify-center"
+                className="w-12 h-12 flex items-center justify-center hover:scale-110 transition"
             >
                 <FaInstagram className="text-5xl font-bold" />
             </a>
 
             {/* Facebook */}
             <a
-                href="https://www.facebook.com/goodwoodqualitymeats/"
+                href="https://www.facebook.com/goodwoodqualitymeats"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-12 h-12 flex items-center justify-center rounded-full bg-black text-white"
+                className="w-12 h-12 flex items-center justify-center hover:scale-110 transition rounded-full bg-black text-white"
             >
                 <FaFacebookF className="text-4xl font-bold translate-x-[1px]" />
             </a>
