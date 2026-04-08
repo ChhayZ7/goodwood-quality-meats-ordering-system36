@@ -32,10 +32,10 @@ const ORDER_ITEMS_SELECT = `
 
 // DATABASE QUERIES
 
-/**
- * All orders for a customer, newest first.
- * Includes line items and product details.
- */
+
+//All orders for a customer, newest first.
+//Includes line items and product details.
+
 export async function getOrdersByCustomer(customerId) {
   return supabase
     .from('orders')
@@ -54,10 +54,10 @@ export async function getOrdersByCustomer(customerId) {
     .order('created_at', { ascending: false })
 }
 
-/**
- * Single order by ID with full detail:
- * customer info, line items, products, weight options, payments.
- */
+
+// Single order by ID with full detail:
+// customer info, line items, products, weight options, payments.
+
 export async function getOrderById(orderId) {
   return supabase
     .from('orders')
@@ -94,14 +94,12 @@ export async function getOrderById(orderId) {
 }
 
 
-/**
- * Insert a new order and its line items (after successful payment)
- *
- * @param {{ customer_id, pickup_date, notes, deposit_required_cents }} orderData
- * @param {{ product_id, quantity, weight_option_id, weight_preference,
- *            unit_price_cents, subtotal_cents, notes }[]} items
- * @returns {{ data: { order_id: string } | null, error }}
- */
+
+
+// orderData is an array [customer_id, pickup_date, notes, deposit_required_cents]
+// items is an array [product_id, quantity, weight_option_id, weight_preference, unit_price_cents, subtotal_cents, notes]
+// returns data: { order_id: string } | null, error
+
 export async function createOrder(orderData, items) {
   const total_cents = items.reduce((sum, item) => sum + (item.subtotal_cents ?? 0), 0)
 
@@ -143,10 +141,9 @@ export async function createOrder(orderData, items) {
   return { data: { order_id: order.id }, error: null }
 }
 
-/**
- * Update allowed fields on an order.
- * Only updates fields that are explicitly passed in.
- */
+
+// Update allowed fields on an order.
+// Only updates fields that are explicitly passed in.
 export async function updateOrder(orderId, fields) {
   const allowed = ['status', 'notes', 'pickup_date', 'deposit_paid_cents']
   const updates = Object.fromEntries(
@@ -161,10 +158,10 @@ export async function updateOrder(orderId, fields) {
     .single()
 }
 
-/**
- * Record a payment row against an order.
- * Called after Stripe confirms payment server-side.
- */
+
+// Record a payment row against an order.
+// Called after Stripe confirms payment server-side.
+
 export async function recordPayment({
   order_id,
   stripe_payment_intent_id,

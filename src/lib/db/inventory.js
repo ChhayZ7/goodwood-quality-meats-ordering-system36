@@ -3,15 +3,11 @@
 
 import { supabase } from '@/lib/supabase'
 
-/**
- * Check all cart items can be fulfilled from current stock.
- *
- * @param {{ product_id: string, quantity: number }[]} items
- * @returns {{
- *   ok: boolean,
- *   failures: { product_id, product_name, requested, available }[]
- * }}
- */
+
+// Check all cart items can be fulfilled from current stock.
+
+// items is an array of objects in the form: [product_id: string, quantity: number]
+// returns a boolean + array of failure attributes if items cannot be fulfilled
 export async function validateStock(items) {
   const productIds = items.map((i) => i.product_id)
 
@@ -57,13 +53,12 @@ export async function validateStock(items) {
   return { ok: failures.length === 0, failures }
 }
 
-/**
- * Decrement stock after a confirmed, paid order.
- * Uses the decrement_stock Postgres function for safe concurrent updates (function made in Supabase)
- *
- * @param {{ product_id: string, quantity: number }[]} items
- * @returns {{ ok: boolean, errors: { product_id, error }[] }}
- */
+
+//Decrement stock after a confirmed, paid order.
+//Uses the decrement_stock Postgres function for safe concurrent updates (this function is made in Supabase)
+
+// items is an array of objects in the form: [product_id: string, quantity: number]
+// returns a boolean + array of error attributes if items cannot be fulfilled
 export async function decrementStock(items) {
   const errors = []
 
@@ -78,10 +73,10 @@ export async function decrementStock(items) {
   return { ok: errors.length === 0, errors }
 }
 
-/**
- * Fetch stock levels for a list of product IDs.
- * Useful for showing low-stock badges on the product listing page.
- */
+
+//Fetch stock levels for a list of product IDs.
+//Useful for showing low-stock badges on the product listing page.
+
 export async function getStockLevels(productIds) {
   return supabase
     .from('inventory')
