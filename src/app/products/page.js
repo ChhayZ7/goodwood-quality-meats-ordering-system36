@@ -1,5 +1,7 @@
 'use client'
 
+import { useState } from 'react'
+import Link from 'next/link'
 import Navbar from '@/components/Navbar'
 import GoldDivider from '@/components/GoldDivider'
 import Footer from '@/components/Footer'
@@ -54,6 +56,15 @@ function ProductCard({ product }) {
 
 export default function ProductsPage() {
     
+    
+  const [activeCategory, setActiveCategory] = useState('All')
+
+  // Temporary empty array until backend is connected
+  const products = []
+
+  const filteredProducts = products.filter((product) => {
+    return activeCategory === 'All' || product.category === activeCategory
+  })
   return (
     <div>
       <Navbar />
@@ -73,7 +84,9 @@ export default function ProductsPage() {
 
           <div>
             {CATEGORIES.map((category) => (
-              <button key={category} type="button">
+              <button key={category} 
+              type="button">
+                onClick={() => setActiveCategory(category)}
                 {category}
               </button>
             ))}
@@ -83,13 +96,24 @@ export default function ProductsPage() {
           <h2>Products</h2>
 
           <div>
+            {products.length === 0 ? (
+              <>
+              <PlaceholderCard />
             <PlaceholderCard />
             <PlaceholderCard />
             <PlaceholderCard />
             <PlaceholderCard />
             <PlaceholderCard />
-            <PlaceholderCard />
+              </>
+             ) : (
+              filteredProducts.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))
+            )}
           </div>
+          {products.length === 0 && (
+            <p>Products will load here once connected to the database</p>
+          )}
         </section>
       </main>
 
