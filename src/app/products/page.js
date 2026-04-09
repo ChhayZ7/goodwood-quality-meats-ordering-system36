@@ -70,20 +70,45 @@ export default function ProductsPage() {
     return activeCategory === 'All' || product.category === activeCategory
   })
   return (
-    <div>
+    <div
+    
+      style={{
+        minHeight: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        backgroundColor: '#faf3e0',
+      }}
+    
+    >
       <Navbar />
       <GoldDivider />
 
-      <main>
-        <section>
-          <h1>Ready for Christmas</h1>
-          <p>
+      <main style={{ flex: 1 }}>
+        <div style={{
+            maxWidth: '1000px',
+            margin: '0 auto',
+            padding: '48px 24px',
+          }}>
+
+        
+        <section style={{
+              textAlign: 'center',
+              marginBottom: '40px',
+            }}>
+          <h1 style={{
+                marginBottom: '12px',
+              }}>Ready for Christmas</h1>
+          <p style={{
+                maxWidth: '600px',
+                margin: '0 auto',
+                lineHeight: '1.6',
+              }}>
             Browse our selection of premium meats. All orders require a $20 deposit,
             with final payment upon collection.
           </p>
         </section>
 
-        <section>
+        <section style={{ marginBottom: '32px' }}>
           <h2>Categories</h2>
 
           <div>
@@ -119,6 +144,7 @@ export default function ProductsPage() {
             <p>Products will load here once connected to the database</p>
           )}
         </section>
+        </div>
       </main>
 
       <Footer />
