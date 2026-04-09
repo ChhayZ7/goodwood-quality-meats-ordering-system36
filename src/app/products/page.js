@@ -12,15 +12,38 @@ const CATEGORIES = ['All', 'Pork', 'Beef', 'Lamb', 'Poultry', 'Seafood', 'Other'
 // Placeholder card shown while backend product data is not connected yet
 function PlaceholderCard() {
   return (
-    <article>
-      <div>
+    <article
+    style={{
+        backgroundColor: '#ffffff',
+        border: '1px solid #e4d3a3',
+        borderRadius: '10px',
+        overflow: 'hidden',
+      }}
+    >
+      <div
+      style={{
+          height: '180px',
+          backgroundColor: '#efe3c4',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
         <p>Image Placeholder</p>
       </div>
 
-      <div>
-        <h3>Product Name</h3>
-        <p>$00.00/kg</p>
-        <button type="button">See Details</button>
+      <div style={{ padding: '16px' }}>
+        <h3 style={{ marginBottom: '8px' }}>Product Name</h3>
+        <p style={{ marginBottom: '12px' }}>$00.00/kg</p>
+        <button type="button"
+          style={{
+            width: '100%',
+            padding: '10px',
+            border: '1px solid #d6c08d',
+            backgroundColor: '#f5ead0',
+            borderRadius: '6px',
+            cursor: 'pointer',
+          }}>See Details</button>
       </div>
     </article>
   )
