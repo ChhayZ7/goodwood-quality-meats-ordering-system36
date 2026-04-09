@@ -60,20 +60,63 @@ function ProductCard({ product }) {
       : `$${(product.price_per_kg_cents / 100).toFixed(2)}/kg`
 
   return (
-    <article>
-      <div>
-        <img src={product.image_url} alt={product.name} />
-        {soldOut && <p>Sold Out</p>}
+    <article 
+    style={{
+        backgroundColor: '#ffffff',
+        border: '1px solid #e4d3a3',
+        borderRadius: '10px',
+        overflow: 'hidden',
+      }}
+    >
+      <div style={{
+          position: 'relative',
+          height: '180px',
+        }}>
+        <img src={product.image_url} alt={product.name} style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+          }}/>
+        {soldOut && (
+          <p
+            style={{
+              position: 'absolute',
+              top: '10px',
+              right: '10px',
+              margin: 0,
+              padding: '6px 10px',
+              backgroundColor: '#7b1a1a',
+              color: '#ffffff',
+              borderRadius: '6px',
+            }}
+          >
+            Sold Out
+          </p>)}
       </div>
 
-      <div>
-        <h3>{product.name}</h3>
-        <p>{priceDisplay}</p>
+      <div style={{ padding: '16px' }}>
+        <h3 style={{ marginBottom: '8px' }}>{product.name}</h3>
+        <p style={{ marginBottom: '12px', fontWeight: '600' }}>{priceDisplay}</p>
 
         {soldOut ? (
-          <p>Unavailable</p>
+          <p  style={{
+              margin: 0,
+              padding: '10px',
+              textAlign: 'center',
+              backgroundColor: '#eeeeee',
+              borderRadius: '6px',
+            }}>Unavailable</p>
         ) : (
-          <Link href={`/products/${product.id}`}>See Details</Link>
+          <Link href={`/products/${product.id}`}
+            style={{
+              display: 'block',
+              textAlign: 'center',
+              padding: '10px',
+              backgroundColor: '#7b1a1a',
+              color: '#ffffff',
+              textDecoration: 'none',
+              borderRadius: '6px',
+            }}>See Details</Link>
         )}
       </div>
     </article>
