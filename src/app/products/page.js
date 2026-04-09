@@ -6,8 +6,10 @@ import Navbar from '@/components/Navbar'
 import GoldDivider from '@/components/GoldDivider'
 import Footer from '@/components/Footer'
 
+// Available product categories shown as filter buttons
 const CATEGORIES = ['All', 'Pork', 'Beef', 'Lamb', 'Poultry', 'Seafood', 'Other']
 
+// Placeholder card shown while backend product data is not connected yet
 function PlaceholderCard() {
   return (
     <article>
@@ -24,6 +26,8 @@ function PlaceholderCard() {
   )
 }
 
+// Reusable card for real product data
+// Handles availability and price display logic
 function ProductCard({ product }) {
   const soldOut = !product.is_available || product.stock === 0
 
@@ -56,12 +60,12 @@ function ProductCard({ product }) {
 
 export default function ProductsPage() {
     
-    
+  // Stores the currently selected category
   const [activeCategory, setActiveCategory] = useState('All')
 
   // Temporary empty array until backend is connected
   const products = []
-
+// Filters products based on the selected category
   const filteredProducts = products.filter((product) => {
     return activeCategory === 'All' || product.category === activeCategory
   })
