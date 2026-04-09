@@ -109,20 +109,36 @@ export default function ProductsPage() {
         </section>
 
         <section style={{ marginBottom: '32px' }}>
-          <h2>Categories</h2>
+          <h2 style={{ marginBottom: '16px' }}>Categories</h2>
 
-          <div>
+          <div style={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: '10px',
+              }}>
             {CATEGORIES.map((category) => (
               <button key={category} 
-              type="button">
-                onClick={() => setActiveCategory(category)}
+              type="button"
+              onClick={() => setActiveCategory(category)}
+                  style={{
+                    padding: '10px 18px',
+                    borderRadius: '999px',
+                    border: '1px solid #d6c08d',
+                    backgroundColor:
+                      activeCategory === category ? '#7b1a1a' : '#f5ead0',
+                    color: activeCategory === category ? '#ffffff' : '#1a1a1a',
+                    cursor: 'pointer',
+                    fontWeight: '600',
+                  }}
+              >
+                
                 {category}
               </button>
             ))}
           </div>
         </section>
         <section>
-          <h2>Products</h2>
+          <h2 style={{ marginBottom: '16px' }}>Products</h2>
 
           <div>
             {products.length === 0 ? (
