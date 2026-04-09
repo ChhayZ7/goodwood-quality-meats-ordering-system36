@@ -1,7 +1,7 @@
 // All database operations for orders (retrieval, order creation etc)
 // ROUTE FILES MUST IMPORT THIS to query database
 
-import { supabaseAdmin } from '@/lib/supabase-admin'  // ← was @/lib/supabase (file doesn't exist)
+import { supabaseAdmin } from '@/lib/supabase-admin'
 
 
 const ORDER_ITEMS_SELECT = `

@@ -1,6 +1,6 @@
 // All database reads related to products
 
-import { supabaseAdmin } from '@/lib/supabase-admin'  // ← was @/lib/supabase (file doesn't exist)
+import { supabaseAdmin } from '@/lib/supabase-admin'
 
 const PRODUCT_SELECT = `
   id,

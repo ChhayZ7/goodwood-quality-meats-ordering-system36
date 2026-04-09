@@ -1,7 +1,7 @@
 // Stock validation and adjustment.
 // validateStock is called before every order creation to prevent overselling.
 
-import { supabaseAdmin } from '@/lib/supabase-admin'  // ← was @/lib/supabase (file doesn't exist)
+import { supabaseAdmin } from '@/lib/supabase-admin'
 
 
 // Check all cart items can be fulfilled from current stock.
