@@ -1,6 +1,6 @@
 // All database reads related to products
 
-import { supabase } from '@/lib/supabase'
+import { supabaseAdmin } from '@/lib/supabase-admin'  // ← was @/lib/supabase (file doesn't exist)
 
 const PRODUCT_SELECT = `
   id,
@@ -22,11 +22,10 @@ const PRODUCT_SELECT = `
 
 
 // Fetch all products with optional filters.
-
 // type is either 'FIXED' or 'WEIGHT_RANGE'
 // availableOnly is a boolean
 export async function getProducts({ type, availableOnly = true } = {}) {
-  let q = supabase.from('products').select(PRODUCT_SELECT).order('name')
+  let q = supabaseAdmin.from('products').select(PRODUCT_SELECT).order('name')
   if (type) q = q.eq('product_type', type)
   if (availableOnly) q = q.eq('is_available', true)
   return q
@@ -35,7 +34,7 @@ export async function getProducts({ type, availableOnly = true } = {}) {
 
 // Fetch a single product by ID with its weight options.
 export async function getProductById(productId) {
-  return supabase
+  return supabaseAdmin
     .from('products')
     .select(PRODUCT_SELECT)
     .eq('id', productId)

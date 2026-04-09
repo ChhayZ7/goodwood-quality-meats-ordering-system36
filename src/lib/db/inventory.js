@@ -1,17 +1,16 @@
 // Stock validation and adjustment.
 // validateStock is called before every order creation to prevent overselling.
 
-import { supabase } from '@/lib/supabase'
+import { supabaseAdmin } from '@/lib/supabase-admin'  // ← was @/lib/supabase (file doesn't exist)
 
 
 // Check all cart items can be fulfilled from current stock.
-
-// items is an array of objects in the form: [product_id: string, quantity: number]
-// returns a boolean + array of failure attributes if items cannot be fulfilled
+// items: [{ product_id: string, quantity: number }]
+// returns { ok: boolean, failures: [{ product_id, product_name, requested, available }] }
 export async function validateStock(items) {
   const productIds = items.map((i) => i.product_id)
 
-  const { data: rows, error } = await supabase
+  const { data: rows, error } = await supabaseAdmin
     .from('inventory')
     .select('product_id, stock_quantity, products(name)')
     .in('product_id', productIds)
@@ -54,16 +53,15 @@ export async function validateStock(items) {
 }
 
 
-//Decrement stock after a confirmed, paid order.
-//Uses the decrement_stock Postgres function for safe concurrent updates (this function is made in Supabase)
-
-// items is an array of objects in the form: [product_id: string, quantity: number]
-// returns a boolean + array of error attributes if items cannot be fulfilled
+// Decrement stock after a confirmed, paid order.
+// Uses the decrement_stock Postgres function for safe concurrent updates (defined in Supabase).
+// items: [{ product_id: string, quantity: number }]
+// returns { ok: boolean, errors: [{ product_id, error }] }
 export async function decrementStock(items) {
   const errors = []
 
   for (const item of items) {
-    const { error } = await supabase.rpc('decrement_stock', {
+    const { error } = await supabaseAdmin.rpc('decrement_stock', {
       p_product_id: item.product_id,
       p_quantity:   item.quantity,
     })
@@ -74,11 +72,10 @@ export async function decrementStock(items) {
 }
 
 
-//Fetch stock levels for a list of product IDs.
-//Useful for showing low-stock badges on the product listing page.
-
+// Fetch stock levels for a list of product IDs.
+// Useful for showing low-stock badges on the product listing page.
 export async function getStockLevels(productIds) {
-  return supabase
+  return supabaseAdmin
     .from('inventory')
     .select('product_id, stock_quantity, low_stock_threshold')
     .in('product_id', productIds)

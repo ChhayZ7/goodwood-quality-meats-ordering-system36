@@ -1,7 +1,7 @@
 // All database operations for orders (retrieval, order creation etc)
 // ROUTE FILES MUST IMPORT THIS to query database
 
-import { supabase } from '@/lib/supabase'
+import { supabaseAdmin } from '@/lib/supabase-admin'  // ← was @/lib/supabase (file doesn't exist)
 
 
 const ORDER_ITEMS_SELECT = `
@@ -33,11 +33,10 @@ const ORDER_ITEMS_SELECT = `
 // DATABASE QUERIES
 
 
-//All orders for a customer, newest first.
-//Includes line items and product details.
-
+// All orders for a customer, newest first.
+// Includes line items and product details.
 export async function getOrdersByCustomer(customerId) {
-  return supabase
+  return supabaseAdmin
     .from('orders')
     .select(`
       id,
@@ -57,9 +56,8 @@ export async function getOrdersByCustomer(customerId) {
 
 // Single order by ID with full detail:
 // customer info, line items, products, weight options, payments.
-
 export async function getOrderById(orderId) {
-  return supabase
+  return supabaseAdmin
     .from('orders')
     .select(`
       id,
@@ -94,16 +92,13 @@ export async function getOrderById(orderId) {
 }
 
 
-
-
-// orderData is an array [customer_id, pickup_date, notes, deposit_required_cents]
-// items is an array [product_id, quantity, weight_option_id, weight_preference, unit_price_cents, subtotal_cents, notes]
-// returns data: { order_id: string } | null, error
-
+// orderData: { customer_id, pickup_date, notes, deposit_required_cents }
+// items: [{ product_id, quantity, weight_option_id, weight_preference, unit_price_cents, subtotal_cents, notes }]
+// returns { data: { order_id: string } | null, error }
 export async function createOrder(orderData, items) {
   const total_cents = items.reduce((sum, item) => sum + (item.subtotal_cents ?? 0), 0)
 
-  const { data: order, error: orderError } = await supabase
+  const { data: order, error: orderError } = await supabaseAdmin
     .from('orders')
     .insert({
       customer_id:            orderData.customer_id,
@@ -130,11 +125,11 @@ export async function createOrder(orderData, items) {
     notes:             item.notes ?? null,
   }))
 
-  const { error: itemsError } = await supabase.from('order_items').insert(lineItems)
+  const { error: itemsError } = await supabaseAdmin.from('order_items').insert(lineItems)
 
   if (itemsError) {
     // Attempt to rollback if item insertion fails
-    await supabase.from('orders').delete().eq('id', order.id)
+    await supabaseAdmin.from('orders').delete().eq('id', order.id)
     return { data: null, error: itemsError }
   }
 
@@ -150,7 +145,7 @@ export async function updateOrder(orderId, fields) {
     Object.entries(fields).filter(([k]) => allowed.includes(k))
   )
 
-  return supabase
+  return supabaseAdmin
     .from('orders')
     .update(updates)
     .eq('id', orderId)
@@ -161,7 +156,6 @@ export async function updateOrder(orderId, fields) {
 
 // Record a payment row against an order.
 // Called after Stripe confirms payment server-side.
-
 export async function recordPayment({
   order_id,
   stripe_payment_intent_id,
@@ -169,7 +163,7 @@ export async function recordPayment({
   type,
   status,
 }) {
-  return supabase
+  return supabaseAdmin
     .from('payments')
     .insert({
       order_id,
