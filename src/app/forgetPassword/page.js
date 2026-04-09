@@ -10,7 +10,7 @@ export default function forgetPassword() {
     <div className="h-screen flex bg-[#f4f1ec] overflow-hidden">
 
       {/* LEFT SIDE */}
-      <div className="w-[45%] flex items-center justify-center px-20">
+      <div className="w-[45%] flex items-center justify-center px-20 -mt-20">
         <div className="w-full max-w-lg">
 
 
@@ -56,7 +56,7 @@ export default function forgetPassword() {
           />
 
           {/* BUTTON */}
-          <button className="w-full bg-red-800 text-white py-5 rounded-xl text-lg font-semibold hover:bg-red-900 transition shadow-md">
+          <button type="submit" className="w-full bg-red-800 text-white py-5 rounded-xl text-lg font-semibold hover:bg-red-900 transition shadow-md">
             Send Reset Link
           </button>
 
