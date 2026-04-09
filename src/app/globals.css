@@ -5,8 +5,9 @@
   --color-background: #FDF8F0;
   --color-gold: #D4AF37;
   --color-green: #2D6A2D;
-  --color-dark: #2C2C2A;
-  --color-muted: #717182;
+  --color-green-dark: #143f14; 
+  --color-dark: #060606;
+  --color-muted: #353535;
 }
 
 body {

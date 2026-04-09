@@ -1,41 +1,36 @@
-import Link from 'next/link'
+import Link from 'next/link';
+import HeroImage from '../assets/heroImage.jpg'
 
 const teamMembers = [
   {
     name: 'David Armstrong',
-    role: 'Owner & Master Butcher',
     bio: 'David is the proud owner of Goodwood Quality Meats and a Master Butcher and Smallgoods maker. David has been in the industry for more than 35 years.',
-    img: 'https://images.unsplash.com/photo-1609153450855-55aaee2c2992?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=400',
+    img: 'https://www.goodwoodqualitymeats.com.au/wp-content/uploads/2025/05/IMG_0620.jpeg',
   },
   {
     name: 'Luke Leyson',
-    role: 'Captain — Australian Competition Butchering Team',
     bio: 'Luke has been part of our team for 20 years and is proudly the Captain of the Australian Competition Butchering Team.',
-    img: 'https://images.unsplash.com/photo-1652735822396-63907adf2786?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=400',
+    img: 'https://www.goodwoodqualitymeats.com.au/wp-content/uploads/2025/05/IMG_0618.jpeg',
   },
   {
     name: 'Caleb Sundqvist',
-    role: 'Qualified Butcher',
     bio: 'Caleb has been part of our team for 16 years and runs the front of house. Caleb won Gold in the Young Butchers Cutting and Cooking Competition in Perth in 2016.',
-    img: 'https://images.unsplash.com/photo-1741243412269-be61e7d2be0d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=400',
+    img: 'https://www.goodwoodqualitymeats.com.au/wp-content/uploads/2025/05/IMG_0626.jpeg',
   },
   {
     name: 'Isaac Visszmeg',
-    role: 'Apprentice Butcher & Smallgoods Maker',
     bio: 'Isaac is one of our talented new team members and an apprentice Butcher and Smallgoods maker.',
-    img: 'https://images.unsplash.com/photo-1609153450855-55aaee2c2992?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=400',
+    img: 'https://www.goodwoodqualitymeats.com.au/wp-content/uploads/2025/05/IMG_0623.jpeg',
   },
   {
     name: 'Sian Hampshire',
-    role: 'Customer Experience',
     bio: 'Sian is our newest team member and brings a fresh approach to our customer experience.',
-    img: 'https://images.unsplash.com/photo-1652735822396-63907adf2786?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=400',
+    img: 'https://www.goodwoodqualitymeats.com.au/wp-content/uploads/2025/05/IMG_0628.jpeg',
   },
   {
     name: 'Steve Edwards',
-    role: 'Experienced Butcher & Smallgoods Maker',
     bio: 'Steve is an Experienced Butcher and Smallgoods maker with over 20 years of experience in the industry.',
-    img: 'https://images.unsplash.com/photo-1741243412269-be61e7d2be0d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=400',
+    img: 'https://www.goodwoodqualitymeats.com.au/wp-content/uploads/2025/05/IMG_0617.jpeg',
   },
 ]
 
@@ -57,26 +52,26 @@ export default function HomePage() {
     <main>
 
       {/* Hero Image */}
-      <div className="w-full h-80 overflow-hidden">
+      <div className="w-full h-110 overflow-hidden">
         <img
-          src="https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1600"
+          src={HeroImage.src}
           alt="Premium Meats"
           className="w-full h-full object-cover"
         />
       </div>
 
       {/* Gold divider */}
-      <div style={{ height: '3px', backgroundColor: '#D4AF37' }} />
+      <div style={{ height: '2.5px', backgroundColor: '#D4AF37' }} />
 
       {/* Welcome Section */}
-      <section className="py-16 text-center max-w-3xl mx-auto px-6">
-        <p className="text-sm font-semibold tracking-widest mb-3" style={{ color: '#D4AF37' }}>
+      <section className="py-25 text-center max-w-3xl mx-auto px-6">
+        <p className="text-3xl font-semibold tracking-widest mb-3" style={{ color: '#D4AF37' }}>
           PREMIUM MEATS
         </p>
         <h1 className="text-5xl font-bold mb-6" style={{ color: '#8B1A1A' }}>
           Order Your Christmas Meats
         </h1>
-        <p className="text-lg mb-8" style={{ color: '#717182' }}>
+        <p className="text-lg/8 mb-8" style={{ color: '#717182' }}>
           Make this Christmas unforgettable with our premium selection of locally sourced,
           expertly prepared meats. Pre-order now for guaranteed availability.
         </p>
@@ -102,15 +97,15 @@ export default function HomePage() {
             {[
               {
                 number: '1',
-                color: '#D4AF37',
+                color: '#a98b29',
                 title: 'Browse & Select',
-                description: 'Choose from our range of premium Christmas meats and specify your preferred weight.',
+                description: 'Choose from our range of premium Christmas meats and specify your preferred weight',
               },
               {
                 number: '2',
                 color: '#2D6A2D',
                 title: 'Pay Deposit',
-                description: 'Secure your order with a $20.00 deposit. Final payment upon collection.',
+                description: 'Secure your order with a $20.00 deposit. Final payment upon collection',
               },
               {
                 number: '3',
@@ -126,7 +121,7 @@ export default function HomePage() {
                 >
                   {step.number}
                 </div>
-                <h3 className="text-xl font-bold mb-3" style={{ color: '#2C2C2A' }}>
+                <h3 className="text-xl font-bold mb-3" style={{ color: step.color }}>
                   {step.title}
                 </h3>
                 <p className="text-sm" style={{ color: '#717182' }}>
@@ -143,28 +138,23 @@ export default function HomePage() {
 
       {/* About Us */}
       <section className="py-20 bg-white">
-        <div className="max-w-4xl mx-auto px-6 text-center">
-          <h2 className="text-4xl mb-8" style={{ color: '#8B1A1A' }}>
+        <div className="max-w-4xl mx-auto px-5 text-center">
+          <h2 className="text-4xl mb-8 font-semibold" style={{ color: '#8B1A1A' }}>
             A Goodwood Institution
           </h2>
-          <p className="text-lg leading-relaxed mb-6" style={{ color: '#717182' }}>
-            Mick Hammond, the previous owner, had this place for 49 years. When David Armstrong
-            took over, his goal was simple — to be better. Using the same trusted suppliers and
-            focusing on quality at every step, the team slowly won over the community with their
-            craft, warmth, and dedication.
-          </p>
-          <p className="text-lg leading-relaxed mb-6" style={{ color: '#717182' }}>
-            Today, Goodwood Quality Meats is one of Adelaide's most recognised and awarded butcher
-            shops — competing locally, nationally, and internationally.
+          <p className="text-lg leading-relaxed mb-6" style={{ color: '#353535' }}>
+            Mick Hammond the previous owner had this place for 49 years. For the first 6 months, people wouldn’t even let me serve them or talk to me. So my goal was to be better than he was. We used similar or the same suppliers and looked to make everything we were doing one step better than it was and people started to warm to our approach.
+
+Then we started to give the shop a warmer feel so when you came in the timber gave it a more comfortable feel and we focussed on changing our uniforms to create a professional feel.
           </p>
           <blockquote
             className="text-xl italic mt-8"
             style={{ color: '#8B1A1A' }}
           >
             "We're still on a journey to make the shop the best we can and a place our customers
-            want to visit and feel right at home."
+            want to visit and feel right at home"
           </blockquote>
-          <p className="mt-2 text-sm font-semibold" style={{ color: '#2C2C2A' }}>
+          <p className="mt-2 text-md font-semibold" style={{ color: '#143f14' }}>
             — David Armstrong, Owner
           </p>
         </div>
@@ -177,31 +167,27 @@ export default function HomePage() {
       <section className="py-20" style={{ backgroundColor: '#FDF8F0' }}>
         <div className="max-w-7xl mx-auto px-6">
           <h2 className="text-4xl mb-4" style={{ color: '#8B1A1A' }}>Our Team</h2>
-          <p className="text-lg mb-12" style={{ color: '#717182' }}>
-            Meet our experienced team of master butchers dedicated to providing you with the finest quality meats.
+          <p className="text-lg mb-12" style={{ color: '#353535' }}>
+            Meet our experienced team of master butchers dedicated to providing you with the finest quality meats
           </p>
           <div className="grid grid-cols-3 gap-8">
             {teamMembers.map((member) => (
               <div
                 key={member.name}
-                className="text-center rounded-lg overflow-hidden"
+                className="text-center rounded-sm overflow-hidden"
                 style={{
-                  border: '2px solid #8B1A1A',
                   boxShadow: '0 6px 20px rgba(45, 106, 45, 0.35)',
                 }}
               >
                 <img
                   src={member.img}
                   alt={member.name}
-                  className="w-full h-64 object-cover"
+                  className="w-full h-125 object-cover"
                 />
                 <div className="p-4">
                   <h3 className="text-lg font-semibold mb-1" style={{ color: '#2C2C2A' }}>
                     {member.name}
                   </h3>
-                  <p className="text-sm font-medium mb-2" style={{ color: '#8B1A1A' }}>
-                    {member.role}
-                  </p>
                   <p className="text-sm" style={{ color: '#717182' }}>
                     {member.bio}
                   </p>
