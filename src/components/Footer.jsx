@@ -2,12 +2,15 @@ import { FaInstagram, FaFacebookF } from "react-icons/fa";
 
 export default function Footer() {
   return (
-    <footer className="bg-[#f4f1ec] py-20 text-black">
-      <div className="max-w-7xl mx-auto grid grid-cols-3 gap-8 items-start">
+    <footer className="bg-white text-black pb-14">
+      {/* TOP LINE */}
+      <div className="w-full h-[2px] bg-[#caa46b] mb-16"></div>
+
+      <div className="max-w-7xl mx-auto pl-0 pr-6 grid grid-cols-3 gap-25 items-start">
 
         {/* LEFT- TIMINGS */}
-        <div>
-          <h3 className="text-3xl font-semibold mb-6">
+        <div className="ml-1">
+          <h3 className="text-3xl font-semibold mb-6" style={{ color: "#7b1e1e" }}>
             OPENING HOURS
           </h3>
           <p className="text-2xl  mb-2">Monday to Friday: 7am - 5:30pm</p>
@@ -18,13 +21,13 @@ export default function Footer() {
 
         {/* CENTER - LOCATION */}
         <div className="text-center">
-          <h3 className="text-3xl font-semibold mb-6">
+          <h3 className="text-3xl font-semibold mb-6" style={{ color: "#7b1e1e" }}>
             VISIT OUR STORE
           </h3>
           <p className="text-2xl">121 Goodwood Road, Goodwood</p>
           <p className="text-2xl mt-2">Ph <b>08 8271 4183</b></p>
 
-          <div className="flex justify-center gap-5 mt-3">
+          <div className="flex justify-center gap-5 mt-3 pt-2">
 
             {/* Instagram */}
             <a
