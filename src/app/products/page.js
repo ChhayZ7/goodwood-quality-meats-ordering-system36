@@ -22,8 +22,38 @@ function PlaceholderCard() {
   )
 }
 
+function ProductCard({ product }) {
+  const soldOut = !product.is_available || product.stock === 0
+
+  const priceDisplay =
+    product.product_type === 'FIXED'
+      ? `$${(product.price_cents / 100).toFixed(2)}/box`
+      : `$${(product.price_per_kg_cents / 100).toFixed(2)}/kg`
+
+  return (
+    <article>
+      <div>
+        <img src={product.image_url} alt={product.name} />
+        {soldOut && <p>Sold Out</p>}
+      </div>
+
+      <div>
+        <h3>{product.name}</h3>
+        <p>{priceDisplay}</p>
+
+        {soldOut ? (
+          <p>Unavailable</p>
+        ) : (
+          <Link href={`/products/${product.id}`}>See Details</Link>
+        )}
+      </div>
+    </article>
+  )
+}
+
 
 export default function ProductsPage() {
+    
   return (
     <div>
       <Navbar />
