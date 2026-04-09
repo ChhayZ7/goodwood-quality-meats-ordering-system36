@@ -6,6 +6,23 @@ import Footer from '@/components/Footer'
 
 const CATEGORIES = ['All', 'Pork', 'Beef', 'Lamb', 'Poultry', 'Seafood', 'Other']
 
+function PlaceholderCard() {
+  return (
+    <article>
+      <div>
+        <p>Image Placeholder</p>
+      </div>
+
+      <div>
+        <h3>Product Name</h3>
+        <p>$00.00/kg</p>
+        <button type="button">See Details</button>
+      </div>
+    </article>
+  )
+}
+
+
 export default function ProductsPage() {
   return (
     <div>
@@ -30,6 +47,18 @@ export default function ProductsPage() {
                 {category}
               </button>
             ))}
+          </div>
+        </section>
+        <section>
+          <h2>Products</h2>
+
+          <div>
+            <PlaceholderCard />
+            <PlaceholderCard />
+            <PlaceholderCard />
+            <PlaceholderCard />
+            <PlaceholderCard />
+            <PlaceholderCard />
           </div>
         </section>
       </main>
