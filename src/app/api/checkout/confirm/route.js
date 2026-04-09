@@ -5,10 +5,10 @@ import { recordPayment, updateOrder } from '@/lib/db/orders'
 import { decrementStock } from '@/lib/db/inventory'
 
 // POST /api/checkout/confirm
-//
+
 // Called after Stripe Elements confirms the payment client-side.
 // Verify server-side NOT client-side
-//
+
 // Steps:
 //   1. Verify PaymentIntent status with Stripe
 //   2. Record the payment row in the database
