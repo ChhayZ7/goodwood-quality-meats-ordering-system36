@@ -1,15 +1,66 @@
-import { stripe } from '@/lib/stripe'
+import { NextResponse } from 'next/server'
+import { withHandler, schemas } from '@/lib/middleware/withHandler'
+import { validateStock } from '@/lib/db/inventory'
+import { createOrder } from '@/lib/db/orders'
+import { createDepositPaymentIntent } from '@/lib/stripe'
 
-// POST - creates Stripe checkout session
-export async function POST(req) {
-  const { priceId } = await req.json()
+// POST /api/checkout
+//
+// Checkout flow:
+//   1. Validate stock   — reject if any item exceeds available quantity
+//   2. Create the order — inserts order + line items, status: PENDING
+//   3. Create Stripe PaymentIntent for the $20 deposit
+//
+// Returns a clientSecret the frontend passes to Stripe Elements.
+// The customer enters their card entirely client-side
+//
+// After Stripe confirms payment on the client, call POST /api/checkout/confirm.
 
-  const session = await stripe.checkout.sessions.create({
-    mode: 'payment',
-    line_items: [{ price: priceId, quantity: 1 }],
-    success_url: `${process.env.NEXT_PUBLIC_URL}/success`,
-    cancel_url: `${process.env.NEXT_PUBLIC_URL}/cancel`,
-  })
 
-  return Response.json({ url: session.url })
-}
+export const POST = withHandler(
+  async (request) => {
+    const {
+      customer_id,
+      customer_email,
+      pickup_date,
+      notes,
+      deposit_required_cents,
+      items,
+    } = request._body
+
+    // Stock validation
+    const { ok, failures } = await validateStock(items)
+
+    if (!ok) {
+      return NextResponse.json(
+        {
+          error:    'Some items exceed available stock',
+          failures, // [{ product_id, product_name, requested, available }]
+          status:   409,
+        },
+        { status: 409 }
+      )
+    }
+
+    // Create order
+    const { data: orderData, error: orderError } = await createOrder(
+      { customer_id, pickup_date, notes, deposit_required_cents },
+      items
+    )
+
+    if (orderError) throw orderError
+
+    // Create Stripe PaymentIntent
+    const { clientSecret, paymentIntentId } = await createDepositPaymentIntent({
+      orderId:       orderData.order_id,
+      customerEmail: customer_email,
+    })
+
+    return NextResponse.json({
+      order_id:        orderData.order_id,
+      clientSecret,       // pass to Stripe Elements
+      paymentIntentId,    // send back in /confirm
+    })
+  },
+  { schema: schemas.createOrder }
+)
