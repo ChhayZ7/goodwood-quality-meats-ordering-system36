@@ -12,6 +12,9 @@ export default function Navbar() {
         <Link href="/">Home</Link>
        
         <Link href="/contact">Contact</Link>
+
+        {/* Testing purpose, Need to remove this link once login code is committed */}
+        <Link href="/forgetPassword">Forget Password</Link> 
       </div>
 
     </nav>

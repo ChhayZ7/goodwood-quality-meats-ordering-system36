@@ -29,7 +29,7 @@ export default function RootLayout({ children }) {
       
       <body className="min-h-full flex flex-col bg-white">
         <Navbar />
-          <main className="flex-grow bg-white mt-20">
+          <main className="flex-grow bg-white ">
             {children}
           </main>
           
