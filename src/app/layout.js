@@ -1,6 +1,7 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Footer from '@/components/Footer'
+import Navbar from "@/components/Navbar";
 
 // Root Layout Page - navbar, footer, font, cart provider
 
@@ -27,8 +28,8 @@ export default function RootLayout({ children }) {
     >
       
       <body className="min-h-full flex flex-col bg-white">
-
-          <main className="flex-grow bg-white">
+        <Navbar />
+          <main className="flex-grow bg-white mt-20">
             {children}
           </main>
           
