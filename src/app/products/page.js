@@ -27,14 +27,15 @@ function PlaceholderCard() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
+          color: '#7a6a49'
         }}
       >
         <p>Image Placeholder</p>
       </div>
 
       <div style={{ padding: '16px' }}>
-        <h3 style={{ marginBottom: '8px' }}>Product Name</h3>
-        <p style={{ marginBottom: '12px' }}>$00.00/kg</p>
+        <h3 style={{ marginBottom: '8px', color: '#1a1a1a'}}>Product Name</h3>
+        <p style={{ marginBottom: '12px', color: '#7b1a1a', fontWeight: '600'}}>$00.00/kg</p>
         <button type="button"
           style={{
             width: '100%',
@@ -43,7 +44,9 @@ function PlaceholderCard() {
             backgroundColor: '#f5ead0',
             borderRadius: '6px',
             cursor: 'pointer',
-          }}>See Details</button>
+            fontWeight: '600'
+          }}>See Details
+          </button>
       </div>
     </article>
   )
@@ -51,7 +54,7 @@ function PlaceholderCard() {
 
 // Reusable card for real product data
 // Handles availability and price display logic
-function ProductCard({ product }) {
+function ProductCard({product}) {
   const soldOut = !product.is_available || product.stock === 0
 
   const priceDisplay =
@@ -88,6 +91,7 @@ function ProductCard({ product }) {
               backgroundColor: '#7b1a1a',
               color: '#ffffff',
               borderRadius: '6px',
+              fontWeight: '600',
             }}
           >
             Sold Out
@@ -95,8 +99,8 @@ function ProductCard({ product }) {
       </div>
 
       <div style={{ padding: '16px' }}>
-        <h3 style={{ marginBottom: '8px' }}>{product.name}</h3>
-        <p style={{ marginBottom: '12px', fontWeight: '600' }}>{priceDisplay}</p>
+        <h3 style={{ marginBottom: '8px', color: '#1a1a1a'}}>{product.name}</h3>
+        <p style={{ marginBottom: '12px', fontWeight: '600', color: '#7b1a1a'  }}>{priceDisplay}</p>
 
         {soldOut ? (
           <p  style={{
@@ -105,6 +109,8 @@ function ProductCard({ product }) {
               textAlign: 'center',
               backgroundColor: '#eeeeee',
               borderRadius: '6px',
+               color: '#666666',
+              fontWeight: '600'
             }}>Unavailable</p>
         ) : (
           <Link href={`/products/${product.id}`}
@@ -116,6 +122,7 @@ function ProductCard({ product }) {
               color: '#ffffff',
               textDecoration: 'none',
               borderRadius: '6px',
+              fontWeight: '600'
             }}>See Details</Link>
         )}
       </div>
@@ -146,8 +153,8 @@ export default function ProductsPage() {
       }}
     
     >
-      <Navbar />
-      <GoldDivider />
+      {/* <Navbar />
+      <GoldDivider /> */}
 
       <main style={{ flex: 1 }}>
         <div style={{
@@ -163,11 +170,14 @@ export default function ProductsPage() {
             }}>
           <h1 style={{
                 marginBottom: '12px',
+                color: '#7b1a1a',
+                fontSize: '36px'
               }}>Ready for Christmas</h1>
           <p style={{
                 maxWidth: '600px',
                 margin: '0 auto',
                 lineHeight: '1.6',
+                color: '#4a4a4a'
               }}>
             Browse our selection of premium meats. All orders require a $20 deposit,
             with final payment upon collection.
@@ -175,7 +185,7 @@ export default function ProductsPage() {
         </section>
 
         <section style={{ marginBottom: '32px' }}>
-          <h2 style={{ marginBottom: '16px' }}>Categories</h2>
+          <h2 style={{ marginBottom: '16px', color: '#1a1a1a' }}>Categories</h2>
 
           <div style={{
                 display: 'flex',
@@ -204,12 +214,16 @@ export default function ProductsPage() {
           </div>
         </section>
         <section>
-          <h2 style={{ marginBottom: '16px' }}>Products</h2>
+          <h2 style={{ marginBottom: '16px', color: '#1a1a1a' }}>Products</h2>
 
-          <div>
+          <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(3, 1fr)',
+                gap: '20px',
+              }}>
             {products.length === 0 ? (
               <>
-              <PlaceholderCard />
+            <PlaceholderCard />
             <PlaceholderCard />
             <PlaceholderCard />
             <PlaceholderCard />
@@ -223,13 +237,18 @@ export default function ProductsPage() {
             )}
           </div>
           {products.length === 0 && (
-            <p>Products will load here once connected to the database</p>
+            <p style={{
+                  marginTop: '20px',
+                  textAlign: 'center',
+                  color: '#777777',
+                  fontStyle: 'italic',
+                }}>Products will load here once connected to the database</p>
           )}
         </section>
         </div>
       </main>
 
-      <Footer />
+      {/* <Footer /> */}
     </div>
   )
 }
