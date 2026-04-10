@@ -30,16 +30,16 @@ export default function Navbar({ cartCount = 0, user = null }) {
   return (
     <header>
       <nav>
-        <div>
+        <div style={{ color: '#000000'}}>
           <Logo />
         </div>
 
-        <div>
+        <div style={{ color: '#000000'}}>
           <Link href="/products">Products</Link>
           <Link href="/contact">Contact Us</Link>
         </div>
 
-        <div>
+        <div style={{ color: '#000000'}}>
           <Link href="/cart">Cart ({cartCount})</Link>
 
           {user ? (

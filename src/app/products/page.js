@@ -142,6 +142,8 @@ export default function ProductsPage() {
   const filteredProducts = products.filter((product) => {
     return activeCategory === 'All' || product.category === activeCategory
   })
+  const showPlaceholders = products.length === 0
+  const placeholderCount = 6
   return (
     <div
     
@@ -153,8 +155,8 @@ export default function ProductsPage() {
       }}
     
     >
-      {/* <Navbar />
-      <GoldDivider /> */}
+      <Navbar />
+      <GoldDivider /> 
 
       <main style={{ flex: 1 }}>
         <div style={{
@@ -169,15 +171,19 @@ export default function ProductsPage() {
               marginBottom: '40px',
             }}>
           <h1 style={{
-                marginBottom: '12px',
+                margin: '0 0 16px',
                 color: '#7b1a1a',
-                fontSize: '36px'
+                fontSize: '30px',
+                fontWeight: '700',
+                letterSpacing: '0.5px',
+                textTransform: 'uppercase'
               }}>Ready for Christmas</h1>
           <p style={{
-                maxWidth: '600px',
+                maxWidth: '520px',
                 margin: '0 auto',
-                lineHeight: '1.6',
-                color: '#4a4a4a'
+                lineHeight: '1.7',
+                color: '#5b5b5b',
+                fontSize: '14px'
               }}>
             Browse our selection of premium meats. All orders require a $20 deposit,
             with final payment upon collection.
@@ -185,7 +191,7 @@ export default function ProductsPage() {
         </section>
 
         <section style={{ marginBottom: '32px' }}>
-          <h2 style={{ marginBottom: '16px', color: '#1a1a1a' }}>Categories</h2>
+          
 
           <div style={{
                 display: 'flex',
@@ -198,13 +204,14 @@ export default function ProductsPage() {
               onClick={() => setActiveCategory(category)}
                   style={{
                     padding: '10px 18px',
-                    borderRadius: '999px',
-                    border: '1px solid #d6c08d',
+                    borderRadius: '10px',
+                    border: '1px solid #d9c48d',
                     backgroundColor:
-                      activeCategory === category ? '#7b1a1a' : '#f5ead0',
+                      activeCategory === category ? '#8f1d1d' : '#efe3c4',
                     color: activeCategory === category ? '#ffffff' : '#1a1a1a',
                     cursor: 'pointer',
                     fontWeight: '600',
+                    fontSize: '14px'
                   }}
               >
                 
@@ -214,41 +221,35 @@ export default function ProductsPage() {
           </div>
         </section>
         <section>
-          <h2 style={{ marginBottom: '16px', color: '#1a1a1a' }}>Products</h2>
+          
 
           <div style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(3, 1fr)',
                 gap: '20px',
               }}>
-            {products.length === 0 ? (
-              <>
-            <PlaceholderCard />
-            <PlaceholderCard />
-            <PlaceholderCard />
-            <PlaceholderCard />
-            <PlaceholderCard />
-            <PlaceholderCard />
-              </>
-             ) : (
-              filteredProducts.map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))
-            )}
+            {showPlaceholders
+                ? Array.from({ length: placeholderCount }).map((_, index) => (
+                    <PlaceholderCard key={index} />
+                  ))
+                : filteredProducts.map((product) => (
+                    <ProductCard key={product.id} product={product} />
+          ))}
           </div>
-          {products.length === 0 && (
+          {showPlaceholders && (
             <p style={{
                   marginTop: '20px',
                   textAlign: 'center',
-                  color: '#777777',
+                  color: '#999999',
                   fontStyle: 'italic',
+                  fontSize: '13px'
                 }}>Products will load here once connected to the database</p>
           )}
         </section>
         </div>
       </main>
-
-      {/* <Footer /> */}
+            <GoldDivider />
+       <Footer /> 
     </div>
   )
 }
