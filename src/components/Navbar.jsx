@@ -1,4 +1,4 @@
-// Top navigation bar - logo, links, cart icon, auth state
+// Top navigation bar - logo, links, cart icon, auth state - This is Dummy, just for me
 'use client'
 
 import Link from 'next/link'

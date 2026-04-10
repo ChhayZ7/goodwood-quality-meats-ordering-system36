@@ -155,7 +155,7 @@ export default function ProductsPage() {
       }}
     
     >
-      <Navbar />
+       <Navbar /> 
       <GoldDivider /> 
 
       <main style={{ flex: 1 }}>
@@ -249,7 +249,7 @@ export default function ProductsPage() {
         </div>
       </main>
             <GoldDivider />
-       <Footer /> 
+        <Footer />  
     </div>
   )
 }
