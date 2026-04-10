@@ -49,25 +49,75 @@ export default function ProductDetailPage() {
 
           {/* Details placeholder */}
           <div>
-            <h1>Product Name</h1>
-            <p>$00.00/kg</p>
+            <h1 style={{
+                  fontFamily: '"Playfair Display", serif',
+                  fontSize: '26px',
+                  fontWeight: 700,
+                  color: '#CCCCCC',
+                  margin: '0 0 8px',
+                  lineHeight: 1.2,
+                }}>Product Name</h1>
+            <p style={{ fontSize: '20px', fontWeight: 700, color: '#DDDDDD', margin: '0 0 24px' }}>$00.00/kg</p>
 
-            <label>Quantity</label>
-            <select value={quantity} onChange={e => setQuantity(Number(e.target.value))}>
-              {[1,2,3,4,5,6,7,8,9,10].map(n => (
-                <option key={n} value={n}>{n}</option>
-              ))}
-            </select>
+            <div style={{ marginBottom: '16px' }}>
+                  <label style={{ display: 'block', fontSize: '14px', fontWeight: 700, color: '#CCCCCC', marginBottom: '6px' }}>
+                    Select Your Weight Range
+                  </label>
+                  <select
+                    disabled
+                    style={{ width: '280px', padding: '10px 14px', border: '1.5px solid #E8E8E8', borderRadius: '8px', background: '#FAFAFA', fontSize: '14px', color: '#CCCCCC', cursor: 'not-allowed' }}
+                  >
+                    <option>-- kg</option>
+                  </select>
+                </div>
+            <div style={{ marginBottom: '16px' }}> 
+              <label style={{ display: 'block', fontSize: '14px', fontWeight: 700, color: '#CCCCCC', marginBottom: '6px' }}>Quantity</label>
+              <select value={quantity} onChange={e => setQuantity(Number(e.target.value))}  style={{ width: '100px', padding: '10px 14px', border: '1.5px solid #CCCCCC', 
+              borderRadius: '8px', background: '#fff', fontSize: '14px', color: '#1A1A1A', cursor: 'pointer', outline: 'none' }}
+                  >
+                {[1,2,3,4,5,6,7,8,9,10].map(n => (
+                  <option key={n} value={n}>{n}</option>
+                ))}
+              </select>
+            </div>
+            
+            <div style={{ marginBottom: '20px' }}>
+                  <p style={{ fontSize: '12px', color: '#CCCCCC', margin: '0 0 3px', textTransform: 'uppercase', letterSpacing: '.05em' }}>
+                    Estimated Price Range
+                  </p>
+                  <p style={{ fontFamily: '"Playfair Display", serif', fontSize: '20px', fontWeight: 700, color: '#DDDDDD', margin: 0 }}>
+                    $-- — $--
+                  </p>
+            </div>
 
-            <p>Total: $--</p>
 
-            <button disabled>Add to Cart</button>
-
-            <h2>Description</h2>
-            <p>Product description will appear here</p>
-
-            <h2>How You'll Be Charged</h2>
-            <p>Deposit: $20.00 paid at checkout. Final payment upon collection.</p>
+           <div style={{
+                  width: '100%',
+                  padding: '14px',
+                  background: '#F0E8D0',
+                  borderRadius: '8px',
+                  border: 'none',
+                  fontSize: '14px',
+                  fontWeight: 700,
+                  color: '#BBBBBB',
+                  textAlign: 'center',
+                  marginBottom: '24px',
+                }}>
+                  Add to Cart
+                </div>
+            
+            <div style={{ borderTop: '1px solid #E8D48A', paddingTop: '20px', marginBottom: '16px' }}>
+                <h2 style={{ fontFamily: '"Playfair Display", serif', fontSize: '16px', fontWeight: 700, color: '#1A1A1A', margin: '0 0 8px' }}>Description</h2>
+            <p style={{ fontSize: '13px', color: '#CCCCCC', lineHeight: 1.7, margin: 0 }}>Product description will appear here</p>
+            </div>
+            
+            <div style={{ background: '#F0E8D0', borderRadius: '8px', padding: '14px 16px' }}>
+                <h2 style={{ fontFamily: '"Playfair Display", serif', fontSize: '14px', fontWeight: 700, color: '#1A1A1A', margin: '0 0 6px' }}>How You'll Be Charged</h2>
+                <p style={{ fontSize: '12px', color: '#555', lineHeight: 1.6, margin: 0 }}>
+                  <strong>Deposit:</strong> $20.00 paid at checkout.{' '}
+                    <strong>Final payment:</strong> The exact weight will be determined when your
+                    order is prepared. The balance will be charged upon collection based on the actual weight.</p>
+            </div>
           </div>
         </div>
         </div>
