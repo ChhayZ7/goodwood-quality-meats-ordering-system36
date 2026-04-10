@@ -1,31 +1,51 @@
 // Single Product Detail - image, price, add to cart
 'use client'
 
+import Link from 'next/link'
+import Navbar from '@/components/Navbar'
+import GoldDivider from '@/components/GoldDivider'
+import Footer from '@/components/Footer'
+
 import { useState } from 'react'
 import { useParams } from 'next/navigation'
 
 export default function ProductDetailPage() {
   
   const { id } = useParams()
-
-
   const [quantity, setQuantity] = useState(1)
-
-
   const [selectedWeight, setSelectedWeight] = useState(null)
-
- 
+  const [addedToCart,  setAddedToCart]  = useState(false)
   const product = null
 
   // If no product yet, show placeholder layout
   if (!product) {
     return (
-      <div>
-        <a href="/products">← Back to Products</a>
+      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#FAF3E0' }}>
+        <Navbar />
+        <GoldDivider />
 
-        <div>
-          {/* Image placeholder */}
-          <div>Product image will appear here</div>
+        <main style={{ flex: 1 }}>
+          <div style={{ maxWidth: '960px', margin: '0 auto', padding: '32px 24px' }}>
+        <a href="/products">Back to Products</a>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '48px' }}>
+
+              {/* LEFT — image placeholder */}
+              <div style={{
+                borderRadius: '10px',
+                overflow: 'hidden',
+                height: '400px',
+                background: '#F0E8D0',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}>
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" strokeWidth="1">
+                  <rect x="3" y="3" width="18" height="18" rx="2"/>
+                  <circle cx="8.5" cy="8.5" r="1.5"/>
+                  <polyline points="21 15 16 10 5 21"/>
+                </svg>
+              </div>
 
           {/* Details placeholder */}
           <div>
@@ -50,8 +70,11 @@ export default function ProductDetailPage() {
             <p>Deposit: $20.00 paid at checkout. Final payment upon collection.</p>
           </div>
         </div>
+        </div>
+        </main>
 
         <p>Product data will load once connected to the database</p>
+        
       </div>
     )
   }
