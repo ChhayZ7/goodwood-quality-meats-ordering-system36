@@ -1,54 +1,22 @@
-// Top navigation bar - logo, links, cart icon, auth state - This is Dummy, just for me
-'use client'
+"use client";
 
-import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import Link from "next/link";
 
-// Pages where we want a simpler header
-const AUTH_PAGES = ['/login', '/signup', '/forgot-password', '/verify-email']
-
-function Logo() {
-  return <Link href="/">Goodwood Quality Meats</Link>
-}
-
-export default function Navbar({ cartCount = 0, user = null }) {
-  const pathname = usePathname()
-  const isAuthPage = AUTH_PAGES.includes(pathname)
-
-  // Simple header for authentication pages
-  if (isAuthPage) {
-    return (
-      <header>
-        <nav>
-          <Logo />
-        </nav>
-      </header>
-    )
-  }
-
-  // Full header for normal pages
+export default function Navbar() {
   return (
-    <header>
-      <nav>
-        <div style={{ color: '#000000'}}>
-          <Logo />
-        </div>
+    <nav className="bg-black text-white fixed top-0 w-full z-50 px-8 py-4 flex justify-between items-center">
 
-        <div style={{ color: '#000000'}}>
-          <Link href="/products">Products</Link>
-          <Link href="/contact">Contact Us</Link>
-        </div>
+      <h1 className="font-bold text-lg">Goodwood Meats</h1>
 
-        <div style={{ color: '#000000'}}>
-          <Link href="/cart">Cart ({cartCount})</Link>
+      <div className="flex gap-6">
+        <Link href="/">Home</Link>
+       
+        <Link href="/contact">Contact</Link>
 
-          {user ? (
-            <Link href="/dashboard/orders">Hi, {user.firstName}</Link>
-          ) : (
-            <Link href="/login">Login</Link>
-          )}
-        </div>
-      </nav>
-    </header>
-  )
+        {/* Testing purpose, Need to remove this link once login code is committed */}
+        <Link href="/forgetPassword">Forget Password</Link> 
+      </div>
+
+    </nav>
+  );
 }
