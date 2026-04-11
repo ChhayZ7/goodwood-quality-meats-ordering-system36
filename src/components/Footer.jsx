@@ -57,7 +57,7 @@ export default function Footer() {
         {/* RIGHT - LOGO*/}
         <div className="flex justify-end items-start">
           <img
-            src="/logo.png" alt="Goodwood Logo" className="w-60"
+            src="/logo.png" alt="Goodwood Logo" className="w-[1100px] h-[150px]"
           />
         </div>
 
