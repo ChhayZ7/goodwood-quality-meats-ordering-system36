@@ -5,7 +5,7 @@
   --color-background: #FDF8F0;
   --color-gold: #D4AF37;
   --color-green: #2D6A2D;
-  --color-green-dark: #143f14; 
+  --color-green-dark: #143f14;
   --color-dark: #060606;
   --color-muted: #353535;
 }
@@ -13,4 +13,38 @@
 body {
   background-color: var(--color-background);
   color: var(--color-dark);
+  font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Reusable input field */
+.gw-input {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1.5px solid #CCCCCC;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 14px;
+  color: #1A1A1A;
+  outline: none;
+  transition: border-color .15s;
+  box-sizing: border-box;
+}
+.gw-input:focus { border-color: #8B1A1A; }
+.gw-input.error { border-color: #DC2626; }
+.gw-input::placeholder { color: #BBBBBB; }
+
+/* Primary red button */
+.btn-primary {
+  background: #8B1A1A;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background .15s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.btn-primary:hover:not(:disabled) { background: #631515; }
+.btn-primary:disabled { opacity: .5; cursor: not-allowed; }
