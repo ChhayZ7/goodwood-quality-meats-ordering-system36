@@ -128,6 +128,7 @@ export default function ProductDetailPage() {
     )
   }
 
+  // done by AI cause of the null reference
   const soldOut = !product.is_available || product.stock === 0
 
   const priceDisplay = product.product_type === 'FIXED'
