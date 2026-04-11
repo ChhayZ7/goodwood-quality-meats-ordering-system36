@@ -1,5 +1,15 @@
 // Cart summary and proceed to checkout
 
-export default function CartPage() {
+const mockCartItems = [
+    
+]
 
+export default function CartPage() {
+    return (
+
+        <main>
+
+        </main>
+
+    )
 }
