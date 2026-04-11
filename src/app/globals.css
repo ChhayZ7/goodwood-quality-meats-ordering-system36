@@ -5,8 +5,10 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --red:        #7B1A1A;
+  --red-hover:  #631515;
+  --cream:      #FAF3E0;
+  --cream-pill: #F0E8D0;
 }
 
 @theme inline {
@@ -28,3 +30,38 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Reusable input field */
+.gw-input {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1.5px solid #CCCCCC;
+  border-radius: 8px;
+  background: #fff;
+  font-family: 'Lato', sans-serif;
+  font-size: 14px;
+  color: #1A1A1A;
+  outline: none;
+  transition: border-color .15s;
+  box-sizing: border-box;
+}
+.gw-input:focus { border-color: #7B1A1A; }
+.gw-input.error { border-color: #DC2626; }
+.gw-input::placeholder { color: #BBBBBB; }
+
+/* Primary red button */
+.btn-primary {
+  background: #7B1A1A;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-family: 'Lato', sans-serif;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background .15s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.btn-primary:hover:not(:disabled) { background: #631515; }
+.btn-primary:disabled { opacity: .5; cursor: not-allowed; }
