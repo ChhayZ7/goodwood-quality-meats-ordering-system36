@@ -72,12 +72,20 @@ export default function ContactPage() {
           <a
             href="https://www.google.com/maps?q=121+Goodwood+Road+Goodwood+SA"
             target="_blank"
+            className="relative group"
           >
             <img
               src="/map.png"
               alt="Map"
-              className="w-[980px] h-[600px] object-cover rounded-2xl shadow-sm"
+              className="w-[980px] h-[600px] object-cover rounded-2xl shadow-sm cursor-pointer"
             />
+
+            {/* HOVER TEXT */}
+            <div className="pointer-events-none absolute inset-0 flex items-end justify-center pb-50 opacity-0 group-hover:opacity-100 transition duration-300">
+              <p className="bg-[#7b1e1e]/90 text-white px-5 py-2 rounded-full text-sm font-medium shadow-md">
+                📍 Open in Maps
+              </p>
+            </div>
           </a>
         </div>
 
