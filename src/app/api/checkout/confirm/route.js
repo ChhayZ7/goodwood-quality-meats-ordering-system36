@@ -9,13 +9,6 @@ import { decrementStock } from '@/lib/db/inventory'
 // Called after Stripe Elements confirms the payment client-side.
 // Verify server-side NOT client-side
 
-// Steps:
-//   1. Verify PaymentIntent status with Stripe
-//   2. Record the payment row in the database
-//   3. Decrement stock for all ordered items
-//   4. Update order status to CONFIRMED
-
-
 export const POST = withHandler(
   async (request) => {
     const { order_id, payment_intent_id, items } = request._body

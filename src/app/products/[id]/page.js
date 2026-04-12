@@ -15,10 +15,53 @@ export default function ProductDetailPage() {
   const [quantity, setQuantity] = useState(1)
   const [selectedWeight, setSelectedWeight] = useState(null)
   const [addedToCart,  setAddedToCart]  = useState(false)
-  const product = null
+  const [product, setProduct] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+
+    // Fetch product from API
+    useEffect(() => {
+      if (!id) return
+   
+      async function fetchProduct() {
+        try {
+          const res = await fetch(`/api/products/${id}`)
+          if (res.status === 404) throw new Error('Product not found')
+          if (!res.ok) throw new Error('Failed to fetch product')
+          const json = await res.json()
+          setProduct(json.product)
+   
+          // Pre-select the first weight option if product has them
+          if (json.product?.product_weight_options?.length > 0) {
+            setSelectedWeight(json.product.product_weight_options[0])
+          }
+        } catch (err) {
+          console.error(err)
+          setError(err.message)
+        } finally {
+          setLoading(false)
+        }
+      }
+   
+      fetchProduct()
+    }, [id])
+
+  // In loading state
+  if (loading) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#FAF3E0' }}>
+        <Navbar />
+        <GoldDivider />
+        <main style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <p style={{ color: '#7a6a49', fontSize: '16px' }}>Loading product...</p>
+        </main>
+        <Footer />
+      </div>
+    )
+  }
 
   // If no product yet, show placeholder layout
-  if (!product) {
+  if (error || !product) {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#FAF3E0' }}>
         <Navbar />
@@ -128,7 +171,7 @@ export default function ProductDetailPage() {
     )
   }
 
-  // done by AI cause of the null reference
+  // done by AI because of the null reference
   const soldOut = !product.is_available || product.stock === 0
 
   const priceDisplay = product.product_type === 'FIXED'
