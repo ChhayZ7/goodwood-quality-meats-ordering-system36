@@ -48,8 +48,7 @@ export default function LoginPage() {
 
     return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#FAF3E0' }}>
-      <Navbar />
-      <GoldDivider />
+      
 
       <main style={{ flex: 1, display: 'flex' }}>
         <div style={{ width: '100%', display: 'flex' }}>
