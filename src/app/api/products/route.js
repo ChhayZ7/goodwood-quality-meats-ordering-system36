@@ -1,18 +1,18 @@
 // GET /api/products
-// Returns single product based on product ID with weight options
+// Returns all available products with weight options
 
 import { NextResponse } from 'next/server'
 import { withHandler } from '@/lib/middleware/withHandler'
-import { getProductById} from '@/lib/db/products'
+import { getProducts } from '@/lib/db/products'
 
-export const GET = withHandler(async (request, { params }) => {
-  const { id } = await params
-  const { data, error } = await getProductById(id)
+export const GET = withHandler(async (request) => {
+  const { searchParams } = new URL(request.url)
+  const type          = searchParams.get('type') ?? undefined
+  const availableOnly = searchParams.get('available') !== 'false'
+
+  const { data, error } = await getProducts({ type, availableOnly })
 
   if (error) throw error
-  if (!data) {
-    return NextResponse.json({error: 'Product not found', status: 404}, {status: 404})
-  }
 
-  return NextResponse.json({ product: data })
+  return NextResponse.json({ products: data })
 })
