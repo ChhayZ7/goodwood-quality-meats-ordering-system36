@@ -10,15 +10,24 @@ import { getUserById, updateUser } from "@/lib/db/users"
 async function getAuthUser() {
     const supabase = await createClient()
     const { data: { user }, error } = await supabase.auth.getUser()
+
+    console.log('[/api/users/me] auth.getUser result:')
+    console.log('  user:', user)
+    console.log('  error:', error)
+
     if (error || !user) return null
-    return user
+    return user ?? null
 }
 
 // GET /api/users/me
-export const GET = withHandler(async () => {
+export const GET = withHandler(async (request) => {
+    console.log('[/api/users/me] GET called')
+    console.log('[/api/users/me] cookies:', request.cookies?.getAll?.())
     const authUser = await getAuthUser()
+    console.log('[/api/users/me] authUser:', authUser)
 
     if (!authUser){
+        console.log('[/api/users/me] No auth user — returning 401')
         return NextResponse.json(
             { error: 'Unauthorised - please log in', status: 401},
             { status: 401 }
