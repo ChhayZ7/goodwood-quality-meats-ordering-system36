@@ -80,4 +80,27 @@ export default function SignUpPage() {
     // Backend signup code will go here later
     }
 
+    return (
+        <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#FAF3E0' }}>
+            <NavBar/>
+            <GoldDivider/>
+            <main style={{ flex: 1, display: 'flex' }}>
+                {/*LEFT — Food photo */}
+                <div style={{ width: '100%', display: 'flex' }}>
+                    <div style={{ width: '50%', overflow: 'hidden' }}>
+                    <img src="https://images.unsplash.com/photo-1544025162-d76594e18c0e?w=900&q=80" alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(.88)' }} />
+                </div>
+                {/*  RIGHT — Form */}
+                <div>
+                    <div>
+
+                    </div>
+                </div>
+
+                </div>
+            </main>
+            <Footer/>
+        </div>
+    )
+
 }
