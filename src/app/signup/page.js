@@ -86,9 +86,9 @@ export default function SignUp() {
       {/* LEFT IMAGE */}
       <div className="w-[55%] relative h-full">
         <img
-          src="/meat.png"
+          src="/signupImage.png"
           alt="meat"
-          className="w-full h-full object-cover grayscale opacity-80"
+          className="w-full h-full object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#f4f1ec]/40 to-[#f4f1ec]"></div>
       </div>
