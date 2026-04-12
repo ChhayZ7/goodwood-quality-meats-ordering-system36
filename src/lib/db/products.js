@@ -7,6 +7,7 @@ const PRODUCT_SELECT = `
   name,
   description,
   product_type,
+  category,
   price_cents,
   price_per_kg_cents,
   is_price_estimate,
