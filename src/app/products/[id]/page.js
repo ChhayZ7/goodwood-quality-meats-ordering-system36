@@ -6,7 +6,7 @@ import Navbar from '@/components/Navbar'
 import GoldDivider from '@/components/GoldDivider'
 import Footer from '@/components/Footer'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 
 export default function ProductDetailPage() {
