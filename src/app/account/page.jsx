@@ -14,6 +14,15 @@ export default function AccountPage(){
   const [error, setError]     = useState(null)
   const [success, setSuccess] = useState(false)
 
+  const [passwordForm, setPasswordForm] = useState({
+    current_password: '',
+    new_password: '',
+    confirm_password: ''
+  })
+  const [passwordError, setPasswordError] = useState(null)
+  const [passwordSuccess, setPasswordSuccess] = useState(false)
+  const [changingPassword, setChangingPassword] = useState(false)
+
   useEffect(() => {
     async function load() {
       const res = await fetch('/api/users/me')
@@ -67,6 +76,51 @@ export default function AccountPage(){
     router.replace('/login')
   }
 
+  const handlePasswordChange = async (e) => {
+    e.preventDefault()
+    setPasswordError(null)
+    setPasswordSuccess(false)
+
+    // Client-side check before hitting the API
+    if (passwordForm.new_password !== passwordForm.confirm_password){
+      setPasswordError('New passwords do not match')
+      return
+    }
+
+    if (passwordForm.new_password.length < 8) {
+      setPasswordError('New password must be at least 8 characters')
+      return
+    }
+
+    setChangingPassword(true)
+
+    const res = await fetch('/api/users/me/password', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        current_password: passwordForm.current_password,
+        new_password: passwordForm.new_password,
+      }),
+    })
+
+    const json = await res.json()
+
+    if (!res.ok){
+      if (json.details){
+        const message = Object.values(json.details).join(', ')
+        setPasswordError(message)
+      } else {
+        setPasswordError(json.error ?? 'Failed to update password')
+      }
+      setChangingPassword(false)
+      return
+    }
+
+    setPasswordSuccess(true)
+    setPasswordForm( { current_password: '', new_password: '', confirm_password: ''})
+    setChangingPassword(false)
+  }
+
   if (loading) return <p>Loading...</p>
 
   return (
@@ -118,7 +172,50 @@ export default function AccountPage(){
       </form>
 
       <hr />
+      <hr />
 
+        <h2>Change Password</h2>
+
+        {passwordError   && <p style={{ color: 'red' }}>{passwordError}</p>}
+        {passwordSuccess && <p style={{ color: 'green' }}>Password updated successfully.</p>}
+
+        <form onSubmit={handlePasswordChange}>
+          <div>
+            <label>Current password</label>
+            <input
+              type="password"
+              value={passwordForm.current_password}
+              onChange={e => setPasswordForm(p => ({ ...p, current_password: e.target.value }))}
+              required
+            />
+          </div>
+
+          <div>
+            <label>New password</label>
+            <input
+              type="password"
+              value={passwordForm.new_password}
+              onChange={e => setPasswordForm(p => ({ ...p, new_password: e.target.value }))}
+              required
+            />
+          </div>
+
+          <div>
+            <label>Confirm new password</label>
+            <input
+              type="password"
+              value={passwordForm.confirm_password}
+              onChange={e => setPasswordForm(p => ({ ...p, confirm_password: e.target.value }))}
+              required
+            />
+          </div>
+
+          <button type="submit" disabled={changingPassword}>
+            {changingPassword ? 'Updating...' : 'Update password'}
+          </button>
+        </form>
+
+        <hr />
       <button onClick={handleSignOut}>Sign out</button>
     </main>
   )
