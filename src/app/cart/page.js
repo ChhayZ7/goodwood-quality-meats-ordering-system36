@@ -272,7 +272,7 @@ export default function CartPage() {
 
                 {/* Proceed Button */}
                 <Link
-                    href="/checkout"
+                    href="/orderConfirmation"
                     className="block w-full text-center py-4 rounded-lg text-white font-semibold transition-opacity hover:opacity-90"
                     style={{
                         backgroundColor: pickupDate && !dateError ? '#8B1A1A' : '#9ca3af',
