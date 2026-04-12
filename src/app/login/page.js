@@ -1,18 +1,60 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { createClient } from '@/lib/supabase-browser'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Navbar from '@/components/Navbar'
 import GoldDivider from '@/components/GoldDivider'
 import Footer from '@/components/Footer'
 
 export default function LoginPage() {
-    
+    const router = useRouter()
+    const [errors, setErrors] = useState({})
     const [email,    setEmail]    = useState('')
     const [password, setPassword] = useState('')
     const [showPass, setShowPass] = useState(false)
-    const [errors,   setErrors]   = useState({})
     const [authError, setAuthError] = useState('')
+
+    useEffect(() => {
+      async function checkSession() {
+        const supabase = createClient()
+        const { data: { session } } = await supabase.auth.getSession()
+        if (session) {
+          router.replace('/account')
+        }
+      }
+      checkSession()
+    }, [router])
+
+    const handleLogin = async (e) => {
+      e.preventDefault()
+      setErrors(null)
+
+      const validationErrors = validate()
+      if (Object.keys(validationErrors).length > 0){
+        setErrors(validationErrors)
+        return
+      }
+
+      setErrors({})
+
+      const supabase = createClient()
+
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
+
+      if (error){
+        setAuthError(error.message)
+        console.error(error)
+        return
+      }
+      console.log(data.session)
+
+      router.push('/account')
+    }
 
     function validate() {
         const errors = {}
@@ -29,21 +71,6 @@ export default function LoginPage() {
         }
 
         return errors
-    }
-
-    function handleSubmit(evt) {
-        evt.preventDefault()
-
-        setAuthError('')
-
-        const errors = validate()
-
-        if (Object.keys(errors).length > 0) {
-            setErrors(errors)
-            return
-        }
-
-        setErrors({})
     }
 
     return (
@@ -87,7 +114,7 @@ export default function LoginPage() {
 
               {/* Form card */}
               <div style={{ background: '#fff', borderRadius: '12px', padding: '32px', boxShadow: '0 2px 16px rgba(0,0,0,0.08)' }}>
-                <form onSubmit={handleSubmit} noValidate>
+                <form onSubmit={handleLogin} noValidate>
 
                   {/* Email */}
                   <div style={{ marginBottom: '16px' }}>
