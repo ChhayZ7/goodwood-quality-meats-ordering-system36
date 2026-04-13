@@ -249,7 +249,6 @@ export default function ProductsPage() {
         </div>
       </main>
             <GoldDivider />
-        <Footer />  
     </div>
   )
 }
