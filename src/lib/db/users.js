@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabase-client'
+import { createClient } from '../supabase-server'
 
 const USER_SELECT = `
     id,
@@ -10,7 +10,9 @@ const USER_SELECT = `
     created_at
 `
 
+
 export async function getUserById(userId){
+    const supabase = await createClient()
     return supabase
     .from('users')
     .select(USER_SELECT)
@@ -21,6 +23,8 @@ export async function getUserById(userId){
 const ALLOWED_UPDATE_FIELDS = ['first_name', 'last_name', 'phone']
 
 export async function updateUser(userId, fields){
+     const supabase = await createClient()
+
     const updates = Object.fromEntries(
         Object.entries(fields).filter(([k]) => ALLOWED_UPDATE_FIELDS.includes(k))
     )
