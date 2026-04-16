@@ -1,33 +1,18 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
 @import "tailwindcss";
 
 :root {
-  --red:        #7B1A1A;
-  --red-hover:  #631515;
-  --cream:      #FAF3E0;
-  --cream-pill: #F0E8D0;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-primary: #8B1A1A;
+  --color-background: #FDF8F0;
+  --color-gold: #D4AF37;
+  --color-green: #2D6A2D;
+  --color-green-dark: #143f14;
+  --color-dark: #060606;
+  --color-muted: #353535;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background-color: var(--color-background);
+  color: var(--color-dark);
   font-family: Arial, Helvetica, sans-serif;
 }
 
@@ -38,24 +23,22 @@ body {
   border: 1.5px solid #CCCCCC;
   border-radius: 8px;
   background: #fff;
-  font-family: 'Lato', sans-serif;
   font-size: 14px;
   color: #1A1A1A;
   outline: none;
   transition: border-color .15s;
   box-sizing: border-box;
 }
-.gw-input:focus { border-color: #7B1A1A; }
+.gw-input:focus { border-color: #8B1A1A; }
 .gw-input.error { border-color: #DC2626; }
 .gw-input::placeholder { color: #BBBBBB; }
 
 /* Primary red button */
 .btn-primary {
-  background: #7B1A1A;
+  background: #8B1A1A;
   color: #fff;
   border: none;
   border-radius: 8px;
-  font-family: 'Lato', sans-serif;
   font-weight: 700;
   cursor: pointer;
   transition: background .15s;

@@ -138,4 +138,20 @@ export const schemas = {
       items:             'array',
     },
   },
+
+  updateUser: {
+    types: {
+      first_name: 'string',
+      last_name: 'string',
+      phone: 'string',
+    },
+    validators: {
+      phone: (val) => {
+        if (val && !/^[\d\s\+\-\(\)]{8,15}$/.test(val)) {
+          return 'Please enter a valid phone number'
+        }
+        return null
+      },
+    },
+  },
 }

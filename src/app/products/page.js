@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Navbar from '@/components/Navbar'
 import GoldDivider from '@/components/GoldDivider'
@@ -133,11 +133,30 @@ function ProductCard({product}) {
 
 export default function ProductsPage() {
     
-  // Stores the currently selected category
   const [activeCategory, setActiveCategory] = useState('All')
-
-  // Temporary empty array until backend is connected
-  const products = []
+  const [products, setProducts] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+ 
+  // Fetch products from your API route on mount
+  useEffect(() => {
+    async function fetchProducts() {
+      try {
+        const res = await fetch('/api/products')
+        if (!res.ok) throw new Error('Failed to fetch products')
+        const json = await res.json()
+        setProducts(json.products ?? [])
+      } catch (err) {
+        console.error(err)
+        setError('Could not load products. Please try again.')
+      } finally {
+        setLoading(false)
+      }
+    }
+ 
+    fetchProducts()
+  }, [])
+  
 // Filters products based on the selected category
   const filteredProducts = products.filter((product) => {
     return activeCategory === 'All' || product.category === activeCategory
@@ -155,8 +174,6 @@ export default function ProductsPage() {
       }}
     
     >
-       <Navbar /> 
-      <GoldDivider /> 
 
       <main style={{ flex: 1 }}>
         <div style={{
@@ -248,7 +265,10 @@ export default function ProductsPage() {
         </section>
         </div>
       </main>
+<<<<<<< HEAD
             <GoldDivider />
+=======
+>>>>>>> origin
     </div>
   )
 }

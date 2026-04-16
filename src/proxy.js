@@ -3,6 +3,8 @@ import { NextResponse } from 'next/server'
 
 // Session refresh + protect/dashboard routes
 export async function proxy(request) {
+  console.log('[proxy] fired for:', request.nextUrl.pathname)
+  console.log('[proxy] cookies:', request.cookies.getAll().map(c => c.name))
   let response = NextResponse.next({ request })
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -15,4 +17,8 @@ export async function proxy(request) {
   return response
 }
 
-export const config = { matcher: ['/dashboard/:path*', '/api/:path*'] }
+export const config = {
+  matcher: [
+    '/dashboard/:path*',
+    '/account/:path*',
+    '/api/:path*'] }

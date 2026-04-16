@@ -5,16 +5,11 @@ import { createOrder } from '@/lib/db/orders'
 import { createDepositPaymentIntent } from '@/lib/stripe'
 
 // POST /api/checkout
-//
-// Checkout flow:
-//   1. Validate stock   — reject if any item exceeds available quantity
-//   2. Create the order — inserts order + line items, status: PENDING
-//   3. Create Stripe PaymentIntent for the $20 deposit
-//
+
 // Returns a clientSecret the frontend passes to Stripe Elements.
 // The customer enters their card entirely client-side
-//
-// After Stripe confirms payment on the client, call POST /api/checkout/confirm.
+
+// After Stripe confirms payment on the client, call POST /api/checkout/confirm
 
 
 export const POST = withHandler(
