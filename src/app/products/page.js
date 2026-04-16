@@ -265,10 +265,7 @@ export default function ProductsPage() {
         </section>
         </div>
       </main>
-<<<<<<< HEAD
-            <GoldDivider />
-=======
->>>>>>> origin
+      <GoldDivider />
     </div>
   )
 }
