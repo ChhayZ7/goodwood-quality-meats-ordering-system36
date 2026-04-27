@@ -4,7 +4,7 @@
 import { supabaseAdmin } from '@/lib/supabase-admin'
  
 // Retrieve total orders grouped by status
-// Returns array of { status: 'PENDING', count: 12 } for each status
+// Returns array of { status: 'PENDING', count: number } for each status
 export async function getOrderCountsByStatus() {
   const { data, error } = await supabaseAdmin
     .from('orders')
@@ -63,4 +63,33 @@ export async function getTotalDepositsCollected() {
       payment_count: data.length,
     }
   }
+
+// Orders by pickup date
+// Groups order counts by pickup_date, only upcoming dates
+// Returns array of { pickup_date: date, order_count: number }
+export async function getOrdersByPickupDate() {
+    const today = new Date().toISOString().split('T')[0]
+   
+    const { data, error } = await supabaseAdmin
+      .from('orders')
+      .select('pickup_date')
+      .gte('pickup_date', today)
+      .not('status', 'eq', 'CANCELLED')
+      .order('pickup_date', { ascending: true })
+   
+    if (error) throw error
+   
+    // Group by pickup_date
+    const grouped = {}
+    for (const row of data) {
+      const date = row.pickup_date
+      grouped[date] = (grouped[date] ?? 0) + 1
+    }
+   
+    return Object.entries(grouped).map(([pickup_date, order_count]) => ({
+      pickup_date,
+      order_count,
+    }))
+  }
+  
   
