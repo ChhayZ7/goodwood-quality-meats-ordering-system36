@@ -92,4 +92,32 @@ export async function getOrdersByPickupDate() {
     }))
   }
   
+// Low stock products
+// Returns products where stock_quantity <= low_stock_threshold
+// Returns { product_id, name, stock_quantity, low_stock_threshold }
+export async function getLowStockProducts() {
+    const { data, error } = await supabaseAdmin
+      .from('inventory')
+      .select(`
+        product_id,
+        stock_quantity,
+        low_stock_threshold,
+        product:products ( name, category, is_available )
+      `)
+   
+    if (error) throw error
+   
+    // Filter where stock is at or below threshold
+    return data
+      .filter((row) => row.stock_quantity <= row.low_stock_threshold)
+      .map((row) => ({
+        product_id:         row.product_id,
+        name:               row.product?.name ?? 'Unknown',
+        category:           row.product?.category ?? null,
+        is_available:       row.product?.is_available ?? true,
+        stock_quantity:     row.stock_quantity,
+        low_stock_threshold: row.low_stock_threshold,
+      }))
+      .sort((a, b) => a.stock_quantity - b.stock_quantity) // sorted by stock quantity
+  }
   
