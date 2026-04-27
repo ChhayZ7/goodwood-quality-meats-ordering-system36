@@ -44,4 +44,23 @@ export async function getTotalRevenue() {
     }
   }
    
+// Total deposits collected
+// Sums amount_cents across all PAID payment rows of type DEPOSIT
+// Returns { deposits_collected_cents: number, payment_count: number }
+export async function getTotalDepositsCollected() {
+    const { data, error } = await supabaseAdmin
+      .from('payments')
+      .select('amount_cents')
+      .eq('type', 'DEPOSIT')
+      .eq('status', 'PAID')
+   
+    if (error) throw error
+   
+    const deposits_collected_cents = data.reduce((sum, row) => sum + (row.amount_cents ?? 0), 0)
+   
+    return {
+      deposits_collected_cents,
+      payment_count: data.length,
+    }
+  }
   
