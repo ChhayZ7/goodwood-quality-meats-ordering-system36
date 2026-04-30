@@ -50,12 +50,10 @@ export default function ProductDetailPage() {
   if (loading) {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#FAF3E0' }}>
-        <Navbar />
-        <GoldDivider />
+
         <main style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <p style={{ color: '#7a6a49', fontSize: '16px' }}>Loading product...</p>
         </main>
-        <Footer />
       </div>
     )
   }
@@ -64,8 +62,7 @@ export default function ProductDetailPage() {
   if (error || !product) {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#FAF3E0' }}>
-        <Navbar />
-        <GoldDivider />
+
 
         <main style={{ flex: 1 }}>
           <div style={{ maxWidth: '960px', margin: '0 auto', padding: '32px 24px' }}>
@@ -166,7 +163,6 @@ export default function ProductDetailPage() {
         </main>
 
         
-        <Footer/>
       </div>
     )
   }
@@ -198,8 +194,7 @@ export default function ProductDetailPage() {
 
   return (
     <div  style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#FAF3E0' }}>
-      <Navbar />
-      <GoldDivider />
+
 
       <main style={{ flex: 1 }}>
       <div style={{ maxWidth: '960px', margin: '0 auto', padding: '32px 24px' }}>

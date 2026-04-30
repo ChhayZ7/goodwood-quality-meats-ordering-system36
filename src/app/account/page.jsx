@@ -32,12 +32,20 @@ export default function AccountPage(){
         return
       }
 
-      const { user } = await res.json()
-      setUser(user)
+      const json = await res.json()
+
+      if (!json.user){
+        console.error("No user in response:", json)
+        setError(json.error ??  'Failed to load profile')
+        setLoading(false)
+        return
+      }
+
+      setUser(json.user)
       setForm({
-        first_name: user.first_name ?? '',
-        last_name:  user.last_name  ?? '',
-        phone:      user.phone      ?? '',
+        first_name: json.user.first_name ?? '',
+        last_name:  json.user.last_name  ?? '',
+        phone:      json.user.phone      ?? '',
       })
       setLoading(false)
     }

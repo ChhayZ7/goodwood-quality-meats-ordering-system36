@@ -36,6 +36,20 @@ export const POST = withHandler(
         { status: 409 }
       )
     }
+    
+    // Check if total cost of order is $20 or above
+    const total = items.reduce((sum, item) => sum + item.subtotal_cents, 0)
+
+    if (total < 2000) { // return error if under $20
+      return NextResponse.json(
+        {
+          error: 'Minimum order value is $20.00',
+          total_cents: total,
+          status: 400,
+        },
+        { status: 400 }
+      )
+    }
 
     // Create order
     const { data: orderData, error: orderError } = await createOrder(
