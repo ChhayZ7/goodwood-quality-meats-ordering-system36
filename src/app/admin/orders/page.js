@@ -18,6 +18,8 @@ function StatusBadge({ status }) {
 
 const ALL_TABS   = ['All', 'CONFIRMED', 'IN_PROGRESS', 'READY', 'COMPLETED', 'CANCELLED']
 const TAB_LABELS = { All: 'All', CONFIRMED: 'Confirmed', IN_PROGRESS: 'In Progress', READY: 'Ready for Pickup', COMPLETED: 'Completed', CANCELLED: 'Cancelled' }
+
+const formatDate = d => new Date(d).toLocaleDateString('en-AU', { day: '2-digit', month: 'short', year: 'numeric' })
 // BACKEND TEAM: replace with useState([]) + useEffect fetching /api/admin/orders
 const orders = []
 
@@ -78,6 +80,23 @@ export default function AdminOrdersPage() {
             <div style={{ padding: '5px 12px', borderRadius: '6px', background: '#F3F4F6', color: '#D1D5DB', fontSize: '12px', fontWeight: 700, textAlign: 'center' }}>View</div>
           </div>
         ))}
+
+        {!showPlaceholders && filtered.map((order, i) => (
+          <div key={order.id} style={{ display: 'grid', gridTemplateColumns: COLS, padding: '15px 20px', borderBottom: i < filtered.length-1 ? '1px solid #F3F4F6' : 'none', alignItems: 'center' }}>
+            <span style={{ fontFamily: 'monospace', fontSize: '13px', fontWeight: 700, color: '#1A1A1A' }}>{order.order_number}</span>
+            <span style={{ fontFamily: '"Lato",sans-serif', fontSize: '13px', color: '#374151' }}>{order.customer_name}</span>
+            <span style={{ fontFamily: '"Lato",sans-serif', fontSize: '13px', color: '#374151' }}>{formatDate(order.pickup_date)}</span>
+            <StatusBadge status={order.status} />
+            <span style={{ fontFamily: '"Lato",sans-serif', fontSize: '12px', color: '#9CA3AF' }}>{formatDate(order.updated_at)}</span>
+            {/* BACKEND TEAM: last_updated_by comes from the audit trail — who last changed the order */}
+            <span style={{ fontFamily: '"Lato",sans-serif', fontSize: '12px', color: '#9CA3AF' }}>{order.last_updated_by ?? '—'}</span>
+            <Link href={`/admin/orders/${order.id}`} style={{ textDecoration: 'none' }}>
+              <div style={{ padding: '6px 12px', borderRadius: '6px', background: '#F0E8D0', color: '#7B1A1A', fontSize: '12px', fontWeight: 700, textAlign: 'center', cursor: 'pointer', transition: 'background .15s' }} onMouseEnter={e => e.currentTarget.style.background = '#E8D5A3'} onMouseLeave={e => e.currentTarget.style.background = '#F0E8D0'}>View</div>
+            </Link>
+          </div>
+        ))}
+
+        {!showPlaceholders && filtered.length === 0 && <div style={{ padding: '48px', textAlign: 'center', fontFamily: '"Lato",sans-serif', fontSize: '14px', color: '#9CA3AF' }}>No orders match your current filter.</div>}
       </div>
     </div>
   )
