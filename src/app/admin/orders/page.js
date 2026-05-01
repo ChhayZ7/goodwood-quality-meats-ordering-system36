@@ -29,8 +29,8 @@ export default function AdminOrdersPage() {
   const [search, setSearch]       = useState('')
 
     const filtered = orders.filter(o => {
-    const tabMatch    = activeTab === 'All' || o.status === activeTab
-    const q           = search.toLowerCase()
+    const tabMatch = activeTab === 'All' || o.status === activeTab
+    const q = search.toLowerCase()
     const searchMatch = !q || o.order_number.toLowerCase().includes(q) || o.customer_name.toLowerCase().includes(q)
     return tabMatch && searchMatch
   })
