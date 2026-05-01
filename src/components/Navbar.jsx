@@ -1,11 +1,14 @@
+'use client'
 // Top navigation bar - logo, navigation links (Products, Recipes, Contact Us), cart icon, auth state
 
-'use client'
 import Link from 'next/link'
 import Image from 'next/image'
 import { ShoppingCartIcon, UserIcon } from '@heroicons/react/24/outline'
+import { useCart } from '@/context/CartContext'
 
 export default function Navbar() {
+    const { itemCount } = useCart()
+
     return (
         <nav className="w-full bg-white border-b" style={{ borderColor: '#e5e5e5' }}>
             <div className="max-w-7xl mx-auto px-6 py-6 flex items-center justify-between">
@@ -45,11 +48,17 @@ export default function Navbar() {
                 </div>
 
                 {/* Icons */}
-
-
                 <div className="flex items-center gap-16">
-                    <Link href="/cart">
+                    <Link href="/cart" className='relative'>
                         <ShoppingCartIcon className="w-6 h-6" style={{ color: '#060606' }} />
+                        {itemCount > 0 && (
+                            <span
+                                className="absolute -top-2 -right-2 w-5 h-5 rounded-full flex items-center justify-center text-white text-xs font-bold"
+                                style={{ backgroundColor: '#8B1A1A', fontSize: '10px' }}
+                            >
+                                {itemCount > 9 ? '9+' : itemCount}
+                            </span>
+                        )}
                     </Link>
                     <Link href="/login">
                         <UserIcon className="w-6 h-6" style={{ color: '#060606' }} />
