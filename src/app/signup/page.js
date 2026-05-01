@@ -118,6 +118,15 @@ export default function SignUp() {
     if (error) {
       if (error.message.includes('already registered')) {
         setErrors({ email: 'An account with this email already exists.'})
+      } else if (error.message.includes('users_phone_key')) {
+        setErrors({ phone: 'This phone number is already linked to an account.'})
+      } else if (
+        error.message.toLowerCase().includes('database') ||
+        error.message.toLowerCase().includes('saving new user') ||
+        error.message.toLowerCase().includes('unexpected') ||
+        error.message.toLowerCase().includes('internal')
+      ){
+        setAuthError('Something went wrong creating your account. Please try again.')
       } else {
         setAuthError(error.message)
       }
