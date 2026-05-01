@@ -1,17 +1,16 @@
-// Single Product Detail - image, price, add to cart
 'use client'
+// Single Product Detail - image, price, add to cart
+
 
 import Link from 'next/link'
-import Navbar from '@/components/Navbar'
-import GoldDivider from '@/components/GoldDivider'
-import Footer from '@/components/Footer'
-
 import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
+import { useCart  } from '@/context/CartContext'
 
 export default function ProductDetailPage() {
   
   const { id } = useParams()
+  const { addToCart } = useCart()
   const [quantity, setQuantity] = useState(1)
   const [selectedWeight, setSelectedWeight] = useState(null)
   const [addedToCart,  setAddedToCart]  = useState(false)
@@ -49,10 +48,28 @@ export default function ProductDetailPage() {
   // In loading state
   if (loading) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#FAF3E0' }}>
+      <div 
+        style={{ 
+        minHeight: '100vh', 
+        display: 'flex', 
+        flexDirection: 'column', 
+        background: '#FAF3E0' 
+      }}>
 
-        <main style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <p style={{ color: '#7a6a49', fontSize: '16px' }}>Loading product...</p>
+        <main 
+          style={{ 
+            flex: 1, 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center' 
+        }}>
+          <p 
+            style={{ 
+              color: '#7a6a49', 
+              fontSize: '16px' 
+              }}>
+                Loading product...
+          </p>
         </main>
       </div>
     )
@@ -61,61 +78,156 @@ export default function ProductDetailPage() {
   // If no product yet, show placeholder layout
   if (error || !product) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#FAF3E0' }}>
-
-
-        <main style={{ flex: 1 }}>
-          <div style={{ maxWidth: '960px', margin: '0 auto', padding: '32px 24px' }}>
-         <a href="/products"
-            style={{ display: 'inline-block', marginBottom: '24px', fontSize: '14px', color: '#555', textDecoration: 'none' }}>
+      <div 
+        style={{ 
+          minHeight: '100vh', 
+          display: 'flex', 
+          flexDirection: 'column',
+           background: '#FAF3E0' 
+      }}>
+        <main 
+        style={{ 
+          flex: 1 
+        }}>
+          <div 
+            style={{ 
+              maxWidth: '960px', 
+              margin: '0 auto', 
+              padding: '32px 24px' 
+            }}>
+         <Link 
+            href="/products"
+            style={{ 
+              display: 'inline-block', 
+              marginBottom: '24px', 
+              fontSize: '14px', 
+              color: '#555', 
+              textDecoration: 'none' 
+            }}>
             ← Back to Products
-          </a>
+          </Link>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '48px' }}>
+          <div 
+            style={{ 
+              display: 'grid', 
+              gridTemplateColumns: '1fr 1fr',
+               gap: '48px' 
+          }}>
 
               {/* LEFT — image placeholder */}
-              <div style={{
-                borderRadius: '10px',
-                height: '400px',
-                background: '#F0E8D0',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
+              <div 
+                style={{
+                  borderRadius: '10px',
+                  height: '400px',
+                  background: '#F0E8D0',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
               }}>
-                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" strokeWidth="1">
-                  <rect x="3" y="3" width="18" height="18" rx="2"/>
-                  <circle cx="8.5" cy="8.5" r="1.5"/>
+                <svg 
+                  width="48" 
+                  height="48"
+                  viewBox="0 0 24 24" 
+                  fill="none" 
+                  stroke="#C9A84C" 
+                  strokeWidth="1">
+                  <rect 
+                    x="3" 
+                    y="3" 
+                    width="18" 
+                    height="18" 
+                    rx="2"
+                  />
+                  <circle 
+                    cx="8.5" 
+                    cy="8.5" 
+                    r="1.5"
+                  />
                   <polyline points="21 15 16 10 5 21"/>
                 </svg>
               </div>
 
           {/* Details placeholder */}
           <div>
-                <h1 style={{ fontFamily: '"Playfair Display", serif', fontSize: '26px', fontWeight: 700, color: '#CCCCCC', margin: '0 0 8px' }}>
+                <h1 
+                  style={{ 
+                    fontFamily: '"Playfair Display", serif', 
+                    fontSize: '26px', 
+                    fontWeight: 700, 
+                    color: '#CCCCCC', 
+                    margin: '0 0 8px' 
+                  }}>
                   Product Name
                 </h1>
 
-                <p style={{ fontSize: '20px', fontWeight: 700, color: '#DDDDDD', margin: '0 0 24px' }}>
+                <p 
+                  style={{ 
+                    fontSize: '20px', 
+                    fontWeight: 700, 
+                    color: '#DDDDDD', 
+                    margin: '0 0 24px' 
+                }}>
                   $00.00/kg
                 </p>
 
-              <div style={{ marginBottom: '16px' }}>
-                  <label style={{ display: 'block', fontSize: '14px', fontWeight: 700, color: '#CCCCCC', marginBottom: '6px' }}>
+              <div 
+                style={{ 
+                  marginBottom: '16px' 
+              }}>
+                  <label 
+                    style={{ 
+                      display: 'block', 
+                      fontSize: '14px', 
+                      fontWeight: 700, 
+                      color: '#CCCCCC',
+                      marginBottom: '6px' 
+                    }}>
                     Select Your Weight Range
                   </label>
-                  <select disabled style={{ width: '280px', padding: '10px 14px', border: '1.5px solid #E8E8E8', borderRadius: '8px', background: '#FAFAFA', fontSize: '14px', color: '#CCCCCC', cursor: 'not-allowed' }}>
+                  <select 
+                    disabled 
+                    style={{ 
+                      width: '280px', 
+                      padding: '10px 14px', 
+                      border: '1.5px solid #E8E8E8', 
+                      borderRadius: '8px', 
+                      background: '#FAFAFA', 
+                      fontSize: '14px', 
+                      color: '#CCCCCC', 
+                      cursor: 'not-allowed' 
+                  }}>
                     <option>-- kg</option>
                   </select>
                 </div>
 
-                <div style={{ marginBottom: '16px' }}>
-                  <label style={{ display: 'block', fontSize: '14px', fontWeight: 700, color: '#CCCCCC', marginBottom: '6px' }}>
+                <div 
+                  style={{ 
+                    marginBottom: '16px' 
+                  }}>
+                  <label 
+                    style={{ 
+                      display: 'block', 
+                      fontSize: '14px', 
+                      fontWeight: 700, 
+                      color: '#CCCCCC', 
+                      marginBottom: '6px' 
+                  }}>
                     Quantity
                   </label>
                   <select
                     value={quantity}
                     onChange={e => setQuantity(Number(e.target.value))}
-                    style={{ width: '100px', padding: '10px 14px', border: '1.5px solid #CCCCCC', borderRadius: '8px', background: '#fff', fontSize: '14px', color: '#1A1A1A', cursor: 'pointer', outline: 'none' }}
+                    style={{ 
+                      width: '100px', 
+                      padding: '10px 14px', 
+                      border: '1.5px solid #CCCCCC', 
+                      borderRadius: '8px', 
+                      background: '#fff', 
+                      fontSize: '14px', 
+                      color: '#1A1A1A', 
+                      cursor: 'pointer', 
+                      outline: 'none' 
+                  }}
                   >
                     {[1,2,3,4,5,6,7,8,9,10].map(n => (
                       <option key={n} value={n}>{n}</option>
@@ -124,32 +236,93 @@ export default function ProductDetailPage() {
                 </div>
 
               <div style={{ marginBottom: '20px' }}>
-                  <p style={{ fontSize: '12px', color: '#CCCCCC', margin: '0 0 3px', textTransform: 'uppercase', letterSpacing: '.05em' }}>
+                  <p 
+                    style={{ 
+                      fontSize: '12px', 
+                      color: '#CCCCCC', 
+                      margin: '0 0 3px', 
+                      textTransform: 'uppercase', 
+                      letterSpacing: '.05em' 
+                    }}>
                     Estimated Price Range
                   </p>
-                  <p style={{ fontFamily: '"Playfair Display", serif', fontSize: '20px', fontWeight: 700, color: '#DDDDDD', margin: 0 }}>
+                  <p 
+                    style={{ 
+                      fontFamily: '"Playfair Display", serif', 
+                      fontSize: '20px', 
+                      fontWeight: 700, 
+                      color: '#DDDDDD', 
+                      margin: 0 
+                    }}>
                     $-- — $--
                   </p>
                 </div>
 
-                <div style={{ width: '100%', padding: '14px', background: '#F0E8D0', borderRadius: '8px', fontSize: '14px', fontWeight: 700, color: '#BBBBBB', textAlign: 'center', marginBottom: '24px' }}>
+                <div 
+                  style={{ 
+                    width: '100%', 
+                    padding: '14px', 
+                    background: '#F0E8D0', 
+                    borderRadius: '8px', 
+                    fontSize: '14px', 
+                    fontWeight: 700, 
+                    color: '#BBBBBB', 
+                    textAlign: 'center', 
+                    marginBottom: '24px' 
+                  }}>
                   Add to Cart
                 </div>
 
-                <div style={{ borderTop: '1px solid #E8D48A', paddingTop: '20px', marginBottom: '16px' }}>
-                  <h2 style={{ fontFamily: '"Playfair Display", serif', fontSize: '16px', fontWeight: 700, color: '#1A1A1A', margin: '0 0 8px' }}>
+                <div 
+                  style={{ 
+                    borderTop: '1px solid #E8D48A', 
+                    paddingTop: '20px', 
+                    marginBottom: '16px' 
+                  }}>
+                  <h2 
+                    style={{ 
+                      fontFamily: '"Playfair Display", serif', 
+                      fontSize: '16px', 
+                      fontWeight: 700, 
+                      color: '#1A1A1A', 
+                      margin: '0 0 8px' 
+                    }}>
                     Description
                   </h2>
-                  <p style={{ fontSize: '13px', color: '#CCCCCC', lineHeight: 1.7, margin: 0 }}>
+                  <p 
+                    style={{ 
+                      fontSize: '13px', 
+                      color: '#CCCCCC', 
+                      lineHeight: 1.7, 
+                      margin: 0 
+                    }}>
                     Product description will appear here once connected to the database.
                   </p>
                 </div>
 
-                <div style={{ background: '#F0E8D0', borderRadius: '8px', padding: '14px 16px' }}>
-                  <h2 style={{ fontFamily: '"Playfair Display", serif', fontSize: '14px', fontWeight: 700, color: '#1A1A1A', margin: '0 0 6px' }}>
+                <div 
+                  style={{ 
+                    background: '#F0E8D0', 
+                    borderRadius: '8px', 
+                    padding: '14px 16px' 
+                  }}>
+                  <h2 
+                    style={{ 
+                      fontFamily: '"Playfair Display", serif', 
+                      fontSize: '14px', 
+                      fontWeight: 700, 
+                      color: '#1A1A1A', 
+                      margin: '0 0 6px' 
+                    }}>
                     How You&apos;ll Be Charged
                   </h2>
-                  <p style={{ fontSize: '12px', color: '#555', lineHeight: 1.6, margin: 0 }}>
+                  <p 
+                    style={{ 
+                      fontSize: '12px', 
+                      color: '#555', 
+                      lineHeight: 1.6, 
+                      margin: 0 
+                    }}>
                     <strong>Deposit:</strong> $20.00 paid at checkout.{' '}
                     <strong>Final payment:</strong> The exact weight will be determined when your order is prepared. The balance will be charged upon collection based on the actual weight.
                   </p>
@@ -157,7 +330,14 @@ export default function ProductDetailPage() {
 
               </div>
         </div>
-        <p style={{ textAlign: 'center', color: '#BBBBBB', fontSize: '13px', marginTop: '32px', fontStyle: 'italic' }}>
+        <p 
+          style={{ 
+            textAlign: 'center', 
+            color: '#BBBBBB', 
+            fontSize: '13px', 
+            marginTop: '32px', 
+            fontStyle: 'italic' 
+          }}>
           Product data will load once connected to the database</p>
         </div>
         </main>
@@ -188,42 +368,100 @@ export default function ProductDetailPage() {
 
   function handleAddToCart() {
     if (soldOut) return
+    addToCart(product, selectedWeight, quantity)
     setAddedToCart(true)
-    setTimeout(() => setAddedToCart(false), 2500)
+    setTimeout(() => setAddedToCart(false), 1500)
   }
 
   return (
-    <div  style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#FAF3E0' }}>
+    <div 
+      style={{ 
+        minHeight: '100vh', 
+        display: 'flex', 
+        flexDirection: 'column', 
+        background: '#FAF3E0' 
+      }}>
 
 
-      <main style={{ flex: 1 }}>
-      <div style={{ maxWidth: '960px', margin: '0 auto', padding: '32px 24px' }}>
-      <a href="/products" style={{ display: 'inline-block', marginBottom: '24px', fontSize: '14px', color: '#555', textDecoration: 'none' }}>← Back to Products</a>
+      <main 
+        style={{ 
+          flex: 1 
+      }}>
+      <div 
+        style={{ 
+          maxWidth: '960px', 
+          margin: '0 auto', 
+          padding: '32px 24px' 
+        }}>
+      <Link 
+        href="/products" 
+        style={{ 
+          display: 'inline-block', 
+          marginBottom: '24px', 
+          fontSize: '14px', 
+          color: '#555', 
+          textDecoration: 'none' 
+          }}> 
+          ← Back to Products
+      </Link>
 
       <div>
-        <div style={{ borderRadius: '10px', overflow: 'hidden', maxHeight: '420px' }}>
+        <div 
+          style={{ 
+            borderRadius: '10px', 
+            overflow: 'hidden', 
+            maxHeight: '420px' 
+          }}>
               <img
                 src={product.image_url}
                 alt={product.name}
-                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                style={{ 
+                  width: '100%', 
+                  height: '100%', 
+                  objectFit: 'cover' 
+                }}
               />
             </div>
 
             {/* RIGHT — real product details */}
             <div>
 
-              <h1 style={{ fontFamily: '"Playfair Display", serif', fontSize: '26px', fontWeight: 700, color: '#1A1A1A', margin: '0 0 8px', lineHeight: 1.2 }}>
+              <h1 
+                style={{ 
+                  fontFamily: '"Playfair Display", serif', 
+                  fontSize: '26px', 
+                  fontWeight: 700, 
+                  color: '#1A1A1A', 
+                  margin: '0 0 8px', 
+                  lineHeight: 1.2 
+                  }}>
                 {product.name}
               </h1>
 
-              <p style={{ fontSize: '20px', fontWeight: 700, color: '#7B1A1A', margin: '0 0 24px' }}>
+              <p 
+                style={{ 
+                  fontSize: '20px', 
+                  fontWeight: 700, 
+                  color: '#7B1A1A',
+                  margin: '0 0 24px' 
+                }}>
                 {priceDisplay}
               </p>
 
               {/* Weight dropdown — only for WEIGHT_RANGE products */}
               {product.product_type === 'WEIGHT_RANGE' && product.product_weight_options?.length > 0 && (
-                <div style={{ marginBottom: '16px' }}>
-                  <label style={{ display: 'block', fontSize: '14px', fontWeight: 700, color: '#555', marginBottom: '6px' }}>
+                <div 
+                  style={{ 
+                    marginBottom: '16px' 
+                  }}>
+                  <label 
+                    style={{ 
+                      display: 'block', 
+                      fontSize: '14px', 
+                      fontWeight: 700, 
+                      color: '#555', 
+                      marginBottom: '6px' 
+                    }}>
                     Select Your Weight Range
                   </label>
                   <select
@@ -232,7 +470,17 @@ export default function ProductDetailPage() {
                       const opt = product.product_weight_options.find(o => o.id === e.target.value)
                       setSelectedWeight(opt)
                     }}
-                    style={{ width: '280px', padding: '10px 14px', border: '1.5px solid #CCCCCC', borderRadius: '8px', background: '#fff', fontSize: '14px', color: '#1A1A1A', outline: 'none', cursor: 'pointer' }}
+                    style={{ 
+                      width: '280px', 
+                      padding: '10px 14px', 
+                      border: '1.5px solid #CCCCCC', 
+                      borderRadius: '8px', 
+                      background: '#fff', 
+                      fontSize: '14px', 
+                      color: '#1A1A1A', 
+                      outline: 'none', 
+                      cursor: 'pointer' 
+                    }}
                   >
                     {product.product_weight_options.map(opt => (
                       <option key={opt.id} value={opt.id}>{opt.label}</option>
