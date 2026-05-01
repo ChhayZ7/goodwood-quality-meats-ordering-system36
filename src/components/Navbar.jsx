@@ -3,11 +3,17 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
+import { useState, useEffect } from 'react'
 import { ShoppingCartIcon, UserIcon } from '@heroicons/react/24/outline'
 import { useCart } from '@/context/CartContext'
 
 export default function Navbar() {
     const { itemCount } = useCart()
+    const [mounted, setMounted] = useState(false)
+
+    useEffect(() => {
+        setMounted(true)
+    }, [])
 
     return (
         <nav className="w-full bg-white border-b" style={{ borderColor: '#e5e5e5' }}>
@@ -51,7 +57,7 @@ export default function Navbar() {
                 <div className="flex items-center gap-16">
                     <Link href="/cart" className='relative'>
                         <ShoppingCartIcon className="w-6 h-6" style={{ color: '#060606' }} />
-                        {itemCount > 0 && (
+                        {mounted && itemCount > 0 && (
                             <span
                                 className="absolute -top-2 -right-2 w-5 h-5 rounded-full flex items-center justify-center text-white text-xs font-bold"
                                 style={{ backgroundColor: '#8B1A1A', fontSize: '10px' }}
