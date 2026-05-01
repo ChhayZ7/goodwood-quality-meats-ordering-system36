@@ -52,6 +52,17 @@ export default function AdminInventoryPage() {
           <h1 style={{ fontFamily: '"Playfair Display",serif', fontSize: '26px', fontWeight: 700, color: '#1A1A1A', margin: '0 0 6px' }}>Inventory Management</h1>
           <p style={{ fontFamily: '"Lato",sans-serif', fontSize: '14px', color: '#888', margin: 0 }}>Update stock levels — changes reflect on the products page immediately</p>
         </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          {changedItems.length > 0 && (
+            <span style={{ fontFamily: '"Lato",sans-serif', fontSize: '13px', color: '#D97706', fontWeight: 600 }}>
+              {changedItems.length} unsaved change{changedItems.length > 1 ? 's' : ''}
+            </span>
+          )}
+          <button onClick={handleSave} disabled={saving || showPlaceholders || changedItems.length === 0} className="btn-primary" style={{ padding: '10px 22px', fontSize: '14px' }}>
+            {saving ? 'Saving…' : 'Save Changes'}
+          </button>
+          {saved && <span style={{ fontFamily: '"Lato",sans-serif', fontSize: '13px', color: '#16A34A', fontWeight: 600 }}>✓ Saved</span>}
+        </div>
       </div>
 
       {/* Table */}
@@ -92,6 +103,17 @@ export default function AdminInventoryPage() {
           )
         })}
       </div>
+
+      {!showPlaceholders && changedItems.length > 0 && (
+        <div style={{ position: 'fixed', bottom: '24px', left: '50%', transform: 'translateX(-50%)', background: '#1A1A1A', borderRadius: '12px', padding: '12px 24px', display: 'flex', alignItems: 'center', gap: '16px', boxShadow: '0 8px 24px rgba(0,0,0,0.2)', zIndex: 200 }}>
+          <span style={{ fontFamily: '"Lato",sans-serif', fontSize: '13px', color: '#E5E5E5' }}>
+            {changedItems.length} unsaved change{changedItems.length > 1 ? 's' : ''}
+          </span>
+          <button onClick={handleSave} disabled={saving} style={{ padding: '8px 20px', background: saving ? '#555' : '#E8D48A', color: '#1A1A1A', border: 'none', borderRadius: '8px', fontSize: '13px', fontWeight: 700, cursor: saving ? 'not-allowed' : 'pointer', fontFamily: '"Lato",sans-serif' }}>
+            {saving ? 'Saving…' : 'Save Changes'}
+          </button>
+        </div>
+      )}
     </div>
   )
 }
