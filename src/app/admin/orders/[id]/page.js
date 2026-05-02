@@ -103,4 +103,40 @@ export default function AdminOrderDetailPage() {
     )
   }
 
+    // ── REAL DATA LAYOUT ──────────────────────────────────────────
+  const isCancelled = order.status === 'CANCELLED'
+
+  return (
+    <div style={{ padding: '32px', maxWidth: '920px' }}>
+      <Link href="/admin/orders" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontFamily: '"Lato",sans-serif', fontSize: '13px', color: '#888', textDecoration: 'none', marginBottom: '20px' }}>← Back to Orders</Link>
+
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <h1 style={{ fontFamily: '"Playfair Display",serif', fontSize: '24px', fontWeight: 700, color: '#1A1A1A', margin: 0 }}>Order #{order.order_number}</h1>
+          <StatusBadge status={order.status} />
+        </div>
+        {/* BACKEND TEAM: Cancel button hidden once order is already cancelled */}
+        {!isCancelled && (
+          <button onClick={() => setShowCancel(true)} style={{ padding: '8px 18px', borderRadius: '8px', border: '1.5px solid #DC2626', background: 'transparent', fontSize: '13px', fontWeight: 700, color: '#DC2626', cursor: 'pointer', fontFamily: '"Lato",sans-serif' }}>
+            Cancel Order
+          </button>
+        )}
+      </div>
+
+            {/* Confirm cancel dialog */}
+      {showCancel && (
+        <div style={{ position: 'fixed', top:0,left:0,right:0,bottom:0, background:'rgba(0,0,0,0.4)', zIndex:999, display:'flex', alignItems:'center', justifyContent:'center' }}>
+          <div style={{ background:'#fff', borderRadius:'12px', padding:'28px 32px', maxWidth:'400px', width:'90%', boxShadow:'0 16px 48px rgba(0,0,0,0.15)' }}>
+            <h3 style={{ fontFamily:'"Playfair Display",serif', fontSize:'18px', fontWeight:700, color:'#1A1A1A', margin:'0 0 10px' }}>Cancel this order?</h3>
+            <p style={{ fontFamily:'"Lato",sans-serif', fontSize:'14px', color:'#555', lineHeight:1.6, margin:'0 0 24px' }}>This cannot be undone. The order status will be set to Cancelled.</p>
+            <div style={{ display:'flex', gap:'10px' }}>
+              <button onClick={handleCancel} disabled={cancelling} className="btn-primary" style={{ flex:1, padding:'10px', fontSize:'14px', background: cancelling ? '#9CA3AF' : '#DC2626' }}>
+                {cancelling ? 'Cancelling…' : 'Yes, Cancel'}
+              </button>
+              <button onClick={() => setShowCancel(false)} style={{ flex:1, padding:'10px', background:'#F3F4F6', color:'#555', border:'none', borderRadius:'8px', fontSize:'14px', fontWeight:700, cursor:'pointer', fontFamily:'"Lato",sans-serif' }}>Keep Order</button>
+            </div>
+          </div>
+        </div>
+      )}
+
 }
