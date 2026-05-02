@@ -138,5 +138,48 @@ export default function AdminOrderDetailPage() {
           </div>
         </div>
       )}
+      {/* Audit trail — admin-only section */}
+      <div style={{ background:'#fff', borderRadius:'12px', border:'1px solid #E5E7EB', padding:'24px', marginBottom:'20px' }}>
+        <h2 style={{ fontFamily:'"Playfair Display",serif', fontSize:'17px', fontWeight:700, color:'#1A1A1A', margin:'0 0 16px' }}>Audit Trail</h2>
+        {/* BACKEND TEAM: audit_trail array comes from GET /api/admin/orders/[id] */}
+        {order.audit_trail?.length > 0 ? order.audit_trail.map((entry, i) => (
+          <div key={i} style={{ display:'flex', alignItems:'flex-start', gap:'12px', paddingBottom:i<order.audit_trail.length-1?'12px':0, marginBottom:i<order.audit_trail.length-1?'12px':0, borderBottom:i<order.audit_trail.length-1?'1px solid #F3F4F6':'none' }}>
+            <div style={{ width:'8px', height:'8px', borderRadius:'50%', background:'#7B1A1A', flexShrink:0, marginTop:'5px' }} />
+            <div>
+              <p style={{ fontFamily:'"Lato",sans-serif', fontSize:'13px', fontWeight:600, color:'#1A1A1A', margin:0 }}>{entry.action}</p>
+              <p style={{ fontFamily:'"Lato",sans-serif', fontSize:'12px', color:'#9CA3AF', margin:'2px 0 0' }}>by {entry.performed_by} · {formatSmall(entry.timestamp)}</p>
+            </div>
+          </div>
+        )) : <p style={{ fontFamily:'"Lato",sans-serif', fontSize:'13px', color:'#9CA3AF', margin:0 }}>No audit history yet.</p>}
+      </div>
+
+      {/* Order summary */}
+      <div style={{ background:'#fff', borderRadius:'12px', border:'1px solid #E5E7EB', padding:'24px', marginBottom:'20px' }}>
+        <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:'24px' }}>
+          {[['Order Number',`#${order.order_number}`],['Customer',`${order.customer?.first_name} ${order.customer?.last_name}`],['Pickup Date',formatDate(order.pickup_date)],['Deposit Paid',formatCents(order.deposit_paid_cents)]].map(([l,v]) => (
+            <div key={l}>
+              <p style={{ fontFamily:'"Lato",sans-serif', fontSize:'11px', fontWeight:700, color:'#9CA3AF', textTransform:'uppercase', letterSpacing:'.08em', margin:'0 0 6px' }}>{l}</p>
+              <p style={{ fontFamily:'"Lato",sans-serif', fontSize:'14px', fontWeight:600, color:'#1A1A1A', margin:0 }}>{v}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Status update — hidden if order is already cancelled */}
+      {!isCancelled && (
+        <div style={{ background:'#fff', borderRadius:'12px', border:'1px solid #E5E7EB', padding:'24px' }}>
+          <h2 style={{ fontFamily:'"Playfair Display",serif', fontSize:'17px', fontWeight:700, color:'#1A1A1A', margin:'0 0 16px' }}>Update Status</h2>
+          <div style={{ display:'flex', alignItems:'center', gap:'12px', flexWrap:'wrap' }}>
+            {/* BACKEND TEAM: selectedStatus sent in body of PATCH /api/admin/orders/[id] */}
+            <select value={selectedStatus} onChange={e => setSelectedStatus(e.target.value)} className="gw-input" style={{ width:'240px', cursor:'pointer' }}>
+              {ADMIN_STATUSES.map(s => <option key={s} value={s}>{STATUS_CONFIG[s]?.label}</option>)}
+            </select>
+            <button onClick={handleSave} disabled={saving} className="btn-primary" style={{ padding:'10px 24px', fontSize:'14px' }}>{saving ? 'Saving…' : 'Save Changes'}</button>
+            {saved && <span style={{ fontFamily:'"Lato",sans-serif', fontSize:'13px', color:'#16A34A', fontWeight:600, display:'flex', alignItems:'center', gap:'5px' }}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>Saved</span>}
+          </div>
+        </div>
+      )}
+    </div>
+  )
 
 }
