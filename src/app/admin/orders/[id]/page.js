@@ -23,3 +23,32 @@ function StatusBadge({ status }) {
 
 // BACKEND TEAM: replace with useState(null) + useEffect fetch (see notes above)
 const order = null
+
+export default function AdminOrderDetailPage() {
+  const { id } = useParams()
+
+  // BACKEND TEAM: pre-fill these from real order data in your useEffect
+  const [selectedStatus, setSelectedStatus] = useState('CONFIRMED')
+  const [weights, setWeights]               = useState({})
+  const [saving, setSaving]                 = useState(false)
+  const [saved, setSaved]                   = useState(false)
+  const [showCancel, setShowCancel]         = useState(false)
+  const [cancelling, setCancelling]         = useState(false)
+
+  const isLocked = selectedStatus === 'READY' || selectedStatus === 'COMPLETED'
+
+  async function handleSave() {
+    setSaving(true)
+    await new Promise(r => setTimeout(r, 700))
+    setSaving(false); setSaved(true); setTimeout(() => setSaved(false), 3000)
+  }
+
+  async function handleCancel() {
+    setCancelling(true)
+    await new Promise(r => setTimeout(r, 700))
+    setCancelling(false); setShowCancel(false); setSelectedStatus('CANCELLED')
+  }
+
+  const formatDate   = d => new Date(d).toLocaleDateString('en-AU', { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' })
+  const formatSmall  = d => new Date(d).toLocaleString('en-AU', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+  const formatCents  = c => `$${(c / 100).toFixed(2)}`
