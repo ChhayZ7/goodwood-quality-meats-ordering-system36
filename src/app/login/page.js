@@ -182,7 +182,7 @@ export default function LoginPage() {
       {/* RIGHT IMAGE */}
       <div className="w-[55%] relative h-full">
         <img
-          src="/signupImage.png"
+          src="/loginImage.jpg"
           alt="meat"
           className="w-full h-full object-cover"
         />
