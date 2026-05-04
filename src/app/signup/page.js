@@ -2,6 +2,9 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { createClient } from '@/lib/supabase-browser'
+import { useRouter } from 'next/navigation'
+import { useEffect } from 'react'
 
 const AUS_PHONE = /^(\+?61|0)[2-9]\d{8}$/;
 
@@ -14,8 +17,23 @@ export default function SignUp() {
     password: "",
     confirmPassword: "",
   });
-
   const [errors, setErrors] = useState({});
+  const [submitting, setSubmitting] = useState(false)
+  const [authError, setAuthError] = useState('')
+
+  const router = useRouter()
+
+  // Redirect to account if already logged in
+  useEffect(() => {
+    async function checkSession(){
+      const supabase = createClient()
+      const { data: { session } } = await supabase.auth.getSession()
+      if (session){
+        router.replace('/account')
+      }
+    }
+    checkSession()
+  }, [router])
 
   const update = (field, value) => {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -66,7 +84,7 @@ export default function SignUp() {
     return err;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     const err = validate();
@@ -77,7 +95,46 @@ export default function SignUp() {
     }
 
     setErrors({});
-    console.log("Signup success", form);
+    setAuthError('')
+    setSubmitting(true)
+  
+    const supabase = createClient()
+
+    // Sign up with Supabase Auth
+    // Passes firstName, last_name, phone as metadata
+    // The on_auth_user_created trigger picks these up and inserts into public.users
+    const { error } = await supabase.auth.signUp({
+      email: form.email,
+      password: form.password,
+      options: {
+        data: {
+          first_name: form.firstName,
+          last_name: form.lastName,
+          phone: form.phone,
+        }
+      }
+    })
+    
+    if (error) {
+      if (error.message.includes('already registered')) {
+        setErrors({ email: 'An account with this email already exists.'})
+      } else if (error.message.includes('users_phone_key')) {
+        setErrors({ phone: 'This phone number is already linked to an account.'})
+      } else if (
+        error.message.toLowerCase().includes('database') ||
+        error.message.toLowerCase().includes('saving new user') ||
+        error.message.toLowerCase().includes('unexpected') ||
+        error.message.toLowerCase().includes('internal')
+      ){
+        setAuthError('Something went wrong creating your account. Please try again.')
+      } else {
+        setAuthError(error.message)
+      }
+      setSubmitting(false)
+      return
+    }
+
+    router.push('/account')
   };
 
   return (
@@ -86,9 +143,9 @@ export default function SignUp() {
       {/* LEFT IMAGE */}
       <div className="w-[55%] relative h-full">
         <img
-          src="/meat.png"
+          src="/signupImage.png"
           alt="meat"
-          className="w-full h-full object-cover grayscale opacity-80"
+          className="w-full h-full object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#f4f1ec]/40 to-[#f4f1ec]"></div>
       </div>
@@ -126,6 +183,11 @@ export default function SignUp() {
               Log in
             </Link>
           </p>
+
+          {/* Add this above the form */}
+          {authError && (
+            <p className="text-red-500 text-sm mb-4">{authError}</p>
+          )}
 
           <form onSubmit={handleSubmit}>
 
@@ -188,13 +250,14 @@ export default function SignUp() {
             />
             {errors.confirmPassword && <p className="text-red-500 text-sm mb-3">{errors.confirmPassword}</p>}
 
+            {/* Update the submit button */}
             <button
               type="submit"
+              disabled={submitting}
               className="w-full mt-3 bg-red-800 text-white py-5 rounded-xl text-lg font-semibold hover:bg-red-900 transition shadow-md"
             >
-              Sign Up
+              {submitting ? 'Creating account...' : 'Sign Up'}
             </button>
-
           </form>
         </div>
       </div>

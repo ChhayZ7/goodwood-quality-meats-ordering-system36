@@ -1,0 +1,123 @@
+// All database queries for the admin reports page.
+// Each function is a separate query so the route can run them in parallel.
+ 
+import { supabaseAdmin } from '@/lib/supabase-admin'
+ 
+// Retrieve total orders grouped by status
+// Returns array of { status: 'PENDING', count: number } for each status
+export async function getOrderCountsByStatus() {
+  const { data, error } = await supabaseAdmin
+    .from('orders')
+    .select('status')
+ 
+  if (error) throw error
+ 
+  // Count occurrences of each status
+  const counts = {}
+  const validStatuses = ['PENDING', 'CONFIRMED', 'READY', 'COMPLETED', 'CANCELLED']
+ 
+  // Initialise all status counts as 0
+  for (const status of validStatuses) counts[status] = 0
+  for (const row of data) {
+    if (counts[row.status] !== undefined) counts[row.status]++
+  }
+ 
+  return Object.entries(counts).map(([status, count]) => ({ status, count }))
+}
+
+// Calculating total revenue
+// Sums total_cents across COMPLETED orders.
+// Returns { revenue_cents: number, order_count: number }
+export async function getTotalRevenue() {
+    const { data, error } = await supabaseAdmin
+      .from('orders')
+      .select('total_cents')
+      .eq('status', 'COMPLETED')
+   
+    if (error) throw error
+   
+    const revenue_cents = data.reduce((sum, row) => sum + (row.total_cents ?? 0), 0)
+   
+    return {
+      revenue_cents,
+      order_count: data.length,
+    }
+  }
+   
+// Total deposits collected
+// Sums amount_cents across all PAID payment rows of type DEPOSIT
+// Returns { deposits_collected_cents: number, payment_count: number }
+export async function getTotalDepositsCollected() {
+    const { data, error } = await supabaseAdmin
+      .from('payments')
+      .select('amount_cents')
+      .eq('type', 'DEPOSIT')
+      .eq('status', 'PAID')
+   
+    if (error) throw error
+   
+    const deposits_collected_cents = data.reduce((sum, row) => sum + (row.amount_cents ?? 0), 0)
+   
+    return {
+      deposits_collected_cents,
+      payment_count: data.length,
+    }
+  }
+
+// Orders by pickup date
+// Groups order counts by pickup_date, only upcoming dates
+// Returns array of { pickup_date: date, order_count: number }
+export async function getOrdersByPickupDate() {
+    const today = new Date().toISOString().split('T')[0]
+   
+    const { data, error } = await supabaseAdmin
+      .from('orders')
+      .select('pickup_date')
+      .gte('pickup_date', today)
+      .not('status', 'eq', 'CANCELLED')
+      .order('pickup_date', { ascending: true })
+   
+    if (error) throw error
+   
+    // Group by pickup_date
+    const grouped = {}
+    for (const row of data) {
+      const date = row.pickup_date
+      grouped[date] = (grouped[date] ?? 0) + 1
+    }
+   
+    return Object.entries(grouped).map(([pickup_date, order_count]) => ({
+      pickup_date,
+      order_count,
+    }))
+  }
+  
+// Low stock products
+// Returns products where stock_quantity <= low_stock_threshold
+// Returns { product_id, name, stock_quantity, low_stock_threshold }
+export async function getLowStockProducts() {
+    const { data, error } = await supabaseAdmin
+      .from('inventory')
+      .select(`
+        product_id,
+        stock_quantity,
+        low_stock_threshold,
+        product:products ( name, category, is_available )
+      `)
+   
+    if (error) throw error
+   
+    // Filter where stock is at or below threshold
+    return data
+      .filter((row) => row.stock_quantity <= row.low_stock_threshold)
+      .map((row) => ({
+        product_id:         row.product_id,
+        name:               row.product?.name ?? 'Unknown',
+        category:           row.product?.category ?? null,
+        is_available:       row.product?.is_available ?? true,
+        stock_quantity:     row.stock_quantity,
+        low_stock_threshold: row.low_stock_threshold,
+      }))
+      .sort((a, b) => a.stock_quantity - b.stock_quantity) // sorted by stock quantity
+  }
+  

@@ -1,10 +1,10 @@
 // Wraps every API route handler with consistent error catching
 // and input validation. All errors are returned in consistent format
 
+// Input validation done with AI for convenience and comprehensiveness
+
 
 import { NextResponse } from 'next/server'
-
-
 
 // Input validation
 function validate(body, schema) {
@@ -136,6 +136,22 @@ export const schemas = {
       order_id:          'string',
       payment_intent_id: 'string',
       items:             'array',
+    },
+  },
+
+  updateUser: {
+    types: {
+      first_name: 'string',
+      last_name: 'string',
+      phone: 'string',
+    },
+    validators: {
+      phone: (val) => {
+        if (val && !/^[\d\s\+\-\(\)]{8,15}$/.test(val)) {
+          return 'Please enter a valid phone number'
+        }
+        return null
+      },
     },
   },
 }
