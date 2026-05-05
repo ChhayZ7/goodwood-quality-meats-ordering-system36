@@ -1,0 +1,50 @@
+.card {
+
+}
+
+/* for the categories up above the page*/
+
+.cardCategory { 
+
+}
+
+/* when click on card*/
+.card:hover {
+
+}
+
+.image {
+
+}
+
+/* when click on image*/
+
+.image:hover { 
+
+}
+
+/* when a card doesn't have a photo */
+
+.cardImagePlaceholder {
+
+}
+
+
+/* where the content goes */
+
+.cardContent {
+
+}
+
+/* for product's name and recipe's name*/
+.cardTitle { 
+
+}
+
+.cardDescription { 
+
+}
+
+.cardLink { 
+
+}
