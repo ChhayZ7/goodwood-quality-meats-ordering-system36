@@ -12,6 +12,7 @@ export default function Navbar() {
 
     const [mounted, setMounted] = useState(false)
     const [isLoggedIn, setIsLoggedIn] = useState(false)
+    const [firstName, setFirstName] = useState('')
 
     useEffect(() => {
         setMounted(true)
@@ -21,15 +22,31 @@ export default function Navbar() {
         // Check session immediately
         supabase.auth.getSession().then(({ data: { session } }) => {
             setIsLoggedIn(!!session)
+            if (session) fetchName()
+            
         })
 
         // Also listen for auth changes (login/logout)
         const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
             setIsLoggedIn(!!session)
+            if (session) fetchName()
+            else setFirstName('')
         })
+
+         async function fetchName() {
+            const res = await fetch('/api/users/me')
+            const json = await res.json()
+            if (json.user) setFirstName(json.user.first_name ?? '')
+        }
 
         return () => subscription.unsubscribe()
     }, [])
+
+    const handleSignOut = async () => {
+        const supabase = createClient()
+        await supabase.auth.signOut()
+        window.location.href = '/login'
+    }
 
     return (
         <nav className="w-full bg-white border-b" style={{ borderColor: '#e5e5e5' }}>
@@ -71,9 +88,27 @@ export default function Navbar() {
                         )}
                     </Link>
 
-                    <Link href={mounted && isLoggedIn ? '/account' : '/login'}>
-                        <UserIcon className="w-6 h-6" style={{ color: '#060606' }} />
-                    </Link>
+                
+                    {mounted && isLoggedIn ? (
+                        <div className="flex items-center gap-3">
+                            <Link href="/account" className="flex items-center gap-2 text-sm text-gray-700 hover:opacity-70">
+                                <UserIcon className="w-6 h-6" style={{ color: '#060606' }} />
+                                <span>Hi, {firstName}</span>
+                            </Link>
+                            <button onClick={handleSignOut} className="hover:opacity-70">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                                    <polyline points="16 17 21 12 16 7"/>
+                                    <line x1="21" y1="12" x2="9" y2="12"/>
+                                </svg>
+                            </button>
+                        </div>
+                    ) : (
+                        <Link href="/login" className="flex items-center gap-2 text-sm text-gray-700 hover:opacity-70">
+                            <UserIcon className="w-6 h-6" style={{ color: '#060606' }} />
+                            <span>Login</span>
+                        </Link>
+                    )}
                 </div>
 
             </div>
