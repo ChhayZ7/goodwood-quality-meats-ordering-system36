@@ -1,18 +1,34 @@
 'use client'
-// Top navigation bar - logo, navigation links (Products, Recipes, Contact Us), cart icon, auth state
-
 import Link from 'next/link'
 import Image from 'next/image'
 import { useState, useEffect } from 'react'
 import { ShoppingCartIcon, UserIcon } from '@heroicons/react/24/outline'
 import { useCart } from '@/context/CartContext'
+import { createClient } from '@/lib/supabase-browser'
 
 export default function Navbar() {
+
     const { itemCount } = useCart()
+
     const [mounted, setMounted] = useState(false)
+    const [isLoggedIn, setIsLoggedIn] = useState(false)
 
     useEffect(() => {
         setMounted(true)
+
+        const supabase = createClient()
+
+        // Check session immediately
+        supabase.auth.getSession().then(({ data: { session } }) => {
+            setIsLoggedIn(!!session)
+        })
+
+        // Also listen for auth changes (login/logout)
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+            setIsLoggedIn(!!session)
+        })
+
+        return () => subscription.unsubscribe()
     }, [])
 
     return (
@@ -30,25 +46,13 @@ export default function Navbar() {
 
                 {/* Nav Links */}
                 <div className="flex items-center gap-30">
-                    <Link
-                        href="/products"
-                        className="text-sm tracking-wide transition-opacity hover:opacity-70"
-                        style={{ color: '#060606' }}
-                    >
+                    <Link href="/products" className="text-sm tracking-wide transition-opacity hover:opacity-70" style={{ color: '#060606' }}>
                         PRODUCTS
                     </Link>
-                    <Link
-                        href="/recipes"
-                        className="text-sm tracking-wide transition-opacity hover:opacity-70"
-                        style={{ color: '#060606' }}
-                    >
+                    <Link href="/recipes" className="text-sm tracking-wide transition-opacity hover:opacity-70" style={{ color: '#060606' }}>
                         RECIPES
                     </Link>
-                    <Link
-                        href="/contact"
-                        className="text-sm tracking-wide transition-opacity hover:opacity-70"
-                        style={{ color: '#060606' }}
-                    >
+                    <Link href="/contact" className="text-sm tracking-wide transition-opacity hover:opacity-70" style={{ color: '#060606' }}>
                         CONTACT US
                     </Link>
                 </div>
@@ -66,7 +70,8 @@ export default function Navbar() {
                             </span>
                         )}
                     </Link>
-                    <Link href="/login">
+
+                    <Link href={mounted && isLoggedIn ? '/account' : '/login'}>
                         <UserIcon className="w-6 h-6" style={{ color: '#060606' }} />
                     </Link>
                 </div>
