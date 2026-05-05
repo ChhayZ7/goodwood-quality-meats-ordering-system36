@@ -83,7 +83,7 @@ function RecipeCard({ recipe }) {
               fontSize: '11px',
               fontWeight: 700,
               fontStyle:Bold,
-              color: '#073b0e',
+              color: '#6d1313',
               textTransform: 'uppercase',
               letterSpacing: '0.08em',
             }}>
@@ -96,7 +96,7 @@ function RecipeCard({ recipe }) {
         <h3 style={{
           fontSize: '17px',
           fontWeight: 700,
-          color: '#0f641a',
+          color: '#8B1A1A',
           margin: '0 0 8px',
           lineHeight: 1.3,
         }}>
@@ -122,9 +122,9 @@ function RecipeCard({ recipe }) {
           style={{
             fontSize: '13px',
             fontWeight: 700,
-            color: '#0f641a',
+            color: '#8B1A1A',
             textDecoration: 'none',
-            borderBottom: '1.5px solid #0f641a',
+            borderBottom: '1.5px solid #8B1A1A',
             paddingBottom: '1px',
             alignSelf: 'flex-start',
             marginTop: 'auto',
