@@ -70,7 +70,7 @@ export default function AccountLayout({ children }) {
       </aside>
 
       {/* MAIN CONTENT */}
-      <main className="flex-1" style={{ backgroundColor: '#F5F0E8' }}>
+      <main className="flex-1" style={{ backgroundColor: '#FAF3E0' }}>
         <div className="px-16 py-8">
           {children}
         </div>
