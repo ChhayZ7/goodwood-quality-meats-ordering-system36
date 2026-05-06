@@ -3,7 +3,7 @@
 
 import { usePathname, useRouter } from 'next/navigation'
 import Link from 'next/link'
-import GoldDivider from '@/components/layout/GoldDivider'
+import GoldDivider from '@/components/GoldDivider'
 
 const LogoutSVG = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
