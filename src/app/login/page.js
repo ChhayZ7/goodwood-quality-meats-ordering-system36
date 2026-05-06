@@ -49,7 +49,9 @@ export default function LoginPage() {
       return
     }
 
-    router.push('/')
+    const redirectTo = new URLSearchParams(window.location.search).get('redirectTo')
+    const isSafe = redirectTo?.startsWith('/') && !redirectTo?.startsWith('//')
+    router.replace(isSafe ? redirectTo : '/')
   }
 
   function validate() {
