@@ -46,6 +46,21 @@ export default function StaffLayout({ children }) {
       </header>
 
       <GoldDivider />
+        <div style={{ display: 'flex', flex: 1 }}>
+        <aside style={{ width: '220px', minWidth: '220px', background: '#fff', borderRight: '1px solid #E5E7EB', display: 'flex', flexDirection: 'column', paddingTop: '20px' }}>
+          <nav style={{ flex: 1 }}>
+            {NAV_ITEMS.map(item => {
+              const isActive = pathname.startsWith(item.href)
+              return (
+                <Link key={item.href} href={item.href}
+                  style={{ display: 'block', padding: '12px 20px', fontFamily: '"Lato",sans-serif', fontSize: '14px', fontWeight: isActive ? 700 : 400, color: isActive ? '#fff' : '#1A1A1A', background: isActive ? '#7B1A1A' : 'transparent', textDecoration: 'none', transition: 'background .15s' }}
+                  onMouseEnter={e => { if (!isActive) e.currentTarget.style.background = '#F5F5F5' }}
+                  onMouseLeave={e => { if (!isActive) e.currentTarget.style.background = 'transparent' }}>
+                  {item.label}
+                </Link>
+              )
+            })}
+          </nav>
       </div>
   )
 }
