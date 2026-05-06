@@ -13,3 +13,9 @@ const LogoutSVG = () => (
     <line x1="21" y1="12" x2="9" y2="12"/>
   </svg>
 )
+
+const NAV_ITEMS = [
+  { href: '/staff/orders',    label: 'Orders'     },
+  { href: '/staff/inventory', label: 'Inventory'  },
+  { href: '/account',         label: 'My Account' },
+]
