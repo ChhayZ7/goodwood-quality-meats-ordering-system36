@@ -4,7 +4,7 @@ import { FiMapPin, FiPhone, FiMail, FiClock } from "react-icons/fi";
 
 export default function ContactPage() {
   return (
-    <div className="bg-[#f4f1ec] min-h-screen py-20">
+    <div className="bg-[#FAF3E0] min-h-screen py-20">
 
       {/* TITLE */}
       <h1
