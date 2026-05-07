@@ -16,6 +16,7 @@ function PaymentForm({ orderId, items, onSuccess }) {
   const elements = useElements()
   const [paying, setPaying] = useState(false)
   const [error, setError] = useState(null)
+  const [ready, setReady] = useState(false)
 
   async function handlePay(e) {
     e.preventDefault()
