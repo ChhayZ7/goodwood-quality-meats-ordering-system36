@@ -96,3 +96,33 @@ export default function StaffOrderDetailPage() {
       </div>
     )
   }
+
+    // ── REAL DATA LAYOUT ─────────────────────────────────────────
+  return (
+    <div style={{ padding: '32px', maxWidth: '900px' }}>
+      <Link href="/staff/orders" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontFamily: '"Lato",sans-serif', fontSize: '13px', color: '#888', textDecoration: 'none', marginBottom: '20px' }}>← Back to Orders</Link>
+
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
+        <h1 style={{ fontFamily: '"Playfair Display",serif', fontSize: '24px', fontWeight: 700, color: '#1A1A1A', margin: 0 }}>Order #{order.order_number}</h1>
+        <StatusBadge status={order.status} />
+      </div>
+
+      {/* Locked warning */}
+      {isLocked && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#FEF3C7', border: '1px solid #FCD34D', borderRadius: '8px', padding: '12px 16px', marginBottom: '20px', fontFamily: '"Lato",sans-serif', fontSize: '13px', color: '#92400E' }}>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+          Weight fields are locked — order is <strong style={{ marginLeft: '4px' }}>{STATUS_CONFIG[order.status]?.label.toLowerCase()}</strong>.
+        </div>
+      )}
+
+      {/* Summary */}
+      <div style={{ background: '#fff', borderRadius: '12px', border: '1px solid #E5E7EB', padding: '24px', marginBottom: '20px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: '24px' }}>
+          {[['Order Number',`#${order.order_number}`],['Customer',`${order.customer?.first_name} ${order.customer?.last_name}`],['Pickup Date',formatDate(order.pickup_date)],['Deposit Paid',formatCents(order.deposit_paid_cents)]].map(([l,v]) => (
+            <div key={l}>
+              <p style={{ fontFamily: '"Lato",sans-serif', fontSize: '11px', fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '.08em', margin: '0 0 6px' }}>{l}</p>
+              <p style={{ fontFamily: '"Lato",sans-serif', fontSize: '14px', fontWeight: 600, color: '#1A1A1A', margin: 0 }}>{v}</p>
+            </div>
+          ))}
+        </div>
+      </div>
