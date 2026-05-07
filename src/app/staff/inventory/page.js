@@ -39,7 +39,21 @@ export default function StaffInventoryPage() {
         <span style={{ fontFamily: '"Lato",sans-serif', fontSize: '12px', fontWeight: 600, color: '#7B1A1A' }}>Read only — contact an admin to update stock levels</span>
       </div>
       
-      
+            {/* Table */}
+      <div style={{ background: '#fff', borderRadius: '12px', border: '1px solid #E5E7EB', overflow: 'hidden' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 140px 160px', padding: '12px 20px', background: '#F9FAFB', borderBottom: '1px solid #E5E7EB' }}>
+          {['Product Name','Category','Current Stock'].map(h => <span key={h} style={{ fontFamily: '"Lato",sans-serif', fontSize: '11px', fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '.06em' }}>{h}</span>)}
+        </div>
+
+        {/* PLACEHOLDER ROWS — shown when inventory = [] */}
+        {showPlaceholders && Array.from({ length: 7 }).map((_, i) => (
+          <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr 140px 160px', padding: '15px 20px', borderBottom: i < 6 ? '1px solid #F3F4F6' : 'none', alignItems: 'center' }}>
+            <div style={{ width: '160px', height: '14px', background: '#F0E8D0', borderRadius: '4px' }} />
+            <div style={{ width: '68px', height: '22px', background: '#F3F4F6', borderRadius: '12px' }} />
+            <span style={{ fontFamily: '"Lato",sans-serif', fontSize: '13px', color: '#D1D5DB' }}>—</span>
+          </div>
+        ))}
+
 
 
 
