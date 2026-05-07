@@ -90,6 +90,14 @@ export default function OrderDetailPage() {
             ))}
           </tbody>
         </table>
+
+        {/* Order level notes */}
+        {order.notes && (
+          <div className="mt-6 pt-4 border-t border-gray-100">
+            <p className="text-sm font-semibold text-gray-700 mb-1">Order Notes</p>
+            <p className="text-sm text-gray-500 italic mt-2">{order.notes}</p>
+          </div>
+        )}
       </div>
 
       {/* Payment Summary Card */}
@@ -99,7 +107,7 @@ export default function OrderDetailPage() {
         <div className="space-y-3 text-sm">
           <div className="flex justify-between text-gray-600">
             <span>Deposit Paid:</span>
-            <span>{payment.deposit_cents != null ? `$${(payment.deposit_cents / 100).toFixed(2)}` : '—'}</span>
+            <span>{order.deposit_paid_cents != null ? `$${(order.deposit_paid_cents / 100).toFixed(2)}` : '—'}</span>
           </div>
           <div className="flex justify-between text-gray-600">
             <span>Estimated Total:</span>
