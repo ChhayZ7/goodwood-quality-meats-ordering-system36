@@ -126,3 +126,47 @@ export default function StaffOrderDetailPage() {
           ))}
         </div>
       </div>
+            {/* Items */}
+      <div style={{ background: '#fff', borderRadius: '12px', border: '1px solid #E5E7EB', overflow: 'hidden', marginBottom: '20px' }}>
+        <div style={{ padding: '16px 20px', borderBottom: '1px solid #E5E7EB' }}><h2 style={{ fontFamily: '"Playfair Display",serif', fontSize: '17px', fontWeight: 700, color: '#1A1A1A', margin: 0 }}>Order Items</h2></div>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 60px 130px 170px', padding: '10px 20px', background: '#F9FAFB', borderBottom: '1px solid #E5E7EB' }}>
+          {['Product','Qty','Est. Price','Actual Weight (kg)'].map(h => <span key={h} style={{ fontFamily: '"Lato",sans-serif', fontSize: '11px', fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '.05em' }}>{h}</span>)}
+        </div>
+        {order.order_items?.map((item, i) => (
+          <div key={item.id} style={{ display: 'grid', gridTemplateColumns: '1fr 60px 130px 170px', padding: '14px 20px', borderBottom: i < order.order_items.length-1 ? '1px solid #F3F4F6' : 'none', alignItems: 'center' }}>
+            <div>
+              <p style={{ fontFamily: '"Lato",sans-serif', fontSize: '13px', fontWeight: 600, color: '#1A1A1A', margin: 0 }}>{item.product?.name}</p>
+              {item.weight_option && <p style={{ fontFamily: '"Lato",sans-serif', fontSize: '12px', color: '#9CA3AF', margin: '2px 0 0' }}>{item.weight_option.label}</p>}
+            </div>
+            <span style={{ fontFamily: '"Lato",sans-serif', fontSize: '13px', color: '#374151' }}>{item.quantity}</span>
+            <span style={{ fontFamily: '"Lato",sans-serif', fontSize: '13px', color: '#374151' }}>{formatCents(item.subtotal_cents)}</span>
+            {/* BACKEND TEAM: weight input only for WEIGHT_RANGE products */}
+            {item.product?.product_type === 'WEIGHT_RANGE' ? (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <input type="number" step="0.01" min="0" value={weights[item.id] ?? ''} onChange={e => setWeights(p => ({...p,[item.id]:e.target.value}))} disabled={isLocked} placeholder="0.00" className="gw-input" style={{ width: '90px', padding: '8px 10px', cursor: isLocked ? 'not-allowed' : 'text', background: isLocked ? '#F9FAFB' : '#fff' }} />
+                <span style={{ fontFamily: '"Lato",sans-serif', fontSize: '12px', color: '#888' }}>kg</span>
+              </div>
+            ) : (
+              <span style={{ fontFamily: '"Lato",sans-serif', fontSize: '12px', color: '#C0C0C0', fontStyle: 'italic' }}>Fixed price</span>
+            )}
+          </div>
+        ))}
+      </div>
+            {/* Status update */}
+      <div style={{ background: '#fff', borderRadius: '12px', border: '1px solid #E5E7EB', padding: '24px' }}>
+        <h2 style={{ fontFamily: '"Playfair Display",serif', fontSize: '17px', fontWeight: 700, color: '#1A1A1A', margin: '0 0 16px' }}>Update Status</h2>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+          {/* BACKEND TEAM: selectedStatus is sent in body of PATCH /api/staff/orders/[id] */}
+          <select value={selectedStatus} onChange={e => setSelectedStatus(e.target.value)} className="gw-input" style={{ width: '240px', cursor: 'pointer' }}>
+            {STAFF_STATUSES.map(s => <option key={s} value={s}>{STATUS_CONFIG[s]?.label}</option>)}
+          </select>
+          <button onClick={handleSave} disabled={saving} className="btn-primary" style={{ padding: '10px 24px', fontSize: '14px' }}>
+            {saving ? 'Saving…' : 'Save Changes'}
+          </button>
+          {saved && <span style={{ fontFamily: '"Lato",sans-serif', fontSize: '13px', color: '#16A34A', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '5px' }}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>Saved</span>}
+        </div>
+        <p style={{ fontFamily: '"Lato",sans-serif', fontSize: '12px', color: '#9CA3AF', margin: '12px 0 0' }}>Note: Only admin can cancel an order.</p>
+      </div>
+    </div>
+  )
+}
