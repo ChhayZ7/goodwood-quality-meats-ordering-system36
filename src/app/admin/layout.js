@@ -19,7 +19,7 @@ const NAV_ITEMS = [
   { href:'/admin/products', label:'Products & Pricing'},
   { href:'/admin/reports', label:'Reports'},
   { href:'/admin/staff', label:'Staff Management'},
-  { href:'/account', label:'My Account'}
+  { href:'/admin/profile', label:'My Account'}
 ]
 
 export default function AdminLayout({ children }) {
