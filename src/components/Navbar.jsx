@@ -50,7 +50,7 @@ export default function Navbar() {
 
     return (
         <nav className="w-full bg-white border-b" style={{ borderColor: '#e5e5e5' }}>
-            <div className="max-w-7xl mx-auto px-6 py-6 flex items-center justify-between">
+            <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
 
                 {/* Logo */}
                 <Link href="/" className="flex items-center">
@@ -114,7 +114,7 @@ export default function Navbar() {
             </div>
 
             {/* Gold divider */}
-            <div style={{ height: '2px', backgroundColor: '#D4AF37' }} />
+            <div style={{ height: '4px', backgroundColor: '#D4AF37' }} />
         </nav>
     )
 }
