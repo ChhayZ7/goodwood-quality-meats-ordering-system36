@@ -52,10 +52,52 @@ export default function StaffOrdersPage() {
         </div>
       </div>
 
-            {/* Filter tabs */}
+        {/* Filter tabs */}
       <div style={{ display: 'flex', gap: '8px', marginBottom: '20px', flexWrap: 'wrap' }}>
         {ALL_TABS.map(tab => {
           const isActive = tab === activeTab
           return <button key={tab} onClick={() => setActiveTab(tab)} style={{ padding: '7px 16px', borderRadius: '20px', border: `1.5px solid ${isActive ? '#7B1A1A' : '#E5E7EB'}`, background: isActive ? '#7B1A1A' : '#fff', color: isActive ? '#fff' : '#555', fontSize: '13px', fontWeight: isActive ? 700 : 400, cursor: 'pointer', fontFamily: '"Lato",sans-serif', transition: 'all .15s' }}>{TAB_LABELS[tab]}</button>
         })}
       </div>
+
+        {/* Table */}
+      <div style={{ background: '#fff', borderRadius: '12px', border: '1px solid #E5E7EB', overflow: 'hidden' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '150px 1fr 160px 180px 120px 80px', padding: '12px 20px', background: '#F9FAFB', borderBottom: '1px solid #E5E7EB' }}>
+          {['Order #', 'Customer', 'Pickup Date', 'Status', 'Updated', ''].map(h => (
+            <span key={h} style={{ fontFamily: '"Lato",sans-serif', fontSize: '11px', fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '.06em' }}>{h}</span>
+          ))}
+        </div>
+
+        {/* PLACEHOLDER ROWS — shown when orders = [] */}
+        {showPlaceholders && Array.from({ length: 6 }).map((_, i) => (
+          <div key={i} style={{ display: 'grid', gridTemplateColumns: '150px 1fr 160px 180px 120px 80px', padding: '15px 20px', borderBottom: i < 5 ? '1px solid #F3F4F6' : 'none', alignItems: 'center' }}>
+            <span style={{ fontFamily: 'monospace', fontSize: '13px', color: '#D1D5DB' }}>GW2025XXXX</span>
+            <span style={{ fontSize: '13px', color: '#D1D5DB' }}>— —</span>
+            <span style={{ fontSize: '13px', color: '#D1D5DB' }}>-- --- ----</span>
+            <span style={{ display: 'inline-block', background: '#F3F4F6', color: '#D1D5DB', fontSize: '12px', fontWeight: 700, padding: '4px 14px', borderRadius: '20px' }}>Status</span>
+            <span style={{ fontSize: '12px', color: '#D1D5DB' }}>— —</span>
+            <div style={{ padding: '5px 12px', borderRadius: '6px', background: '#F3F4F6', color: '#D1D5DB', fontSize: '12px', fontWeight: 700, textAlign: 'center' }}>View</div>
+          </div>
+        ))}
+
+        {/* REAL DATA ROWS — rendered once orders has data */}
+        {!showPlaceholders && filtered.map((order, i) => (
+          <div key={order.id} style={{ display: 'grid', gridTemplateColumns: '150px 1fr 160px 180px 120px 80px', padding: '15px 20px', borderBottom: i < filtered.length - 1 ? '1px solid #F3F4F6' : 'none', alignItems: 'center' }}>
+            <span style={{ fontFamily: 'monospace', fontSize: '13px', fontWeight: 700, color: '#1A1A1A' }}>{order.order_number}</span>
+            <span style={{ fontFamily: '"Lato",sans-serif', fontSize: '13px', color: '#374151' }}>{order.customer_name}</span>
+            <span style={{ fontFamily: '"Lato",sans-serif', fontSize: '13px', color: '#374151' }}>{formatDate(order.pickup_date)}</span>
+            <StatusBadge status={order.status} />
+            <span style={{ fontFamily: '"Lato",sans-serif', fontSize: '12px', color: '#9CA3AF' }}>{formatDate(order.updated_at)}</span>
+            <Link href={`/staff/orders/${order.id}`} style={{ textDecoration: 'none' }}>
+              <div style={{ padding: '6px 12px', borderRadius: '6px', background: '#F0E8D0', color: '#7B1A1A', fontSize: '12px', fontWeight: 700, textAlign: 'center', cursor: 'pointer', transition: 'background .15s' }} onMouseEnter={e => e.currentTarget.style.background = '#E8D5A3'} onMouseLeave={e => e.currentTarget.style.background = '#F0E8D0'}>View</div>
+            </Link>
+          </div>
+        ))}
+
+        {!showPlaceholders && filtered.length === 0 && (
+          <div style={{ padding: '48px', textAlign: 'center', fontFamily: '"Lato",sans-serif', fontSize: '14px', color: '#9CA3AF' }}>No orders match your current filter.</div>
+        )}
+      </div>
+    </div>
+  )
+}
