@@ -6,7 +6,7 @@ import { NextResponse } from 'next/server'
 
 const PROTECTED_ROUTES = ['/checkout']
 
-export async function middleware(request) {
+export async function proxy(request) {
   const { pathname } = request.nextUrl
 
   let response = NextResponse.next({ request })
