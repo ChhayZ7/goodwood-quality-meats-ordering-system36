@@ -54,11 +54,25 @@ export default function StaffInventoryPage() {
           </div>
         ))}
 
-
-
-
-
-
+        {/* REAL DATA ROWS */}
+        {!showPlaceholders && inventory.map((item, i) => {
+          const isLow = item.stock_quantity <= LOW_STOCK
+          const isOut = item.stock_quantity === 0
+          const cat   = CATEGORY_COLOURS[item.product?.category] || CATEGORY_COLOURS['Other']
+          return (
+            <div key={item.id} style={{ display: 'grid', gridTemplateColumns: '1fr 140px 160px', padding: '15px 20px', borderBottom: i < inventory.length-1 ? '1px solid #F3F4F6' : 'none', alignItems: 'center', background: isOut ? '#FFFBFB' : 'transparent' }}>
+              <span style={{ fontFamily: '"Lato",sans-serif', fontSize: '14px', fontWeight: 600, color: '#1A1A1A' }}>{item.product?.name}</span>
+              <span style={{ display: 'inline-block', padding: '3px 10px', borderRadius: '12px', background: cat.bg, color: cat.color, fontSize: '12px', fontWeight: 700, width: 'fit-content' }}>{item.product?.category}</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ fontFamily: '"Lato",sans-serif', fontSize: '14px', fontWeight: isLow ? 700 : 400, color: isOut ? '#DC2626' : isLow ? '#D97706' : '#1A1A1A' }}>{item.stock_quantity}</span>
+                {isOut  && <span style={{ fontFamily: '"Lato",sans-serif', fontSize: '11px', color: '#DC2626', fontWeight: 700, background: '#FEE2E2', padding: '2px 8px', borderRadius: '10px' }}>Sold out</span>}
+                {isLow && !isOut && <span style={{ fontFamily: '"Lato",sans-serif', fontSize: '11px', color: '#D97706', fontWeight: 700, background: '#FEF3C7', padding: '2px 8px', borderRadius: '10px' }}>Low stock</span>}
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    
 
       </div>
   )
