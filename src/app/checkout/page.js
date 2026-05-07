@@ -1,16 +1,15 @@
-// Checkout page, reads cart from CartContext and query params
+'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { loadStripe } from '@stripe/stripe-js'
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js'
 import { useCart } from '@/context/CartContext'
-import { createClient } from '@/lib/supabase-client'
+import { createClient } from '@/lib/supabase-browser'
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY)
 
-// Stripe payment form 
-// Rendered inside <Elements> so it has access to the Stripe context
+// Stripe payment form
 
 function PaymentForm({ orderId, items, onSuccess }) {
   const stripe = useStripe()
@@ -25,7 +24,6 @@ function PaymentForm({ orderId, items, onSuccess }) {
     setPaying(true)
     setError(null)
 
-    // Confirm the payment with Stripe client-side
     const { error: stripeError, paymentIntent } = await stripe.confirmPayment({
       elements,
       redirect: 'if_required',
@@ -37,7 +35,6 @@ function PaymentForm({ orderId, items, onSuccess }) {
       return
     }
 
-    // Verify server-side and confirm the order
     const confirmRes = await fetch('/api/checkout/confirm', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -59,18 +56,12 @@ function PaymentForm({ orderId, items, onSuccess }) {
       return
     }
 
-    // Success, let parent handle cart clear + redirect
     onSuccess()
   }
 
   return (
     <form onSubmit={handlePay}>
-      {/* Stripe's prebuilt card input UI */}
-      <PaymentElement
-        options={{
-          layout: 'tabs',
-        }}
-      />
+      <PaymentElement options={{ layout: 'tabs' }} />
 
       {error && (
         <p className="text-sm mt-3" style={{ color: '#DC2626' }}>
@@ -112,20 +103,26 @@ export default function CheckoutPage() {
   const [loading, setLoading]           = useState(true)
   const [error, setError]               = useState(null)
 
-  // Redirect to cart if no items
+  // ensure guard for single ref, only first instancde of order made is used
+  const initCalled = useRef(false)
+
   useEffect(() => {
+    if (initCalled.current) return
+    initCalled.current = true
+
+    // Redirect to cart if empty
     if (items.length === 0) {
       router.replace('/cart')
+      return
     }
-  }, [items, router])
 
-  // Create order + payment intent on mount
-  useEffect(() => {
-    if (items.length === 0 || !pickupDate) return
+    if (!pickupDate) {
+      router.replace('/cart')
+      return
+    }
 
     async function initCheckout() {
       try {
-        // Get the logged-in user's ID and email
         const supabase = createClient()
         const { data: { user } } = await supabase.auth.getUser()
 
@@ -134,7 +131,6 @@ export default function CheckoutPage() {
           return
         }
 
-        // Build items payload from cart
         const orderItems = items.map(item => ({
           product_id:        item.product_id,
           quantity:          item.quantity,
@@ -145,7 +141,11 @@ export default function CheckoutPage() {
                                : item.price_per_kg_cents,
           subtotal_cents:    item.product_type === 'FIXED'
                                ? item.price_cents * item.quantity
-                               : Math.round(item.price_per_kg_cents * item.weight_option?.min_weight_kg * item.quantity),
+                               : Math.round(
+                                   item.price_per_kg_cents *
+                                   (item.weight_option?.min_weight_kg ?? 1) *
+                                   item.quantity
+                                 ),
           notes: item.notes ?? null,
         }))
 
@@ -180,7 +180,7 @@ export default function CheckoutPage() {
     }
 
     initCheckout()
-  }, []) // run once on mount
+  }, []) 
 
   function handlePaymentSuccess() {
     clearCart()
@@ -239,9 +239,7 @@ export default function CheckoutPage() {
             className="flex justify-between items-center pt-3 mt-3"
             style={{ borderTop: '1px solid #e5e5e5' }}
           >
-            <span className="text-sm font-semibold" style={{ color: '#2C2C2A' }}>
-              Pickup Date
-            </span>
+            <span className="text-sm font-semibold" style={{ color: '#2C2C2A' }}>Pickup Date</span>
             <span className="text-sm" style={{ color: '#2C2C2A' }}>
               {new Date(pickupDate).toLocaleDateString('en-AU', {
                 day: 'numeric', month: 'long', year: 'numeric',
@@ -252,12 +250,8 @@ export default function CheckoutPage() {
             className="flex justify-between items-center pt-3 mt-3"
             style={{ borderTop: '1px solid #e5e5e5' }}
           >
-            <span className="text-sm font-semibold" style={{ color: '#2C2C2A' }}>
-              Deposit Due Today
-            </span>
-            <span className="text-lg font-bold" style={{ color: '#8B1A1A' }}>
-              $20.00
-            </span>
+            <span className="text-sm font-semibold" style={{ color: '#2C2C2A' }}>Deposit Due Today</span>
+            <span className="text-lg font-bold" style={{ color: '#8B1A1A' }}>$20.00</span>
           </div>
         </div>
 

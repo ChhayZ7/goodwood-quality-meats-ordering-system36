@@ -1,3 +1,4 @@
+'use client'
 // Shown after a successful checkout. Reads ?order_id= from the URL,
 // fetches the real order from /api/orders/:id, and displays it.
 
@@ -72,6 +73,7 @@ export default function OrderConfirmationPage() {
         setLoading(false)
       }
     }
+
 
     fetchOrder()
   }, [orderId])
@@ -204,7 +206,7 @@ export default function OrderConfirmationPage() {
           {/* Balance due */}
           <div className="flex justify-between items-center pt-3">
             <span className="text-sm font-semibold" style={{ color: '#2C2C2A' }}>
-              Balance Due at Pickup
+              Estimated Minimum Balance Due at Pickup
             </span>
             <span className="text-lg font-bold" style={{ color: '#8B1A1A' }}>
               {order.total_cents > 0
