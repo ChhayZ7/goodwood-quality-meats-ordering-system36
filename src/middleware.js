@@ -4,44 +4,45 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse } from 'next/server'
 
-// Routes that require the user to be logged in
 const PROTECTED_ROUTES = ['/checkout']
 
 export async function middleware(request) {
   const { pathname } = request.nextUrl
 
-  console.log('[middleware] fired for:', pathname)
-  console.log('[middleware] cookies:', request.cookies.getAll().map(c => c.name))
-
   let response = NextResponse.next({ request })
 
-  // Create Supabase client that reads/writes session cookies
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
     {
       cookies: {
-        getAll: () => request.cookies.getAll(),
-        setAll: (cookiesToSet) =>
-          cookiesToSet.forEach(({ name, value, options }) =>
+        // Must return all cookies
+        getAll() {
+          return request.cookies.getAll()
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value, options }) => {
+            request.cookies.set(name, value)
+            response = NextResponse.next({ request })
             response.cookies.set(name, value, options)
-          ),
+          })
+        },
       },
     }
   )
 
-  // Refresh the session
+  // Refresh session, required for Supabase SSR to work correctly
   const { data: { user } } = await supabase.auth.getUser()
 
-  // Check if this route requires authentication
   const isProtected = PROTECTED_ROUTES.some((route) =>
     pathname.startsWith(route)
   )
 
   if (isProtected && !user) {
-    // Redirect to login and save original destination
+    // Encode the FULL URL including query params as redirectTo
+    const fullPath = request.nextUrl.pathname + request.nextUrl.search
     const loginUrl = new URL('/login', request.url)
-    loginUrl.searchParams.set('redirectTo', pathname)
+    loginUrl.searchParams.set('redirectTo', fullPath)
     return NextResponse.redirect(loginUrl)
   }
 
