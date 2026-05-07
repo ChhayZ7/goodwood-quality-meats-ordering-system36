@@ -13,8 +13,10 @@ function RecipeCardSkeleton() {
       overflow: 'hidden',
       background: '#9e9067',
     }}>
-      <div style={{ width: '100%', height: '220px', background: '#bca26c' }} />
+      {/* Image */}
+      <div style={{ width: '100%', height: '220px', background: '#bca26c' }} /> 
       <div style={{ padding: '16px' }}>
+        {/* Body */}
         <div style={{ width: '60px', height: '12px', background: '#bca26c', borderRadius: '4px', marginBottom: '10px' }} />
         <div style={{ width: '80%', height: '18px', background: '#bca26c', borderRadius: '4px', marginBottom: '8px' }} />
         <div style={{ width: '100%', height: '12px', background: '#bca26c', borderRadius: '4px', marginBottom: '4px' }} />
@@ -107,7 +109,7 @@ function RecipeCard({ recipe }) {
         {descriptionPreview && (
           <p style={{
             fontSize: '13px',
-            color: '#2e4631',
+            color: '#1c261d',
             lineHeight: 1.6,
             margin: '0 0 12px',
             flex: 1,
