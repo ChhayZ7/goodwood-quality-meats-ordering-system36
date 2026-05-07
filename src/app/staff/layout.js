@@ -61,7 +61,7 @@ export default function StaffLayout({ children }) {
               )
             })}
           </nav>
-                    <button onClick={handleLogout}
+          <button onClick={handleLogout}
             style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 20px', fontFamily: '"Lato",sans-serif', fontSize: '14px', color: '#1A1A1A', background: 'transparent', border: 'none', cursor: 'pointer', textAlign: 'left', width: '100%', borderTop: '1px solid #E5E7EB' }}
             onMouseEnter={e => e.currentTarget.style.background = '#F5F5F5'}
             onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
