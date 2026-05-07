@@ -232,7 +232,7 @@ export default function OrderConfirmationPage() {
         {/* Buttons */}
         <div className="flex flex-col gap-3">
           <Link
-            href="/dashboard"
+            href="/account/orders"
             className="block w-full text-center py-4 rounded-lg text-white font-semibold transition-opacity hover:opacity-90"
             style={{ backgroundColor: '#8B1A1A' }}
           >
