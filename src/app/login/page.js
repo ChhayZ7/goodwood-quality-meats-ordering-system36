@@ -18,7 +18,7 @@ export default function LoginPage() {
       const supabase = createClient()
       const { data: { session } } = await supabase.auth.getSession()
       if (session) {
-        router.replace('/account')
+        router.replace('/')
       }
     }
     checkSession()
@@ -49,7 +49,9 @@ export default function LoginPage() {
       return
     }
 
-    router.push('/account')
+    const redirectTo = new URLSearchParams(window.location.search).get('redirectTo')
+    const isSafe = redirectTo?.startsWith('/') && !redirectTo?.startsWith('//')
+    router.replace(isSafe ? redirectTo : '/')
   }
 
   function validate() {
