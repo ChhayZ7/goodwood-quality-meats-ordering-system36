@@ -32,6 +32,8 @@ export const POST = withHandler(async (request) => {
     const supabase = await createClient()
 
     // Check admin role
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+
     if (authError || !user){
         return Response.json({ error: 'Unauthorised' }, { status: 401 })
     }
