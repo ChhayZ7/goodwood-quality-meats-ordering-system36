@@ -7,8 +7,9 @@ export const PATCH = withHandler(async (request, { params }) => {
     const { id } = await params
     
     // Check admin role
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user){
-        return Response.json({ error: 'Unauthorised' }, { statis: 401 })
+        return Response.json({ error: 'Unauthorised' }, { status: 401 })
     }
     const role = user.app_metadata?.role
     if (role !== 'ADMIN' && role != 'STAFF'){
@@ -34,8 +35,8 @@ export const PATCH = withHandler(async (request, { params }) => {
     if (category !== undefined) updates.category = category
     if (product_type !== undefined) updates.product_type = product_type
     if (price_cents !== undefined) updates.price_cents = price_cents
+    if (price_per_kg_cents !== undefined) updates.price_per_kg_cents = price_per_kg_cents
     if (is_available !== undefined) updates.is_available = is_available
-    updates.updated_at = new Date().toISOString()
 
     const { error: updateError } = await supabase
         .from('products')
