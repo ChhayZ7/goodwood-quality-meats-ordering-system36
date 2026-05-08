@@ -1,6 +1,6 @@
 // Refreshes the Supabase session on every matched request for Supabase SSR auth functionality
 // Redirects unauthenticated users in PROTECTED_ROUTES so they return after logging in
-
+// Redirects staff/admin away from /account to /admin (they manage, not shop)
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse } from 'next/server'
 
