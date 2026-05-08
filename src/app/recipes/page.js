@@ -2,25 +2,19 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Bold } from 'lucide-react'
-
+import styles from '@/app/styles/card.module.css'
 
 const CATEGORIES = ['All', 'Beef', 'Poultry', 'Christmas', 'Lamb', 'Pork', 'Sauce']
 
 function RecipeCardSkeleton() {
   return (
-    <div style={{
-      borderRadius: '8px',
-      overflow: 'hidden',
-      background: '#9e9067',
-    }}>
-      {/* Image */}
-      <div style={{ width: '100%', height: '220px', background: '#bca26c' }} /> 
-      <div style={{ padding: '16px' }}>
-        {/* Body */}
-        <div style={{ width: '60px', height: '12px', background: '#bca26c', borderRadius: '4px', marginBottom: '10px' }} />
-        <div style={{ width: '80%', height: '18px', background: '#bca26c', borderRadius: '4px', marginBottom: '8px' }} />
-        <div style={{ width: '100%', height: '12px', background: '#bca26c', borderRadius: '4px', marginBottom: '4px' }} />
-        <div style={{ width: '70%', height: '12px', background: '#bca26c', borderRadius: '4px' }} />
+  <div className={styles.card-skeleton}>
+      <div className={styles.skeleton-image} />
+      <div className={styles.skeleton-content}>
+        <div className={styles.skeleton-line} style={{ width: '60px', height: '12px', marginBottom: '10px' }} />
+        <div className={styles.skeleton-line} style={{ width: '80%', height: '18px', marginBottom: '8px' }} />
+        <div className={styles.skeleton-line} style={{ width: '100%', height: '12px', marginBottom: '4px' }} />
+        <div className={styles.skeleton-line} style={{ width: '70%', height: '12px' }} />
       </div>
     </div>
   )
@@ -33,27 +27,9 @@ function RecipeCard({ recipe }) {
     : ''
 
   return (
-    <div
-      style={{
-        borderRadius: '8px',
-        overflow: 'hidden',
-        background: '#f7e4bc',
-        cursor: 'pointer',
-        transition: 'transform .2s, box-shadow .2s',
-        display: 'flex',
-        flexDirection: 'column',
-      }}
-      onMouseEnter={e => {
-        e.currentTarget.style.transform = 'translateY(-4px)'
-        e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.12)'
-      }}
-      onMouseLeave={e => {
-        e.currentTarget.style.transform = 'translateY(0)'
-        e.currentTarget.style.boxShadow = 'none'
-      }}
-    >
+    <div className = {styles.card}>
       {/* Image */}
-      <div style={{ width: '100%', height: '220px', overflow: 'hidden', flexShrink: 0 }}>
+      <div className = {styles.image}>
         {recipe.image_url ? (
           <img
             src={recipe.image_url}
