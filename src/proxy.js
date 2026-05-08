@@ -5,6 +5,7 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse } from 'next/server'
 
 const PROTECTED_ROUTES = ['/checkout']
+const CUSTOMER_ONLY_ROUTES = ['/account']
 
 export async function proxy(request) {
   const { pathname } = request.nextUrl
@@ -44,6 +45,18 @@ export async function proxy(request) {
     const loginUrl = new URL('/login', request.url)
     loginUrl.searchParams.set('redirectTo', fullPath)
     return NextResponse.redirect(loginUrl)
+  }
+
+  const isCustomerRoute = CUSTOMER_ONLY_ROUTES.some((route) =>
+    pathname.startsWith(route)
+  )
+
+  if (isCustomerRoute && user) {
+    const role = user.app_metadata?.role
+    if (role === 'STAFF' || role === 'ADMIN') {
+      const homeUrl = new URL('/admin/orders', request.url)
+      return NextResponse.redirect(homeUrl)
+    }
   }
 
   return response
