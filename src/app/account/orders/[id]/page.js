@@ -5,11 +5,12 @@ import { useRouter, useParams } from 'next/navigation'
 import Link from 'next/link'
 
 const statusColors = {
-  'Ready for Pickup': 'bg-green-500',
-  'In Progress':      'bg-blue-500',
-  'Confirmed':        'bg-yellow-500',
-  'Cancelled':        'bg-red-500',
-  'Completed':        'bg-gray-500',
+  'PENDING':          'bg-gray-400',
+  'CONFIRMED':        'bg-yellow-500',
+  'IN_PROGRESS':      'bg-blue-500',
+  'READY_FOR_PICKUP': 'bg-green-500',
+  'COMPLETED':        'bg-gray-500',
+  'CANCELLED':        'bg-red-500',
 }
 
 export default function OrderDetailPage() {
@@ -36,6 +37,8 @@ export default function OrderDetailPage() {
   if (error)   return <p className="text-red-600 p-8">{error}</p>
   if (!order)  return <p className="text-gray-500 p-8">Order not found.</p>
 
+  const payment = order.payments?.[0] ?? order.payment ?? {}
+
   return (
     <div className="max-w-5xl mx-auto">
 
@@ -43,7 +46,7 @@ export default function OrderDetailPage() {
       <div className="flex items-start justify-between mb-8">
         <div>
           <h1 className="text-3xl font-bold text-[#8B1A1A] mt-2 mb-1">
-            Order #{order.order_number}
+            Order #{order.id.slice(0, 8).toUpperCase()}
           </h1>
           <div className="text-sm text-gray-500 flex gap-4">
             {order.created_at && (
@@ -67,24 +70,34 @@ export default function OrderDetailPage() {
           <thead>
             <tr className="text-gray-600 border-b border-gray-200">
               <th className="text-left pb-3 font-semibold">Product</th>
-              <th className="text-left pb-3 font-semibold">Weight Range</th>
+              <th className="text-left pb-3 font-semibold">Weight Preference</th>
               <th className="text-center pb-3 font-semibold">Quantity</th>
-              <th className="text-right pb-3 font-semibold">Estimated Price</th>
+              <th className="text-right pb-3 font-semibold">Unit Price</th>
             </tr>
           </thead>
           <tbody>
-            {(order.items ?? []).map((item, i) => (
+            {(order.order_items ?? []).map((item, i) => (
               <tr key={i} className="border-b border-gray-100 last:border-0">
-                <td className="py-4 text-gray-800">{item.product_name}</td>
-                <td className="py-4 text-gray-600">{item.weight_range ?? '—'}</td>
+                <td className="py-4 text-gray-800">{item.product?.name ?? '—'}</td>
+                <td className="py-4 text-gray-600">{item.weight_preference ?? '—'}</td>
                 <td className="py-4 text-center text-gray-800">{item.quantity}</td>
                 <td className="py-4 text-right text-gray-800">
-                  ${Number(item.estimated_price).toFixed(2)}
+                  {item.unit_price_cents
+                    ? `$${(item.unit_price_cents / 100).toFixed(2)}`
+                    : '—'}
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
+
+        {/* Order level notes */}
+        {order.notes && (
+          <div className="mt-6 pt-4 border-t border-gray-100">
+            <p className="text-sm font-semibold text-gray-700 mb-1">Order Notes</p>
+            <p className="text-sm text-gray-500 italic mt-2">{order.notes}</p>
+          </div>
+        )}
       </div>
 
       {/* Payment Summary Card */}
@@ -94,22 +107,22 @@ export default function OrderDetailPage() {
         <div className="space-y-3 text-sm">
           <div className="flex justify-between text-gray-600">
             <span>Deposit Paid:</span>
-            <span>${Number(order.deposit_amount ?? 0).toFixed(2)}</span>
+            <span>{order.deposit_paid_cents != null ? `$${(order.deposit_paid_cents / 100).toFixed(2)}` : '—'}</span>
           </div>
           <div className="flex justify-between text-gray-600">
             <span>Estimated Total:</span>
-            <span>${Number(order.estimated_total ?? 0).toFixed(2)}</span>
+            <span>{order.total_cents != null ? `$${(order.total_cents / 100).toFixed(2)}` : '—'}</span>
           </div>
 
           <div className="border-t border-gray-200 pt-3 mt-3 space-y-3">
             <div className="flex justify-between text-gray-700">
               <span>Final Total:</span>
-              <span>${Number(order.final_total ?? 0).toFixed(2)}</span>
+              <span>{payment.total_cents != null ? `$${(payment.total_cents / 100).toFixed(2)}` : '—'}</span>
             </div>
             <div className="flex justify-between font-semibold">
               <span>Balance Due:</span>
               <span className="text-[#8B1A1A]">
-                ${Number(order.balance_due ?? 0).toFixed(2)}
+                {payment.balance_cents != null ? `$${(payment.balance_cents / 100).toFixed(2)}` : '—'}
               </span>
             </div>
           </div>

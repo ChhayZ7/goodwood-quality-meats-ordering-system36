@@ -59,10 +59,19 @@ export const POST = withHandler(
 
     if (orderError) throw orderError
 
+    // Get or create Stripe Customer so transactions display correctly in dashboard
+    const { getOrCreateStripeCustomer } = await import('@/lib/stripe')
+    const stripeCustomerId = await getOrCreateStripeCustomer({
+      userId: customer_id,
+      email:  customer_email,
+      name:   customer_email,
+    })
+
     // Create Stripe PaymentIntent
     const { clientSecret, paymentIntentId } = await createDepositPaymentIntent({
-      orderId:       orderData.order_id,
-      customerEmail: customer_email,
+      orderId:          orderData.order_id,
+      customerEmail:    customer_email,
+      stripeCustomerId,
     })
 
     return NextResponse.json({

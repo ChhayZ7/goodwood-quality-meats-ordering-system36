@@ -5,11 +5,12 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
 const statusColors = {
-  'Ready for Pickup': 'bg-green-500',
-  'In Progress':      'bg-blue-500',
-  'Confirmed':        'bg-yellow-500',
-  'Cancelled':        'bg-red-500',
-  'Completed':        'bg-gray-500',
+  'PENDING':          'bg-gray-400',
+  'CONFIRMED':        'bg-yellow-500',
+  'IN_PROGRESS':      'bg-blue-500',
+  'READY_FOR_PICKUP': 'bg-green-500',
+  'COMPLETED':        'bg-gray-500',
+  'CANCELLED':        'bg-red-500',
 }
 
 export default function OrdersPage() {
@@ -30,7 +31,6 @@ export default function OrdersPage() {
     load()
   }, [router])
 
-  // Group orders by month
   const grouped = orders.reduce((acc, order) => {
     const date = new Date(order.created_at)
     const key = date.toLocaleString('default', { month: 'long', year: 'numeric' })
@@ -40,8 +40,7 @@ export default function OrdersPage() {
   }, {})
 
   if (loading) return null
-
-  if (error) return <p className="text-red-600 p-8">{error}</p>
+  if (error)   return <p className="text-red-600 p-8">{error}</p>
 
   return (
     <div className="max-w-5xl mx-auto">
@@ -62,22 +61,24 @@ export default function OrdersPage() {
                   key={order.id}
                   className="bg-white p-6 rounded-2xl shadow-sm border flex justify-between items-center"
                 >
-                  {/* LEFT */}
                   <div>
                     <div className="flex items-center gap-3 mb-2">
-                      <h2 className="font-semibold text-lg">Order #{order.order_number}</h2>
+                      <h2 className="font-semibold text-lg">Order #{order.id.slice(0, 8).toUpperCase()}</h2>
                       <span className={`text-white text-xs px-3 py-1 rounded-full ${statusColors[order.status] ?? 'bg-gray-400'}`}>
                         {order.status}
                       </span>
                     </div>
                     <div className="text-sm text-gray-600 flex gap-6">
                       <p>Placed: {new Date(order.created_at).toLocaleDateString()}</p>
-                      {order.pickup_date && <p>Pickup: {new Date(order.pickup_date).toLocaleDateString()}</p>}
-                      {order.deposit_amount && <p>Deposit: ${Number(order.deposit_amount).toFixed(2)}</p>}
+                      {order.pickup_date && (
+                        <p>Pickup: {new Date(order.pickup_date).toLocaleDateString()}</p>
+                      )}
+                      {order.total_cents && (
+                        <p>Total: ${(order.total_cents / 100).toFixed(2)}</p>
+                      )}
                     </div>
                   </div>
 
-                  {/* RIGHT */}
                   <Link
                     href={`/account/orders/${order.id}`}
                     className="bg-red-800 text-white px-5 py-2 rounded-lg hover:bg-red-700 transition"
