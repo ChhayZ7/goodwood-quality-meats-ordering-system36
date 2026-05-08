@@ -26,10 +26,10 @@ export default function RootLayout({ children }) {
       <body className="min-h-full flex flex-col">
         <CartProvider>
           <Navbar />
-            <main className="flex-1 ">
-              {children}
-            </main>
-            <Footer />
+          <main className="flex-1 ">
+            {children}
+          </main>
+          <Footer />
         </CartProvider>
       </body>
     </html>

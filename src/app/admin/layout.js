@@ -19,6 +19,7 @@ const NAV_ITEMS = [
   { href:'/admin/products', label:'Products & Pricing'},
   { href:'/admin/reports', label:'Reports'},
   { href:'/admin/staff', label:'Staff Management'},
+  { href:'/admin/feedback', label:'Feedback'},
   { href:'/admin/profile', label:'My Account'}
 ]
 

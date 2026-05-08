@@ -1,60 +1,25 @@
 'use client'
-
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import Navbar from '@/components/Navbar'
-import GoldDivider from '@/components/GoldDivider'
-import Footer from '@/components/Footer'
+import styles from '@/app/styles/card.module.css'
 
-// Available product categories shown as filter buttons
 const CATEGORIES = ['All', 'Pork', 'Beef', 'Lamb', 'Poultry', 'Seafood', 'Other']
 
-// Placeholder card shown while backend product data is not connected yet
-function PlaceholderCard() {
+function ProductCardSkeleton() {
   return (
-    <article
-    style={{
-        backgroundColor: '#ffffff',
-        border: '1px solid #e4d3a3',
-        borderRadius: '10px',
-        overflow: 'hidden',
-      }}
-    >
-      <div
-      style={{
-          height: '180px',
-          backgroundColor: '#efe3c4',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          color: '#7a6a49'
-        }}
-      >
-        <p>Image Placeholder</p>
+    <div className={styles.cardSkeleton}>
+      <div className={styles.skeletonImage} />
+      <div className={styles.skeletonContent}>
+        <div className={styles.skeletonLine} style={{ width: '60px', height: '12px', marginBottom: '10px' }} />
+        <div className={styles.skeletonLine} style={{ width: '80%', height: '18px', marginBottom: '8px' }} />
+        <div className={styles.skeletonLine} style={{ width: '100%', height: '12px', marginBottom: '4px' }} />
+        <div className={styles.skeletonLine} style={{ width: '70%', height: '12px' }} />
       </div>
-
-      <div style={{ padding: '16px' }}>
-        <h3 style={{ marginBottom: '8px', color: '#1a1a1a'}}>Product Name</h3>
-        <p style={{ marginBottom: '12px', color: '#7b1a1a', fontWeight: '600'}}>$00.00/kg</p>
-        <button type="button"
-          style={{
-            width: '100%',
-            padding: '10px',
-            border: '1px solid #d6c08d',
-            backgroundColor: '#f5ead0',
-            borderRadius: '6px',
-            cursor: 'pointer',
-            fontWeight: '600'
-          }}>See Details
-          </button>
-      </div>
-    </article>
+    </div>
   )
 }
 
-// Reusable card for real product data
-// Handles availability and price display logic
-function ProductCard({product}) {
+function ProductCard({ product }) {
   const soldOut = !product.is_available || product.stock === 0
 
   const priceDisplay =
@@ -63,82 +28,77 @@ function ProductCard({product}) {
       : `$${(product.price_per_kg_cents / 100).toFixed(2)}/kg`
 
   return (
-    <article 
-    style={{
-        backgroundColor: '#ffffff',
-        border: '1px solid #e4d3a3',
-        borderRadius: '10px',
-        overflow: 'hidden',
-      }}
-    >
-      <div style={{
-          position: 'relative',
-          height: '180px',
-        }}>
-        <img src={product.image_url} alt={product.name} style={{
-            width: '100%',
-            height: '100%',
-            objectFit: 'cover',
-          }}/>
-        {soldOut && (
-          <p
-            style={{
-              position: 'absolute',
-              top: '10px',
-              right: '10px',
-              margin: 0,
-              padding: '6px 10px',
-              backgroundColor: '#7b1a1a',
-              color: '#ffffff',
-              borderRadius: '6px',
-              fontWeight: '600',
-            }}
-          >
-            Sold Out
-          </p>)}
-      </div>
-
-      <div style={{ padding: '16px' }}>
-        <h3 style={{ marginBottom: '8px', color: '#1a1a1a'}}>{product.name}</h3>
-        <p style={{ marginBottom: '12px', fontWeight: '600', color: '#7b1a1a'  }}>{priceDisplay}</p>
-
-        {soldOut ? (
-          <p  style={{
-              margin: 0,
-              padding: '10px',
-              textAlign: 'center',
-              backgroundColor: '#eeeeee',
-              borderRadius: '6px',
-               color: '#666666',
-              fontWeight: '600'
-            }}>Unavailable</p>
+    <div className={styles.card}>
+      {/* Image */}
+      <div className={styles.imageWrapper} style={{ position: 'relative' }}>
+        {product.image_url ? (
+          <img
+            src={product.image_url}
+            alt={product.name}
+            className={styles.image}
+          />
         ) : (
-          <Link href={`/products/${product.id}`}
-            style={{
-              display: 'block',
-              textAlign: 'center',
-              padding: '10px',
-              backgroundColor: '#7b1a1a',
-              color: '#ffffff',
-              textDecoration: 'none',
-              borderRadius: '6px',
-              fontWeight: '600'
-            }}>See Details</Link>
+          <div className={styles.cardImagePlaceholder}>
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" strokeWidth="1">
+              <rect x="3" y="3" width="18" height="18" rx="2"/>
+              <circle cx="8.5" cy="8.5" r="1.5"/>
+              <polyline points="21 15 16 10 5 21"/>
+            </svg>
+          </div>
+        )}
+        {soldOut && (
+          <span style={{
+            position: 'absolute',
+            top: '10px',
+            right: '10px',
+            padding: '6px 10px',
+            backgroundColor: '#7b1a1a',
+            color: '#ffffff',
+            borderRadius: '6px',
+            fontWeight: 600,
+            fontSize: '12px',
+          }}>
+            Sold Out
+          </span>
         )}
       </div>
-    </article>
+
+      {/* Content */}
+      <div className={styles.cardContent}>
+        <h3 className={styles.cardTitle}>{product.name}</h3>
+        <p style={{ marginBottom: '12px', fontWeight: 600, color: '#7b1a1a', fontSize: '14px' }}>
+          {priceDisplay}
+        </p>
+
+        {soldOut ? (
+          <p style={{
+            margin: 0,
+            padding: '10px',
+            textAlign: 'center',
+            backgroundColor: '#eeeeee',
+            borderRadius: '6px',
+            color: '#666666',
+            fontWeight: 600,
+            fontSize: '13px',
+          }}>
+            Unavailable
+          </p>
+        ) : (
+          <Link href={`/products/${product.id}`} className={styles.cardLink}>
+            See Details →
+          </Link>
+        )}
+      </div>
+    </div>
   )
 }
 
-
 export default function ProductsPage() {
-    
   const [activeCategory, setActiveCategory] = useState('All')
   const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
- 
-  // Fetch products from your API route on mount
+
   useEffect(() => {
     async function fetchProducts() {
       try {
@@ -153,116 +113,86 @@ export default function ProductsPage() {
         setLoading(false)
       }
     }
- 
     fetchProducts()
   }, [])
-  
-// Filters products based on the selected category
-  const filteredProducts = products.filter((product) => {
-    return activeCategory === 'All' || product.category === activeCategory
-  })
-  const showPlaceholders = products.length === 0
-  const placeholderCount = 6
+
+  const filteredProducts = products.filter(product =>
+    activeCategory === 'All' || product.category === activeCategory
+  )
+
   return (
-    <div
-    
-      style={{
-        minHeight: '100vh',
-        display: 'flex',
-        flexDirection: 'column',
-        backgroundColor: '#faf3e0',
-      }}
-    
-    >
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#FAF3E0' }}>
+ 
 
       <main style={{ flex: 1 }}>
-        <div style={{
-            maxWidth: '1000px',
-            margin: '0 auto',
-            padding: '48px 24px',
-          }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '48px 24px' }}>
 
-        
-        <section style={{
-              textAlign: 'center',
-              marginBottom: '40px',
+          {/* Header */}
+          <section style={{ textAlign: 'center', marginBottom: '40px' }}>
+            <h1 style={{
+              margin: '0 0 16px',
+              color: '#7b1a1a',
+              fontSize: '36px',
+              fontWeight: 700,
+              letterSpacing: '0.5px',
+              textTransform: 'uppercase',
             }}>
-          <h1 style={{
-                margin: '0 0 16px',
-                color: '#7b1a1a',
-                fontSize: '30px',
-                fontWeight: '700',
-                letterSpacing: '0.5px',
-                textTransform: 'uppercase'
-              }}>Ready for Christmas</h1>
-          <p style={{
-                maxWidth: '520px',
-                margin: '0 auto',
-                lineHeight: '1.7',
-                color: '#5b5b5b',
-                fontSize: '14px'
-              }}>
-            Browse our selection of premium meats. All orders require a $20 deposit,
-            with final payment upon collection.
-          </p>
-        </section>
-
-        <section style={{ marginBottom: '32px' }}>
-          
-
-          <div style={{
-                display: 'flex',
-                flexWrap: 'wrap',
-                gap: '10px',
-              }}>
-            {CATEGORIES.map((category) => (
-              <button key={category} 
-              type="button"
-              onClick={() => setActiveCategory(category)}
-                  style={{
-                    padding: '10px 18px',
-                    borderRadius: '10px',
-                    border: '1px solid #d9c48d',
-                    backgroundColor:
-                      activeCategory === category ? '#8f1d1d' : '#efe3c4',
-                    color: activeCategory === category ? '#ffffff' : '#1a1a1a',
-                    cursor: 'pointer',
-                    fontWeight: '600',
-                    fontSize: '14px'
-                  }}
-              >
-                
-                {category}
-              </button>
-            ))}
-          </div>
-        </section>
-        <section>
-          
-
-          <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(3, 1fr)',
-                gap: '20px',
-              }}>
-            {showPlaceholders
-                ? Array.from({ length: placeholderCount }).map((_, index) => (
-                    <PlaceholderCard key={index} />
-                  ))
-                : filteredProducts.map((product) => (
-                    <ProductCard key={product.id} product={product} />
-          ))}
-          </div>
-          {showPlaceholders && (
+              Ready for Christmas
+            </h1>
             <p style={{
-                  marginTop: '20px',
-                  textAlign: 'center',
-                  color: '#999999',
-                  fontStyle: 'italic',
-                  fontSize: '13px'
-                }}>Products will load here once connected to the database</p>
-          )}
-        </section>
+              maxWidth: '520px',
+              margin: '0 auto',
+              lineHeight: 1.7,
+              color: '#5b5b5b',
+              fontSize: '14px',
+            }}>
+              Browse our selection of premium meats. All orders require a $20 deposit,
+              with final payment upon collection.
+            </p>
+          </section>
+
+          {/* Category Filter */}
+          <section style={{ marginBottom: '32px' }}>
+            <div className={styles.filterContainer}>
+              {CATEGORIES.map(category => (
+                <button
+                  key={category}
+                  type="button"
+                  onClick={() => setActiveCategory(category)}
+                  className={`${styles.filterButton} ${activeCategory === category ? styles.filterButtonActive : ''}`}
+                >
+                  {category}
+                </button>
+              ))}
+            </div>
+          </section>
+
+          {/* Product Grid */}
+          <section>
+            {error && (
+              <p style={{ textAlign: 'center', color: '#7B1A1A', fontSize: '14px' }}>{error}</p>
+            )}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px' }}>
+              {loading
+                ? Array.from({ length: 6 }).map((_, i) => <ProductCardSkeleton key={i} />)
+                : filteredProducts.length > 0
+                  ? filteredProducts.map(product => <ProductCard key={product.id} product={product} />)
+                  : (
+                    <p style={{
+                      gridColumn: '1 / -1',
+                      textAlign: 'center',
+                      color: '#999',
+                      fontStyle: 'italic',
+                      fontSize: '14px',
+                      padding: '40px 0',
+                    }}>
+                      No products found for this category.
+                    </p>
+                  )
+              }
+            </div>
+          </section>
+
         </div>
       </main>
     </div>

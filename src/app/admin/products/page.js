@@ -1,5 +1,6 @@
 'use client'
-
+//Display all the current product, letting the admin to edit that product (could be editting description, name, price)
+//Letting admin to create new products (attributes including name, description, product type, price, image and category)
 
 
 export default function AdminProductsPage() {
@@ -15,3 +16,4 @@ export default function AdminProductsPage() {
     </div>
   )
 }
+

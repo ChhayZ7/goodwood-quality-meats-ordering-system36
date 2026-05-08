@@ -1,24 +1,19 @@
 'use client'
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { Bold } from 'lucide-react'
-
+import styles from '@/app/styles/card.module.css'
 
 const CATEGORIES = ['All', 'Beef', 'Poultry', 'Christmas', 'Lamb', 'Pork', 'Sauce']
 
 function RecipeCardSkeleton() {
   return (
-    <div style={{
-      borderRadius: '8px',
-      overflow: 'hidden',
-      background: '#9e9067',
-    }}>
-      <div style={{ width: '100%', height: '220px', background: '#bca26c' }} />
-      <div style={{ padding: '16px' }}>
-        <div style={{ width: '60px', height: '12px', background: '#bca26c', borderRadius: '4px', marginBottom: '10px' }} />
-        <div style={{ width: '80%', height: '18px', background: '#bca26c', borderRadius: '4px', marginBottom: '8px' }} />
-        <div style={{ width: '100%', height: '12px', background: '#bca26c', borderRadius: '4px', marginBottom: '4px' }} />
-        <div style={{ width: '70%', height: '12px', background: '#bca26c', borderRadius: '4px' }} />
+    <div className={styles.cardSkeleton}>
+      <div className={styles.skeletonImage} />
+      <div className={styles.skeletonContent}>
+        <div className={styles.skeletonLine} style={{ width: '60px', height: '12px', marginBottom: '10px' }} />
+        <div className={styles.skeletonLine} style={{ width: '80%', height: '18px', marginBottom: '8px' }} />
+        <div className={styles.skeletonLine} style={{ width: '100%', height: '12px', marginBottom: '4px' }} />
+        <div className={styles.skeletonLine} style={{ width: '70%', height: '12px' }} />
       </div>
     </div>
   )
@@ -31,40 +26,17 @@ function RecipeCard({ recipe }) {
     : ''
 
   return (
-    <div
-      style={{
-        borderRadius: '8px',
-        overflow: 'hidden',
-        background: '#f7e4bc',
-        cursor: 'pointer',
-        transition: 'transform .2s, box-shadow .2s',
-        display: 'flex',
-        flexDirection: 'column',
-      }}
-      onMouseEnter={e => {
-        e.currentTarget.style.transform = 'translateY(-4px)'
-        e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.12)'
-      }}
-      onMouseLeave={e => {
-        e.currentTarget.style.transform = 'translateY(0)'
-        e.currentTarget.style.boxShadow = 'none'
-      }}
-    >
+    <div className={styles.card}>
       {/* Image */}
-      <div style={{ width: '100%', height: '220px', overflow: 'hidden', flexShrink: 0 }}>
+      <div className={styles.imageWrapper}>
         {recipe.image_url ? (
           <img
             src={recipe.image_url}
             alt={recipe.name}
-            style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform .3s' }}
-            onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.05)'}
-            onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+            className={styles.image}
           />
         ) : (
-          <div style={{
-            width: '100%', height: '100%', background: '#E0D5BE',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-          }}>
+          <div className={styles.cardImagePlaceholder}>
             <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" strokeWidth="1">
               <rect x="3" y="3" width="18" height="18" rx="2"/>
               <circle cx="8.5" cy="8.5" r="1.5"/>
@@ -75,61 +47,26 @@ function RecipeCard({ recipe }) {
       </div>
 
       {/* Content */}
-      <div style={{ padding: '16px', flex: 1, display: 'flex', flexDirection: 'column' }}>
+      <div className={styles.cardContent}>
         {/* Category tags */}
         <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '8px' }}>
           {categories.map((cat, i) => (
-            <span key={i} style={{
-              fontSize: '11px',
-              fontWeight: 700,
-              fontStyle:Bold,
-              color: '#073b0e',
-              textTransform: 'uppercase',
-              letterSpacing: '0.08em',
-            }}>
+            <span key={i} className={styles.cardCategory}>
               {cat}{i < categories.length - 1 ? ' ·' : ''}
             </span>
           ))}
         </div>
 
         {/* Name */}
-        <h3 style={{
-          fontSize: '17px',
-          fontWeight: 700,
-          color: '#0f641a',
-          margin: '0 0 8px',
-          lineHeight: 1.3,
-        }}>
-          {recipe.name}
-        </h3>
+        <h3 className={styles.cardTitle}>{recipe.name}</h3>
 
         {/* Description preview */}
         {descriptionPreview && (
-          <p style={{
-            fontSize: '13px',
-            color: '#2e4631',
-            lineHeight: 1.6,
-            margin: '0 0 12px',
-            flex: 1,
-          }}>
-            {descriptionPreview}
-          </p>
+          <p className={styles.cardDescription}>{descriptionPreview}</p>
         )}
 
         {/* Read more link */}
-        <Link
-          href={`/recipes/${recipe.id}`}
-          style={{
-            fontSize: '13px',
-            fontWeight: 700,
-            color: '#0f641a',
-            textDecoration: 'none',
-            borderBottom: '1.5px solid #0f641a',
-            paddingBottom: '1px',
-            alignSelf: 'flex-start',
-            marginTop: 'auto',
-          }}
-        >
+        <Link href={`/recipes/${recipe.id}`} className={styles.cardLink}>
           Read More →
         </Link>
       </div>
@@ -197,23 +134,12 @@ export default function RecipesPage() {
         </div>
 
         {/* Category Filter */}
-        <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', flexWrap: 'wrap', padding: '0 24px 40px' }}>
+        <div className={styles.filterContainer}>
           {CATEGORIES.map(cat => (
             <button
               key={cat}
               onClick={() => setSelected(cat)}
-              style={{
-                padding: '10px 20px',
-                fontSize: '14px',
-                fontWeight: 600,
-                border: '2px solid #7B1A1A',
-                borderRadius: '4px',
-                fontStyle: Bold,
-                cursor: 'pointer',
-                transition: 'all .15s',
-                background: selected === cat ? '#7B1A1A' : 'transparent',
-                color: selected === cat ? '#fff' : '#7B1A1A',
-              }}
+              className={`${styles.filterButton} ${selected === cat ? styles.filterButtonActive : ''}`}
             >
               {cat}
             </button>
@@ -225,12 +151,7 @@ export default function RecipesPage() {
           {error && (
             <p style={{ textAlign: 'center', color: '#7B1A1A', fontSize: '14px' }}>{error}</p>
           )}
-
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(3, 1fr)',
-            gap: '24px',
-          }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px' }}>
             {loading
               ? Array.from({ length: 6 }).map((_, i) => <RecipeCardSkeleton key={i} />)
               : filtered.length > 0
@@ -251,7 +172,6 @@ export default function RecipesPage() {
           </div>
         </div>
       </main>
-
     </div>
   )
 }
