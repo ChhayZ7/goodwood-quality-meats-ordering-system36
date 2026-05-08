@@ -2,6 +2,7 @@ import { Geist, Arvo } from "next/font/google";
 import "./globals.css";
 import Footer from '@/components/Footer'
 import Navbar from "@/components/Navbar";
+import GoldDivider from "@/components/GoldDivider";
 import { CartProvider } from "@/context/CartContext";
 
 // Root Layout Page - navbar, footer, font, cart provider
@@ -26,9 +27,11 @@ export default function RootLayout({ children }) {
       <body className="min-h-full flex flex-col">
         <CartProvider>
           <Navbar />
+          <GoldDivider />
           <main className="flex-1 ">
             {children}
           </main>
+          <GoldDivider />
           <Footer />
         </CartProvider>
       </body>

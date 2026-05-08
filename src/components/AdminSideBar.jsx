@@ -10,6 +10,7 @@ const NAV_ITEMS = [
   { href: '/admin/products',  label: 'Products & Pricing', roles: ['ADMIN'] },
   { href: '/admin/reports',   label: 'Reports',            roles: ['ADMIN'] },
   { href: '/admin/staff',     label: 'Staff Management',   roles: ['ADMIN'] },
+  { href: '/admin/feedback',  label: 'Feedback',           roles: ['ADMIN'] },
   { href: '/admin/profile',   label: 'My Account',         roles: ['ADMIN', 'STAFF'] },
 ]
 
@@ -25,7 +26,6 @@ export default function AdminSidebar({ role }) {
   const pathname = usePathname()
   const router   = useRouter()
 
-  // Filter nav items based on the role passed from the server
   const visibleNav = NAV_ITEMS.filter(item => item.roles.includes(role))
 
   async function handleLogout() {
@@ -39,11 +39,25 @@ export default function AdminSidebar({ role }) {
       width: '240px',
       minWidth: '240px',
       background: '#fff',
-      borderRight: '1px solid #E5E7EB',
       display: 'flex',
       flexDirection: 'column',
-      paddingTop: '20px',
     }}>
+
+      {/* Portal label at top of sidebar */}
+      <div style={{
+        padding: '20px 20px 16px',
+        fontFamily: '"Lato", sans-serif',
+        fontWeight: 700,
+        fontSize: '16px',
+        color: '#7B1A1A',
+        letterSpacing: '.12em',
+        textTransform: 'uppercase',
+        borderBottom: '0.5px solid #e4e4e4',
+        marginBottom: '8px',
+      }}>
+        {role === 'ADMIN' ? 'Admin Portal' : 'Staff Portal'}
+      </div>
+
       <nav style={{ flex: 1 }}>
         {visibleNav.map(item => {
           const isActive = pathname.startsWith(item.href)
@@ -54,7 +68,7 @@ export default function AdminSidebar({ role }) {
               style={{
                 display: 'block',
                 padding: '12px 20px',
-                fontFamily: '"Lato",sans-serif',
+                fontFamily: '"Lato", sans-serif',
                 fontSize: '14px',
                 fontWeight: isActive ? 700 : 400,
                 color: isActive ? '#fff' : '#1A1A1A',
@@ -71,40 +85,19 @@ export default function AdminSidebar({ role }) {
         })}
       </nav>
 
-      {/* Role badge — lets staff know their access level */}
-      <div style={{
-        padding: '12px 20px',
-        borderTop: '1px solid #F3F4F6',
-        borderBottom: '1px solid #E5E7EB',
-      }}>
-        <span style={{
-          display: 'inline-block',
-          fontSize: '11px',
-          fontWeight: 700,
-          fontFamily: '"Lato",sans-serif',
-          color: role === 'ADMIN' ? '#7B1A1A' : '#1D4ED8',
-          background: role === 'ADMIN' ? '#FEF2F2' : '#EFF6FF',
-          padding: '3px 10px',
-          borderRadius: '99px',
-          letterSpacing: '.06em',
-          textTransform: 'uppercase',
-        }}>
-          {role}
-        </span>
-      </div>
-
       <button
         onClick={handleLogout}
         style={{
           display: 'flex',
           alignItems: 'center',
           gap: '8px',
-          padding: '14px 20px',
-          fontFamily: '"Lato",sans-serif',
+          padding: '12px 20px',
+          fontFamily: '"Lato", sans-serif',
           fontSize: '14px',
           color: '#1A1A1A',
           background: 'transparent',
           border: 'none',
+          borderTop: '1px solid #E5E7EB',
           cursor: 'pointer',
           textAlign: 'left',
           width: '100%',
