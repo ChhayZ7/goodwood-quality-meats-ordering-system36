@@ -43,6 +43,11 @@ export default function AdminSidebar({ role }) {
       display: 'flex',
       flexDirection: 'column',
       paddingTop: '20px',
+      height: '100vh',
+      position: 'sticky',
+      top: 0,
+      overflowY: 'auto',
+      flexShrink: 0,
     }}>
       <nav style={{ flex: 1 }}>
         {visibleNav.map(item => {
