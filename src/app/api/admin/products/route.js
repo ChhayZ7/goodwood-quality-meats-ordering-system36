@@ -12,6 +12,7 @@ export const GET = withHandler(async (request) => {
         return Response.json({ error: 'Unauthorised' }, { status: 401 })
     }
     const role = user.app_metadata?.role
+    console.log('User role:', role)
     if (role !== 'ADMIN' && role != 'STAFF'){
         return Response.json({ error: 'Forbidden' }, { status: 403 })
     }

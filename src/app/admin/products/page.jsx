@@ -375,80 +375,80 @@ function AddModal({ onClose, onAdded }) {
 }
  
 // Sidebar
-function Sidebar({ adminName }) {
-  const router = useRouter()
-  const links = [
-    { label: 'Orders',              href: '/admin/orders' },
-    { label: 'Inventory',           href: '/admin/inventory' },
-    { label: 'Products & Pricing',  href: '/admin/products', active: true },
-    { label: 'Staff Management',    href: '/admin/staff' },
-    { label: 'Reports',             href: '/admin/reports' },
-    { label: 'Feedback',            href: '/admin/feedback' },
-    { label: 'My Account',          href: '/admin/account' },
-  ]
- 
-  async function handleLogout() {
-    await fetch('/api/auth/signout', { method: 'POST' })
-    router.replace('/login')
-  }
- 
-  return (
-    <aside style={{
-      width: '260px', minHeight: '100vh', background: COLOR.sidebar,
-      borderRight: `1px solid ${COLOR.border}`,
-      display: 'flex', flexDirection: 'column',
-      padding: '32px 0', flexShrink: 0,
-      position: 'sticky', top: 0, alignSelf: 'flex-start', height: '100vh',
-    }}>
-      {/* Greeting */}
-      <p style={{ fontSize: '15px', color: COLOR.muted, padding: '0 28px', marginBottom: '28px' }}>
-        Hi, {adminName}
-      </p>
- 
-      {/* Nav links */}
-      <nav style={{ flex: 1 }}>
-        {links.map(link => (
-          <a
-            key={link.href}
-            href={link.href}
-            style={{
-              display: 'block',
-              padding: '13px 28px',
-              fontSize: '15px',
-              fontFamily: '"Lato", sans-serif',
-              fontWeight: link.active ? 700 : 400,
-              color: link.active ? COLOR.white : COLOR.text,
-              background: link.active ? COLOR.red : 'transparent',
-              borderRadius: link.active ? '0' : '0',
-              textDecoration: 'none',
-              transition: 'background .12s',
-            }}
-            onMouseEnter={e => { if (!link.active) e.currentTarget.style.background = '#EDE5CC' }}
-            onMouseLeave={e => { if (!link.active) e.currentTarget.style.background = 'transparent' }}
-          >
-            {link.label}
-          </a>
-        ))}
-      </nav>
- 
-      {/* Bottom actions */}
-      <div style={{ padding: '0 28px', borderTop: `1px solid ${COLOR.border}`, paddingTop: '20px', marginTop: '16px' }}>
-        <button
-          onClick={handleLogout}
-          style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'none', border: 'none', fontSize: '15px', color: COLOR.text, cursor: 'pointer', fontFamily: '"Lato", sans-serif', marginBottom: '16px', padding: 0 }}
-        >
-          ↪ Log Out
-        </button>
-        <a
-          href="/"
-          style={{ fontSize: '14px', color: COLOR.red, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '6px' }}
-        >
-          ← Back to Home
-        </a>
-      </div>
-    </aside>
-  )
-}
+// function Sidebar({ adminName }) {
+//   const router = useRouter()
+//   const links = [
+//     { label: 'Orders',              href: '/admin/orders' },
+//     { label: 'Inventory',           href: '/admin/inventory' },
+//     { label: 'Products & Pricing',  href: '/admin/products', active: true },
+//     { label: 'Staff Management',    href: '/admin/staff' },
+//     { label: 'Reports',             href: '/admin/reports' },
+//     { label: 'Feedback',            href: '/admin/feedback' },
+//     { label: 'My Account',          href: '/admin/account' },
+//   ]
+
+//   async function handleLogout() {
+//     await fetch('/api/auth/signout', { method: 'POST' })
+//     router.replace('/login')
+//   }
+
+//   return (
+//     <aside style={{
+//       width: '260px', minHeight: '100vh', background: COLOR.sidebar,
+//       borderRight: `1px solid ${COLOR.border}`,
+//       display: 'flex', flexDirection: 'column',
+//       padding: '32px 0', flexShrink: 0,
+//       position: 'sticky', top: 0, alignSelf: 'flex-start', height: '100vh',
+//     }}>
+//       {/* Greeting */}
+//       <p style={{ fontSize: '15px', color: COLOR.muted, padding: '0 28px', marginBottom: '28px' }}>
+//         Hi, {adminName}
+//       </p>
+
+//       {/* Nav links */}
+//       <nav style={{ flex: 1 }}>
+//         {links.map(link => (
+//           <a
+//             key={link.href}
+//             href={link.href}
+//             style={{
+//               display: 'block',
+//               padding: '13px 28px',
+//               fontSize: '15px',
+//               fontFamily: '"Lato", sans-serif',
+//               fontWeight: link.active ? 700 : 400,
+//               color: link.active ? COLOR.white : COLOR.text,
+//               background: link.active ? COLOR.red : 'transparent',
+//               borderRadius: link.active ? '0' : '0',
+//               textDecoration: 'none',
+//               transition: 'background .12s',
+//             }}
+//             onMouseEnter={e => { if (!link.active) e.currentTarget.style.background = '#EDE5CC' }}
+//             onMouseLeave={e => { if (!link.active) e.currentTarget.style.background = 'transparent' }}
+//           >
+//             {link.label}
+//           </a>
+//         ))}
+//       </nav>
+
+//       {/* Bottom actions */}
+//       <div style={{ padding: '0 28px', borderTop: `1px solid ${COLOR.border}`, paddingTop: '20px', marginTop: '16px' }}>
+//         <button
+//           onClick={handleLogout}
+//           style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'none', border: 'none', fontSize: '15px', color: COLOR.text, cursor: 'pointer', fontFamily: '"Lato", sans-serif', marginBottom: '16px', padding: 0 }}
+//         >
+//           ↪ Log Out
+//         </button>
+//         <a
+//           href="/"
+//           style={{ fontSize: '14px', color: COLOR.red, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '6px' }}
+//         >
+//           ← Back to Home
+//         </a>
+//       </div>
+//     </aside>
+//   )
+// }
  
 // Main page
 export default function AdminProductsPage() {
@@ -491,7 +491,7 @@ export default function AdminProductsPage() {
  
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: COLOR.cream, fontFamily: '"Lato", sans-serif' }}>
-      <Sidebar adminName={adminName} />
+      {/* <Sidebar adminName={adminName} /> */}
  
       <main style={{ flex: 1, padding: '40px 48px', overflowY: 'auto' }}>
         {/* Header */}
