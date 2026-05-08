@@ -7,7 +7,6 @@ export default function Footer() {
   return (
     <footer className="bg-white text-black">
       {/* TOP LINE */}
-      <div style={{ height: '2px', backgroundColor: '#D4AF37' }} />
       <div className="max-w-7xl mx-auto px-6 py-10 grid grid-cols-3 gap-8 items-start">
 
         {/* LEFT- OPENING HOURS */}

@@ -4,10 +4,9 @@ export default function GoldDivider() {
       aria-hidden="true"
       style={{
         width: '100%',
-        height: '3px',
-        backgroundColor: '#d6c08d',
+        height: '2px',
+        backgroundColor: '#D4AF37',
       }}
     />
   )
 }
-//This is Dummy, just for me
