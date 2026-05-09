@@ -41,6 +41,12 @@ export default function AdminSidebar({ role }) {
       background: '#fff',
       display: 'flex',
       flexDirection: 'column',
+      paddingTop: '20px',
+      height: '100vh',
+      position: 'sticky',
+      top: 0,
+      overflowY: 'auto',
+      flexShrink: 0,
       borderRight: '3px solid #C9A84C',
     }}>
  

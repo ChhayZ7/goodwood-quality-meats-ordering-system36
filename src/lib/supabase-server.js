@@ -13,11 +13,16 @@ export async function createClient() {
     {
       cookies: {
         getAll: () => cookieStore.getAll(),
-        setAll: (cookiesToSet) =>
-          cookiesToSet.forEach(({ name, value, options }) =>
-            cookieStore.set(name, value, options)
-          ),
-      },
+        setAll: (cookiesToSet) => {
+          try {
+            cookiesToSet.forEach(({ name, value, options }) =>
+              cookieStore.set(name, value, options)
+            )
+          } catch (error) {
+            console.error('[supabase-server] error setting cookies:', error)
+          }
+        }
+      }
     }
   )
 }
