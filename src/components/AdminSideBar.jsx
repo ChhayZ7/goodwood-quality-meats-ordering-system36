@@ -5,15 +5,15 @@ import { usePathname, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase-browser'
 
 const NAV_ITEMS = [
-  { href: '/admin/orders',    label: 'Orders',             roles: ['ADMIN', 'STAFF'] },
-  { href: '/admin/inventory', label: 'Inventory',          roles: ['ADMIN', 'STAFF'] },
-  { href: '/admin/products',  label: 'Products & Pricing', roles: ['ADMIN'] },
-  { href: '/admin/reports',   label: 'Reports',            roles: ['ADMIN'] },
-  { href: '/admin/staff',     label: 'Staff Management',   roles: ['ADMIN'] },
-  { href: '/admin/feedback',  label: 'Feedback',           roles: ['ADMIN'] },
-  { href: '/admin/profile',   label: 'My Account',         roles: ['ADMIN', 'STAFF'] },
+  { href: {ADMIN: '/admin/orders', STAFF: '/staff/orders'},    label: 'Orders',             roles: ['ADMIN', 'STAFF'] },
+  { href: {ADMIN: '/admin/inventory', STAFF: '/staff/inventory'}, label: 'Inventory',          roles: ['ADMIN', 'STAFF'] },
+  { href: {ADMIN: '/admin/products'},  label: 'Products & Pricing', roles: ['ADMIN'] },
+  { href: {ADMIN: '/admin/reports'},   label: 'Reports',            roles: ['ADMIN'] },
+  { href: {ADMIN: '/admin/staff'},     label: 'Staff Management',   roles: ['ADMIN'] },
+  { href: {ADMIN: '/admin/feedback'},  label: 'Feedback',           roles: ['ADMIN'] },
+  { href: {ADMIN: '/admin/profile', STAFF: '/staff/profile'},   label: 'My Account',         roles: ['ADMIN', 'STAFF'] },
 ]
-
+ 
 const LogoutSVG = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
@@ -21,19 +21,19 @@ const LogoutSVG = () => (
     <line x1="21" y1="12" x2="9" y2="12"/>
   </svg>
 )
-
+ 
 export default function AdminSidebar({ role }) {
   const pathname = usePathname()
   const router   = useRouter()
-
+ 
   const visibleNav = NAV_ITEMS.filter(item => item.roles.includes(role))
-
+ 
   async function handleLogout() {
     const supabase = createClient()
     await supabase.auth.signOut()
     router.push('/login')
   }
-
+ 
   return (
     <aside style={{
       width: '240px',
@@ -41,9 +41,10 @@ export default function AdminSidebar({ role }) {
       background: '#fff',
       display: 'flex',
       flexDirection: 'column',
+      borderRight: '3px solid #C9A84C',
     }}>
-
-      {/* Portal label at top of sidebar */}
+ 
+      {/* Portal label: changes based on role */}
       <div style={{
         padding: '20px 20px 16px',
         fontFamily: '"Lato", sans-serif',
@@ -57,14 +58,15 @@ export default function AdminSidebar({ role }) {
       }}>
         {role === 'ADMIN' ? 'Admin Portal' : 'Staff Portal'}
       </div>
-
+ 
       <nav style={{ flex: 1 }}>
         {visibleNav.map(item => {
-          const isActive = pathname.startsWith(item.href)
+          const href = item.href[role]
+          const isActive = pathname.startsWith(href)
           return (
             <Link
-              key={item.href}
-              href={item.href}
+              key={href}
+              href={href}
               style={{
                 display: 'block',
                 padding: '12px 20px',
@@ -84,7 +86,7 @@ export default function AdminSidebar({ role }) {
           )
         })}
       </nav>
-
+ 
       <button
         onClick={handleLogout}
         style={{
