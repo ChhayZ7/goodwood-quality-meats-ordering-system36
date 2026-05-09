@@ -1,5 +1,3 @@
-'use client'
-
 //use design pattern of admin's sidebar layout.js
 
 import { createClient } from '@/lib/supabase-server'
