@@ -41,7 +41,6 @@ export default function DashboardSidebar({ role }) {
       background: '#fff',
       display: 'flex',
       flexDirection: 'column',
-      borderRight: '3px solid #C9A84C',
     }}>
  
       {/* Portal label: changes based on role */}
