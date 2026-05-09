@@ -113,8 +113,6 @@ export default function Navbar() {
 
             </div>
 
-            {/* Gold divider */}
-            <div style={{ height: '4px', backgroundColor: '#D4AF37' }} />
         </nav>
     )
 }
