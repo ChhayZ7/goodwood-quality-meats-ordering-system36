@@ -1,7 +1,7 @@
 // Server Component — fetches user role server-side and passes to AdminSidebar
 import { createClient } from '@/lib/supabase-server'
 import { redirect } from 'next/navigation'
-import AdminSidebar from '@/components/AdminSidebar'
+import DashboardSidebar from '@/components/DashboardSideBar'
 
 export default async function AdminLayout({ children }) {
   const supabase = await createClient()
@@ -18,8 +18,8 @@ export default async function AdminLayout({ children }) {
   return (
     <div style={{ minHeight: '100vh', display: 'flex', background: '#FAF3E0' }}>
 
-      {/* Sidebar — Client Component, receives role as prop */}
-      <AdminSidebar role={role} />
+      {/* Sidebar - Client Component, receives role as prop */}
+      <DashboardSidebar role={role} />
 
       {/* Main content */}
       <main style={{ flex: 1, background: '#FAF3E0', padding: '32px' }}>

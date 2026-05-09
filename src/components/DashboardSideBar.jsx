@@ -22,7 +22,7 @@ const LogoutSVG = () => (
   </svg>
 )
  
-export default function AdminSidebar({ role }) {
+export default function DashboardSidebar({ role }) {
   const pathname = usePathname()
   const router   = useRouter()
  
