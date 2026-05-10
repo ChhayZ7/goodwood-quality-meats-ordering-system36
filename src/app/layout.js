@@ -1,4 +1,4 @@
-import { Geist, Arvo } from "next/font/google";
+import { Geist} from "next/font/google";
 import "./globals.css";
 import Footer from '@/components/Footer'
 import Navbar from "@/components/Navbar";

@@ -5,7 +5,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
-import { createClient } from '@/lib/supabase-client'
+import { supabase } from '@/lib/supabase-client'
 
 const COLOR = {
   red:       '#7B1A1A',
@@ -116,7 +116,7 @@ function DeleteModal({ productName, onConfirm, onCancel, deleting }) {
         padding: '32px', width: '440px', maxWidth: '90vw',
         zIndex: 101, boxShadow: '0 20px 60px rgba(0,0,0,0.2)',
       }}>
-        <h2 style={{ fontFamily: '"Playfair Display", serif', fontSize: '22px', fontWeight: 700, color: COLOR.text, margin: '0 0 12px' }}>
+        <h2 style={{ fontSize: '22px', fontWeight: 700, color: COLOR.text, margin: '0 0 12px' }}>
           Delete Product?
         </h2>
         <p style={{ fontSize: '14px', color: COLOR.muted, lineHeight: 1.7, margin: '0 0 28px' }}>
@@ -147,7 +147,6 @@ function DeleteModal({ productName, onConfirm, onCancel, deleting }) {
 export default function EditProductPage() {
   const router  = useRouter()
   const { id }  = useParams()
-  const supabase = createClient()
 
   //hooks 
 
@@ -326,19 +325,10 @@ export default function EditProductPage() {
         </button>
 
         {/* Title row with delete */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-          <h1 style={{ fontFamily: '"Playfair Display", serif', fontSize: '32px', fontWeight: 700, color: COLOR.red, margin: 0 }}>
+          <h1 style={{fontFamily: '"Lato", sans-serif', fontSize: '32px', fontWeight: 700, color: COLOR.red, margin: 0 }}>
             Edit Product
           </h1>
-          <button
-            onClick={() => setShowDelete(true)}
-            style={{ padding: '8px 18px', background: COLOR.redLight, border: `1.5px solid ${COLOR.redBorder}`, borderRadius: '8px', fontSize: '13px', fontWeight: 700, color: '#B91C1C', cursor: 'pointer', fontFamily: '"Lato", sans-serif' }}
-            onMouseEnter={e => { e.currentTarget.style.background = '#FECACA' }}
-            onMouseLeave={e => { e.currentTarget.style.background = COLOR.redLight }}
-          >
-            🗑 Delete Product
-          </button>
-        </div>
+        
         <div style={{ height: '2px', background: `linear-gradient(90deg, ${COLOR.gold}, transparent)`, marginBottom: '32px', borderRadius: '1px' }} />
 
         {/* Banners */}
@@ -357,7 +347,7 @@ export default function EditProductPage() {
 
           {/* ── Left: Product Details ── */}
           <div style={{ background: COLOR.white, borderRadius: '12px', border: `1px solid ${COLOR.border}`, padding: '28px' }}>
-            <h2 style={{ fontFamily: '"Playfair Display", serif', fontSize: '18px', fontWeight: 700, color: COLOR.text, margin: '0 0 4px' }}>
+            <h2 style={{ fontFamily: '"Lato", sans-serif', fontSize: '18px', fontWeight: 700, color: COLOR.text, margin: '0 0 4px' }}>
               Product Details
             </h2>
             <div style={{ height: '1px', background: COLOR.border, marginBottom: '8px' }} />
@@ -416,7 +406,7 @@ export default function EditProductPage() {
 
             {/* Image */}
             <div style={{ background: COLOR.white, borderRadius: '12px', border: `1px solid ${COLOR.border}`, padding: '28px' }}>
-              <h2 style={{ fontFamily: '"Playfair Display", serif', fontSize: '18px', fontWeight: 700, color: COLOR.text, margin: '0 0 4px' }}>
+              <h2 style={{ fontFamily: '"Lato", sans-serif', fontSize: '18px', fontWeight: 700, color: COLOR.text, margin: '0 0 4px' }}>
                 Product Image
               </h2>
               <div style={{ height: '1px', background: COLOR.border, marginBottom: '16px' }} />
@@ -455,7 +445,7 @@ export default function EditProductPage() {
             {type === 'WEIGHT_RANGE' && (
               <div style={{ background: COLOR.white, borderRadius: '12px', border: `1px solid ${COLOR.border}`, padding: '28px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-                  <h2 style={{ fontFamily: '"Playfair Display", serif', fontSize: '18px', fontWeight: 700, color: COLOR.text, margin: 0 }}>
+                  <h2 style={{ fontFamily: '"Lato", sans-serif', fontSize: '18px', fontWeight: 700, color: COLOR.text, margin: 0 }}>
                     Weight Options
                   </h2>
                   <button
@@ -502,9 +492,19 @@ export default function EditProductPage() {
           <button
             onClick={handleSave}
             disabled={saving}
-            style={{ padding: '10px 28px', background: saving ? '#C9A08A' : COLOR.red, border: 'none', borderRadius: '8px', fontSize: '14px', fontWeight: 700, color: COLOR.white, cursor: saving ? 'not-allowed' : 'pointer', fontFamily: '"Lato", sans-serif' }}
+            style={{ padding: '10px 28px', background: saving ? '#C9A08A' : COLOR.red, border: 'none', borderRadius: '5px', fontSize: '14px', fontWeight: 700, color: COLOR.white, cursor: saving ? 'not-allowed' : 'pointer', fontFamily: '"Lato", sans-serif' }}
+            onMouseEnter={e => { e.currentTarget.style.background = '#c86c6c' }}
+            onMouseLeave={e => { e.currentTarget.style.background = COLOR.red }}
           >
             {saving ? 'Saving…' : 'Save Changes'}
+          </button>
+              <button
+            onClick={() => setShowDelete(true)}
+            style={{ padding: '10px 20px', background: COLOR.red, border: 'none', borderRadius: '5px', fontSize: '14px', fontWeight: 700, color: COLOR.redLight, cursor: 'pointer', fontFamily: '"Lato", sans-serif' }}
+            onMouseEnter={e => { e.currentTarget.style.background = '#c86c6c' }}
+            onMouseLeave={e => { e.currentTarget.style.background = COLOR.red }}
+          >
+            Delete Product
           </button>
         </div>
 

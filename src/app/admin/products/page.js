@@ -183,7 +183,7 @@ export default function AdminProductsPage() {
                   {/* Edit button -> navigates to separate page */}
                   <div style={{ textAlign: 'center' }}>
                     <button
-                      onClick={() => router.push(`/admin/products/${product.id}/edit`)}
+                      onClick={() => router.push(`/admin/products/${product.id}`)}
                       style={{
                         padding: '7px 20px',
                         border: `1.5px solid ${COLOR.red}`,
