@@ -111,7 +111,7 @@ export default function AdminInventoryPage() {
   const showPlaceholders = loading || inventory.length === 0
 
   return (
-    <div style={{ padding: '32px', maxWidth: '860px' }}>
+    <div style={{ padding: '32px', maxWidth: '1250px' }}>
 
       {/* Heading + Save button */}
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '24px' }}>
