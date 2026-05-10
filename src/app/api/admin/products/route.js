@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase-server'
 import { withHandler } from '@/lib/middleware/withHandler'
 
-// GET /api/aadmin/products - list all products with weight options
+// GET /api/admin/products - list all products with weight options
 export const GET = withHandler(async (request) => {
     const supabase = await createClient()
 
