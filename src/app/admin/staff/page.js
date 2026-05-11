@@ -28,7 +28,7 @@ function StatusBadge({ isActive }) {
   )
 }
 
-// ── Add Staff Modal ─────────────────────────────────────────────
+// Add Staff Modal
 function AddStaffModal({ onClose, onCreated }) {
   const [role,      setRole]      = useState('STAFF')
   const [firstName, setFirstName] = useState('')
@@ -206,7 +206,7 @@ function AddStaffModal({ onClose, onCreated }) {
   )
 }
 
-// ── Toggle confirm dialog ────────────────────────────────────────
+// Toggle confirm dialog
 function ToggleDialog({ member, onConfirm, onCancel, loading, error }) {
   const deactivating = member.is_active
 
@@ -267,7 +267,7 @@ function ToggleDialog({ member, onConfirm, onCancel, loading, error }) {
   )
 }
 
-// ── Main page ────────────────────────────────────────────────────
+// Main page
 export default function AdminStaffPage() {
   const [staff,         setStaff]         = useState([])
   const [loading,       setLoading]       = useState(true)

@@ -60,7 +60,7 @@ export const PATCH = withHandler(async (request, { params }) => {
     )
   }
 
-  // ── Step 1: Update Supabase Auth FIRST ──────────────────────────
+  // Step 1: Update Supabase Auth FIRST
   // Must update auth before DB — if this fails we don't want DB out of sync
   // ban_duration 'none' = unban (reactivate), '876600h' ≈ 100 years = ban
   const { error: authUpdateError } = await supabaseAdmin.auth.admin.updateUserById(id, {
@@ -71,7 +71,7 @@ export const PATCH = withHandler(async (request, { params }) => {
     return NextResponse.json({ error: authUpdateError.message }, { status: 500 })
   }
 
-  // ── Step 2: Sync public.users AFTER auth succeeds ────────────────
+  // Step 2: Sync public.users AFTER auth succeeds
   const { error: updateError } = await supabaseAdmin
     .from('users')
     .update({ is_active })
