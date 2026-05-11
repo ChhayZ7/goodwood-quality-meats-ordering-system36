@@ -44,8 +44,11 @@ export default function LoginPage() {
     })
 
     if (error) {
-      setAuthError(error.message)
-      console.error(error)
+      if (error.message === 'User is banned') {
+        setAuthError('Your account has been deactivated. Please contact your manager.')
+      } else {
+        setAuthError(error.message)
+      }
       return
     }
 
