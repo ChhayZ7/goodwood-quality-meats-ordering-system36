@@ -1,6 +1,36 @@
 import { createClient } from '@/lib/supabase-server'
 import { withHandler } from '@/lib/middleware/withHandler'
 
+
+// GET /api/admin/products/[id] - fetch a single product
+export const GET = withHandler(async (request, { params }) => {
+    console.log('[/api/admin/products/[id]] GET called') //to test if GET is being called
+    const supabase = await createClient()
+    const { id } = await params
+
+
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) {
+        return Response.json({ error: 'Unauthorised' }, { status: 401 })
+    }
+    const role = user.app_metadata?.role
+    if (role !== 'ADMIN' && role !== 'STAFF') {
+        return Response.json({ error: 'Forbidden' }, { status: 403 })
+    }
+
+    const { data: product, error } = await supabase
+        .from('products')
+        .select('*, product_weight_options(*)')
+        .eq('id', id)
+        .single()
+
+    if (error) return Response.json({ error: error.message }, { status: 500 })
+    if (!product) return Response.json({ error: 'Product not found' }, { status: 404 })
+
+    return Response.json({ product })
+})
+
+
 // PATCH /api/admin/products/[id] - update product + sync weight options
 export const PATCH = withHandler(async (request, { params }) => {
     const supabase = await createClient()

@@ -1,4 +1,4 @@
-import { Geist, Arvo } from "next/font/google";
+import { Geist} from "next/font/google";
 import "./globals.css";
 import Footer from '@/components/Footer'
 import Navbar from "@/components/Navbar";
@@ -22,9 +22,10 @@ export default function RootLayout({ children }) {
     <html
       lang="en"
       className={`${geistSans.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
       
-      <body className="min-h-full flex flex-col">
+      <body suppressHydrationWarning className="min-h-full flex flex-col">
         <CartProvider>
           <Navbar />
           <GoldDivider />
