@@ -2,39 +2,55 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-
+ 
+const COLOR = {
+  red:       '#7B1A1A',
+  redLight:  '#FEF2F2',
+  redBorder: '#FECACA',
+  cream:     '#FAF3E0',
+  gold:      '#C9A84C',
+  text:      '#1A1A1A',
+  muted:     '#6B7280',
+  border:    '#E5DCC8',
+  white:     '#FFFFFF',
+  sidebar:   '#F5EDD8',
+}
+ 
 function RoleBadge({ role }) {
   const isAdmin = role === 'ADMIN'
   return (
     <span style={{
-      display: 'inline-block', padding: '5px 14px', borderRadius: '6px',
-      fontSize: '13px', fontWeight: 700, fontFamily: '"Lato", sans-serif',
-      background: isAdmin ? '#7B1A1A' : '#C9A84C', color: '#fff',
+      display: 'inline-block', padding: '4px 12px', borderRadius: '6px',
+      fontSize: '12px', fontWeight: 700, fontFamily: '"Lato", sans-serif',
+      background: isAdmin ? COLOR.red : COLOR.gold, color: COLOR.white,
     }}>
       {isAdmin ? 'Admin' : 'Staff'}
     </span>
   )
 }
-
+ 
 function StatusBadge({ isActive }) {
   return (
     <span style={{
-      display: 'inline-block', padding: '4px 12px', borderRadius: '20px',
-      fontSize: '12px', fontWeight: 700, fontFamily: '"Lato", sans-serif',
-      background: isActive ? '#DCFCE7' : '#FEE2E2',
-      color: isActive ? '#166534' : '#991B1B',
+      display: 'inline-block', padding: '3px 10px', borderRadius: '99px',
+      fontSize: '11px', fontWeight: 700, fontFamily: '"Lato", sans-serif',
+      textTransform: 'uppercase', letterSpacing: '.04em',
+      background: isActive ? '#DCFCE7' : '#F3F4F6',
+      color: isActive ? '#166534' : COLOR.muted,
     }}>
       {isActive ? 'Active' : 'Inactive'}
     </span>
   )
 }
-
+ 
+const COLS = '2fr 2fr 120px 110px 100px'
+ 
 export default function AdminStaffPage() {
   const router = useRouter()
   const [staff,      setStaff]      = useState([])
   const [loading,    setLoading]    = useState(true)
   const [fetchError, setFetchError] = useState(null)
-
+ 
   const loadStaff = useCallback(async () => {
     setLoading(true)
     setFetchError(null)
@@ -49,118 +65,149 @@ export default function AdminStaffPage() {
       setLoading(false)
     }
   }, [])
-
+ 
   useEffect(() => { loadStaff() }, [loadStaff])
-
-  const COLS = '1fr 1fr 120px 110px 100px'
-
+ 
   return (
-    <div style={{ padding: '32px', maxWidth: '1050px' }}>
-
-      {/* Heading */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '28px' }}>
-        <div>
-          <h1 style={{ fontFamily: '"Playfair Display", serif', fontSize: '26px', fontWeight: 700, color: '#1A1A1A', margin: '0 0 6px' }}>
+    <div style={{ display: 'flex', minHeight: '100vh', background: COLOR.cream, fontFamily: '"Lato", sans-serif' }}>
+      <main style={{ flex: 1, padding: '40px 48px', overflowY: 'auto' }}>
+ 
+        {/* Header */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '32px' }}>
+          <h1 style={{ fontFamily: '"Lato", serif', fontSize: '36px', fontWeight: 700, color: COLOR.red, margin: 0 }}>
             Staff Management
           </h1>
-          <p style={{ fontFamily: '"Lato", sans-serif', fontSize: '14px', color: '#888', margin: 0 }}>
-            Create and manage staff and admin accounts
-          </p>
+          {!loading && !fetchError && (
+            <button
+              onClick={() => router.push('/admin/staff/new')}
+              style={{
+                padding: '12px 28px',
+                background: COLOR.red,
+                border: 'none',
+                borderRadius: '10px',
+                fontSize: '15px',
+                fontWeight: 700,
+                fontFamily: '"Lato", sans-serif',
+                color: COLOR.white,
+                cursor: 'pointer',
+              }}
+              onMouseEnter={e => e.currentTarget.style.background = '#5C1212'}
+              onMouseLeave={e => e.currentTarget.style.background = COLOR.red}
+            >
+              + Create Account
+            </button>
+          )}
         </div>
-        <button
-          onClick={() => router.push('/admin/staff/new')}
-          className="btn-primary"
-          style={{ padding: '10px 22px', fontSize: '14px' }}
-        >
-          + Create Account
-        </button>
-      </div>
-
-      {fetchError && (
-        <div style={{ background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: '8px', padding: '12px 16px', fontSize: '13px', color: '#B91C1C', marginBottom: '20px', fontFamily: '"Lato", sans-serif' }}>
-          {fetchError} —{' '}
-          <button onClick={loadStaff} style={{ background: 'none', border: 'none', color: '#7B1A1A', cursor: 'pointer', textDecoration: 'underline', fontSize: '13px', padding: 0 }}>retry</button>
-        </div>
-      )}
-
-      {/* Table */}
-      <div style={{ background: '#fff', borderRadius: '12px', border: '1px solid #E5E7EB', overflow: 'hidden' }}>
-
-        <div style={{ padding: '20px 28px', borderBottom: '1px solid #E5E7EB' }}>
-          <h2 style={{ fontFamily: '"Playfair Display", serif', fontSize: '20px', fontWeight: 700, color: '#1A1A1A', margin: 0 }}>
-            Current Staff &amp; Admins
-          </h2>
-        </div>
-
-        {/* Column headers */}
-        <div style={{ display: 'grid', gridTemplateColumns: COLS, padding: '10px 28px', background: '#F9FAFB', borderBottom: '1px solid #E5E7EB' }}>
-          {['Name', 'Email', 'Role', 'Status', 'Actions'].map((h, i) => (
-            <span key={h} style={{
-              fontFamily: '"Lato", sans-serif', fontSize: '13px', fontWeight: 700, color: '#6B7280',
-              textAlign: i >= 4 ? 'center' : 'left',
-            }}>
-              {h}
-            </span>
-          ))}
-        </div>
-
-        {/* Skeleton */}
-        {loading && Array.from({ length: 3 }).map((_, i) => (
-          <div key={i} style={{ display: 'grid', gridTemplateColumns: COLS, padding: '18px 28px', borderBottom: '1px solid #F3F4F6', alignItems: 'center' }}>
-            <div style={{ height: '14px', width: '130px', background: '#F0E8D0', borderRadius: '4px' }} />
-            <div style={{ height: '14px', width: '170px', background: '#F0E8D0', borderRadius: '4px' }} />
-            <div style={{ height: '26px', width: '72px', background: '#F3F4F6', borderRadius: '6px' }} />
-            <div style={{ height: '22px', width: '60px', background: '#F3F4F6', borderRadius: '20px', margin: '0 auto' }} />
-            <div style={{ height: '28px', width: '60px', background: '#F3F4F6', borderRadius: '6px', margin: '0 auto' }} />
-          </div>
-        ))}
-
-        {/* Rows */}
-        {!loading && staff.map((member, i) => (
-          <div key={member.id} style={{
-            display: 'grid', gridTemplateColumns: COLS,
-            padding: '18px 28px',
-            borderBottom: i < staff.length - 1 ? '1px solid #F3F4F6' : 'none',
-            alignItems: 'center',
-            opacity: member.is_active ? 1 : 0.6,
-          }}>
-            <span style={{ fontFamily: '"Lato", sans-serif', fontSize: '15px', color: '#1A1A1A' }}>
-              {member.first_name} {member.last_name}
-            </span>
-            <span style={{ fontFamily: '"Lato", sans-serif', fontSize: '14px', color: '#6B7280' }}>
-              {member.email}
-            </span>
-            <RoleBadge role={member.role} />
-            <div style={{ textAlign: 'left' }}>
-              <StatusBadge isActive={member.is_active} />
-            </div>
-            <div style={{ textAlign: 'center' }}>
-              {/* Admins can still be edited (to view details), but the edit page guards deactivation */}
-              <button
-                onClick={() => router.push(`/admin/staff/${member.id}`)}
-                style={{
-                  padding: '6px 14px', borderRadius: '6px',
-                  border: '1.5px solid #E5E7EB',
-                  fontSize: '12px', fontWeight: 700, cursor: 'pointer',
-                  fontFamily: '"Lato", sans-serif',
-                  background: '#fff', color: '#374151',
-                  transition: 'border-color .15s, color .15s',
-                }}
-                onMouseEnter={e => { e.currentTarget.style.borderColor = '#C9A84C'; e.currentTarget.style.color = '#7B1A1A' }}
-                onMouseLeave={e => { e.currentTarget.style.borderColor = '#E5E7EB'; e.currentTarget.style.color = '#374151' }}
-              >
-                Edit
-              </button>
-            </div>
-          </div>
-        ))}
-
-        {!loading && staff.length === 0 && !fetchError && (
-          <div style={{ padding: '48px', textAlign: 'center', fontFamily: '"Lato", sans-serif', fontSize: '14px', color: '#9CA3AF' }}>
-            No staff accounts yet. Click "+ Create Account" to get started.
+ 
+        {/* Gold divider */}
+        <div style={{ height: '2px', background: `linear-gradient(90deg, ${COLOR.gold}, transparent)`, marginBottom: '32px', borderRadius: '1px' }} />
+ 
+        {/* Loading */}
+        {loading && (
+          <div style={{ textAlign: 'center', padding: '60px 0', color: COLOR.muted, fontSize: '15px' }}>
+            Loading staff…
           </div>
         )}
-      </div>
+ 
+        {/* Error */}
+        {fetchError && (
+          <div style={{ background: COLOR.redLight, border: `1px solid ${COLOR.redBorder}`, borderRadius: '10px', padding: '16px 20px', color: '#B91C1C', fontSize: '14px', marginBottom: '24px' }}>
+            {fetchError} —{' '}
+            <button
+              onClick={loadStaff}
+              style={{ background: 'none', border: 'none', color: COLOR.red, cursor: 'pointer', textDecoration: 'underline', fontSize: '14px', padding: 0 }}
+            >
+              retry
+            </button>
+          </div>
+        )}
+ 
+        {/* Table */}
+        {!loading && !fetchError && (
+          <div style={{ background: COLOR.white, borderRadius: '12px', overflow: 'hidden', boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
+ 
+            {/* Table header */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: COLS,
+              padding: '14px 28px',
+              borderBottom: `2px solid ${COLOR.border}`,
+            }}>
+              {['Name', 'Email', 'Role', 'Status', 'Actions'].map((h, i) => (
+                <span key={h} style={{
+                  fontSize: '13px', fontWeight: 700, color: COLOR.muted,
+                  textTransform: 'uppercase', letterSpacing: '.06em',
+                  textAlign: i === 4 ? 'center' : 'left',
+                }}>
+                  {h}
+                </span>
+              ))}
+            </div>
+ 
+            {/* Empty state */}
+            {staff.length === 0 && (
+              <div style={{ padding: '48px', textAlign: 'center', color: COLOR.muted, fontSize: '14px' }}>
+                No staff accounts yet. Click &ldquo;+ Create Account&rdquo; to get started.
+              </div>
+            )}
+ 
+            {/* Rows */}
+            {staff.map((member, idx) => (
+              <div
+                key={member.id}
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: COLS,
+                  padding: '16px 28px',
+                  borderBottom: idx < staff.length - 1 ? `1px solid ${COLOR.border}` : 'none',
+                  alignItems: 'center',
+                  opacity: member.is_active ? 1 : 0.6,
+                  transition: 'background .1s',
+                }}
+                onMouseEnter={e => e.currentTarget.style.background = '#FDFAF3'}
+                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+              >
+                {/* Name */}
+                <span style={{ fontSize: '15px', fontWeight: 600, color: COLOR.text }}>
+                  {member.first_name} {member.last_name}
+                </span>
+ 
+                {/* Email */}
+                <span style={{ fontSize: '14px', color: COLOR.muted }}>{member.email}</span>
+ 
+                {/* Role */}
+                <RoleBadge role={member.role} />
+ 
+                {/* Status */}
+                <StatusBadge isActive={member.is_active} />
+ 
+                {/* Edit button */}
+                <div style={{ textAlign: 'center' }}>
+                  <button
+                    onClick={() => router.push(`/admin/staff/${member.id}`)}
+                    style={{
+                      padding: '7px 20px',
+                      border: `1.5px solid ${COLOR.red}`,
+                      borderRadius: '8px',
+                      background: 'transparent',
+                      color: COLOR.red,
+                      fontSize: '13px',
+                      fontWeight: 700,
+                      fontFamily: '"Lato", sans-serif',
+                      cursor: 'pointer',
+                      transition: 'all .12s',
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.background = COLOR.red; e.currentTarget.style.color = COLOR.white }}
+                    onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = COLOR.red }}
+                  >
+                    Edit
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </main>
     </div>
   )
 }
