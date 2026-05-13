@@ -58,34 +58,80 @@ export default function NewStaffPage() {
     const [phone, setPhone] = useState('')
     const [password, setPassword] = useState('')
     const [showPassword, setShowPassword] = useState(fasle) //true when password become visible, set false as initial 
-    const [saving, setSaving] = useState (false)
-    const [error, setError] = useState (null) //as no error message to show yet
-    const [success, setSuccess] = useState (fasle)
+    const [saving, setSaving] = useState(false)
+    const [error, setError] = useState(null) //as no error message to show yet
+    const [success, setSuccess] = useState(fasle)
 
     const isAdmin = role === 'ADMIN'
 
     //this function validate the form fields and then send a POST request to create a new account
-    async function handleSubmit () {
+    async function handleSubmit() {
 
         //check all required field if they are all filled in 
         //if not, display error message
+        setError(null) //error has to be clear first to clean the prev error so the user gets a clean state each time they try to submit
+
+        //ignore white space
+        if (!firstName.trim()) {
+            setError('First name is required!')
+            return
+        }
+        else if (!lastName.trim()) {
+            setError('Last name is required!')
+            return
+        }
+        else if (!email.trim()) {
+            setError('Email is required!')
+            return
+        }
+        else if (!password.trim()){
+            setError('Password is required!')
+            return
+        }
+
 
         //check password is at least 8 characters
         //if not, display error message
 
+        if(password.length < 8) { 
+            setError('Password must be at least 8 character')
+            return
+        }
+
         //set saving to true to show loading state on the button 
-
+        setSaving(true)
+        
         //Try to send POST request to api/admin/staff with the data filled
-          //if the response fail, throw error message
+        //if the response fail, throw error message
+         try { 
+            const res = await fetch('/api/admin/staff', {
+                method: 'POST',
+                headers: {'Content-Type': application/json},
+                body: JSON.stringify ({
+                    first_name: firstName.trim(),
+                    last_name: lastName.trim(), 
+                    email: email.trim(),
+                    phone: phone.trim(),
+                    password,
+                    role
+                    
+                }),
+            })
 
-          //if success, set success to true to show the success message
-
+            const data = await res.json()
+            if(!res.ok) throw new Error (data.error ?? 'Failed to create account')
+            setSuccess(true)         //if success, set success to true to show the success message
         //if anything goes wrong, set the erro message and set saving to false again as now, saving is unsuccess
+        }catch (err) {
+            setError (err.message) 
+            setSaving(false)
+        }
+
+
     }
 
     //if success, show the success message instead of forms
-
-    if (success){ 
+    if (success) {
 
         //show success message
 
@@ -99,7 +145,7 @@ export default function NewStaffPage() {
     //Form fields
 
     return (
-null
+        null
     )
 
 
