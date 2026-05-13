@@ -25,7 +25,6 @@ const labelSt = {
     color: '#9CA3AF',
     textTransform: 'uppercase',
     letterSpacing: '.06em',
-    width: '120px',
     flexShrink: 0,
 }
 
@@ -42,104 +41,96 @@ const inputSt = {
     boxSizing: 'border-box',
 }
 
+// Small red error text displayed under each input field
+function FieldError({ message }) {
+    if (!message) return null
+    return (
+        <p style={{ fontFamily: '"Lato", sans-serif', fontSize: '12px', color: '#B91C1C', margin: '4px 0 0' }}>
+            {message}
+        </p>
+    )
+}
+
 //components of the main create new staff page 
-
 export default function NewStaffPage() {
-
-    //declare variables
 
     const router = useRouter()
 
-    //set role as staff as an initial variable
+    // set role as staff as initial value
     const [role, setRole] = useState('STAFF')
 
-    //for input fields
+    // for input fields
     const [firstName, setFirstName] = useState('')
-    const [lastName, setlastName] = useState('')
+    const [lastName, setLastName] = useState('')
     const [email, setEmail] = useState('')
     const [phone, setPhone] = useState('')
     const [password, setPassword] = useState('')
-    const [showPassword, setShowPassword] = useState(false) //true when password become visible, set false as initial 
+    const [showPassword, setShowPassword] = useState(false) // true when password becomes visible, false by default
     const [saving, setSaving] = useState(false)
-    const [error, setError] = useState(null) //as no error message to show yet
+    const [errors, setErrors] = useState({}) // object to hold per-field error messages
     const [success, setSuccess] = useState(false)
 
     const isAdmin = role === 'ADMIN'
 
-    //this function validate the form fields and then send a POST request to create a new account
+    // this function validates the form fields and then sends a POST request to create a new account
     async function handleSubmit() {
 
-        //check all required field if they are all filled in 
-        //if not, display error message
-        setError(null) //error has to be clear first to clean the prev error so the user gets a clean state each time they try to submit
+        // clear all previous field errors so the user gets a clean state each time they submit
+        setErrors({})
 
-        //ignore white space
-        if (!firstName.trim()) {
-            setError('First name is required!')
-            return
-        }
-        else if (!lastName.trim()) {
-            setError('Last name is required!')
-            return
-        }
-        else if (!email.trim()) {
-            setError('Email is required!')
-            return
-        }
-        else if (!password.trim()) {
-            setError('Password is required!')
+        // validate all required fields at once and collect errors
+        const newErrors = {}
+
+        if (!firstName.trim()) newErrors.firstName = 'First name is required'
+        if (!lastName.trim()) newErrors.lastName = 'Last name is required'
+        if (!email.trim()) newErrors.email = 'Email is required'
+        if (!password.trim()) newErrors.password = 'Password is required'
+        else if (password.length < 8) newErrors.password = 'Password must be at least 8 characters'
+
+        // if there are any errors, update state and stop — do not send the request
+        if (Object.keys(newErrors).length > 0) {
+            setErrors(newErrors)
             return
         }
 
-
-        //check password is at least 8 characters
-        //if not, display error message
-
-        if (password.length < 8) {
-            setError('Password must be at least 8 character')
-            return
-        }
-
-        //set saving to true to show loading state on the button 
+        // set saving to true to show loading state on the button
         setSaving(true)
 
-        //Try to send POST request to api/admin/staff with the data filled
-        //if the response fail, throw error message
+        // try to send POST request to /api/admin/staff with the form data
+        // if the response fails, throw an error with the message from the API
         try {
             const res = await fetch('/api/admin/staff', {
                 method: 'POST',
-                headers: { 'Content-Type': application / json },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     first_name: firstName.trim(),
                     last_name: lastName.trim(),
                     email: email.trim(),
                     phone: phone.trim(),
                     password,
-                    role
-
+                    role,
                 }),
             })
 
             const data = await res.json()
             if (!res.ok) throw new Error(data.error ?? 'Failed to create account')
-            setSuccess(true)         //if success, set success to true to show the success message
-            //if anything goes wrong, set the erro message and set saving to false again as now, saving is unsuccess
+
+            // if successful, set success to true to show the success screen
+            setSuccess(true)
+
         } catch (err) {
-            setError(err.message)
+            // if anything goes wrong, show a general error and set saving back to false
+            setErrors({ general: err.message })
             setSaving(false)
         }
-
-
     }
 
-    //if success, show the success message instead of forms
+    // if the account was created successfully, show success screen instead of the form
     if (success) {
 
-        //show success message
-
-        //show button to go back to staff list
-
-        //reset all form fields and states back to their initial values
+        // show success message with the staff member's name
+        // show button to go back to staff list
+        // show button to create another — resets all form fields and states back to initial values
 
         return (
             <div style={{ display: 'flex', minHeight: '100vh', background: COLOR.cream, fontFamily: '"Lato", sans-serif' }}>
@@ -169,8 +160,14 @@ export default function NewStaffPage() {
                                 </button>
                                 <button
                                     onClick={() => {
-                                        setSuccess(false); setSaving(false)
-                                        setFirstName(''); setLastName(''); setEmail(''); setPhone(''); setPassword('')
+                                        setSuccess(false)
+                                        setSaving(false)
+                                        setFirstName('')
+                                        setLastName('')
+                                        setEmail('')
+                                        setPhone('')
+                                        setPassword('')
+                                        setErrors({})
                                         setRole('STAFF')
                                     }}
                                     style={{ padding: '10px 24px', borderRadius: '8px', border: `1.5px solid ${COLOR.border}`, background: COLOR.white, color: COLOR.text, fontFamily: '"Lato", sans-serif', fontSize: '14px', fontWeight: 700, cursor: 'pointer' }}
@@ -185,11 +182,7 @@ export default function NewStaffPage() {
         )
     }
 
-
-
-
-    //Form fields
-
+    // Form fields
     return (
         <div style={{ display: 'flex', minHeight: '100vh', background: COLOR.cream, fontFamily: '"Lato", sans-serif' }}>
             <main style={{ flex: 1, padding: '40px 48px', overflowY: 'auto' }}>
@@ -217,20 +210,19 @@ export default function NewStaffPage() {
                     <div style={{ background: COLOR.white, borderRadius: '12px', padding: '32px', boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
 
                         {/* Role toggle */}
-                        <div style={{ marginBottom: '24px' }}>
+                        <div style={{ marginBottom: '16px', marginTop: '3px' }}>
                             <label style={labelSt}>Account Type</label>
-                            <div style={{ display: 'flex', gap: '8px' }}>
+                            <div style={{ display: 'flex', gap: '8px', marginTop: '5px' }}>
                                 {['STAFF', 'ADMIN'].map(r => {
                                     const active = role === r
-                                    const color = r === 'ADMIN' ? COLOR.red : COLOR.gold
                                     return (
                                         <button
                                             key={r}
                                             onClick={() => setRole(r)}
                                             style={{
                                                 flex: 1, padding: '11px', borderRadius: '8px',
-                                                border: `1.5px solid ${active ? color : COLOR.border}`,
-                                                background: active ? color : COLOR.white,
+                                                border: `1.5px solid ${active ? COLOR.red : COLOR.border}`,
+                                                background: active ? COLOR.red : COLOR.white,
                                                 color: active ? COLOR.white : COLOR.muted,
                                                 fontSize: '14px', fontWeight: 700,
                                                 fontFamily: '"Lato", sans-serif',
@@ -243,7 +235,7 @@ export default function NewStaffPage() {
                                 })}
                             </div>
                             {isAdmin && (
-                                <p style={{ fontFamily: '"Lato", sans-serif', fontSize: '12px', color: '#B45309', margin: '8px 0 0', background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: '6px', padding: '8px 12px' }}>
+                                <p style={{ fontFamily: '"Lato", sans-serif', fontSize: '12px', color: '#023506', margin: '8px 0 0', background: '#dfffe6', border: '1px solid #1b831f', borderRadius: '6px', padding: '8px 12px' }}>
                                     Admin accounts have full access to all settings, staff management, and reports
                                 </p>
                             )}
@@ -253,24 +245,51 @@ export default function NewStaffPage() {
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
                             <div>
                                 <label style={labelSt}>First Name *</label>
-                                <input type="text" value={firstName} onChange={e => setFirstName(e.target.value)} placeholder="Jane" style={inputSt} />
+                                <input
+                                    type="text"
+                                    value={firstName}
+                                    onChange={e => { setFirstName(e.target.value); setErrors(p => ({ ...p, firstName: null })) }}
+                                    placeholder="Jane"
+                                    style={{ ...inputSt, borderColor: errors.firstName ? '#B91C1C' : COLOR.border }}
+                                />
+                                <FieldError message={errors.firstName} />
                             </div>
                             <div>
                                 <label style={labelSt}>Last Name *</label>
-                                <input type="text" value={lastName} onChange={e => setLastName(e.target.value)} placeholder="Smith" style={inputSt} />
+                                <input
+                                    type="text"
+                                    value={lastName}
+                                    onChange={e => { setLastName(e.target.value); setErrors(p => ({ ...p, lastName: null })) }}
+                                    placeholder="Smith"
+                                    style={{ ...inputSt, borderColor: errors.lastName ? '#B91C1C' : COLOR.border }}
+                                />
+                                <FieldError message={errors.lastName} />
                             </div>
                         </div>
 
                         {/* Email */}
                         <div style={{ marginBottom: '16px' }}>
                             <label style={labelSt}>Email *</label>
-                            <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="jane@goodwoodmeats.com.au" style={inputSt} />
+                            <input
+                                type="email"
+                                value={email}
+                                onChange={e => { setEmail(e.target.value); setErrors(p => ({ ...p, email: null })) }}
+                                placeholder="jane@goodwoodmeats.com.au"
+                                style={{ ...inputSt, borderColor: errors.email ? '#B91C1C' : COLOR.border }}
+                            />
+                            <FieldError message={errors.email} />
                         </div>
 
                         {/* Phone */}
                         <div style={{ marginBottom: '16px' }}>
                             <label style={labelSt}>Phone (optional)</label>
-                            <input type="tel" value={phone} onChange={e => setPhone(e.target.value)} placeholder="04xx xxx xxx" style={inputSt} />
+                            <input
+                                type="tel"
+                                value={phone}
+                                onChange={e => setPhone(e.target.value)}
+                                placeholder="04xx xxx xxx"
+                                style={inputSt}
+                            />
                         </div>
 
                         {/* Password */}
@@ -280,9 +299,9 @@ export default function NewStaffPage() {
                                 <input
                                     type={showPassword ? 'text' : 'password'}
                                     value={password}
-                                    onChange={e => setPassword(e.target.value)}
+                                    onChange={e => { setPassword(e.target.value); setErrors(p => ({ ...p, password: null })) }}
                                     placeholder="Min. 8 characters"
-                                    style={{ ...inputSt, paddingRight: '44px' }}
+                                    style={{ ...inputSt, paddingRight: '44px', borderColor: errors.password ? '#B91C1C' : COLOR.border }}
                                 />
                                 <button
                                     type="button"
@@ -292,14 +311,16 @@ export default function NewStaffPage() {
                                     {showPassword ? <IoEyeOffOutline /> : <IoEyeOutline />}
                                 </button>
                             </div>
+                            <FieldError message={errors.password} />
                             <p style={{ fontFamily: '"Lato", sans-serif', fontSize: '12px', color: '#9CA3AF', margin: '6px 0 0' }}>
-                                Share this with the {isAdmin ? 'admin' : 'staff member'} — they can update it after logging in.
+                                Share this with the {isAdmin ? 'admin' : 'staff member'} - they can update it after logging in
                             </p>
                         </div>
 
-                        {error && (
+                        {/* General API error e.g. email already exists */}
+                        {errors.general && (
                             <div style={{ background: COLOR.redLight, border: `1px solid ${COLOR.redBorder}`, borderRadius: '8px', padding: '10px 14px', fontSize: '13px', color: '#B91C1C', fontFamily: '"Lato", sans-serif', marginTop: '16px' }}>
-                                {error}
+                                {errors.general}
                             </div>
                         )}
 
@@ -339,9 +360,4 @@ export default function NewStaffPage() {
             </main>
         </div>
     )
-
-
-
-
-
 }
