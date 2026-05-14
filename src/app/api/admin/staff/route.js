@@ -125,3 +125,61 @@ export const POST = withHandler(async (request) => {
 
   return NextResponse.json({ staff: staffMember }, { status: 201 })
 })
+
+export const DELETE = withHandler(async (request, { params }) => {
+  const { id } = await params
+
+  const { user: adminUser, error: authErr } = await requireAdmin()
+  if (authErr === 'unauthenticated') {
+    return NextResponse.json({ error: 'Unauthorised — please log in' }, { status: 401 })
+  }
+  if (authErr === 'forbidden') {
+    return NextResponse.json({ error: 'Access denied — admin only' }, { status: 403 })
+  }
+
+  // Prevent admin from deleting themselves
+  if (id === adminUser.id) {
+    return NextResponse.json(
+      { error: 'You cannot delete your own account' },
+      { status: 400 }
+    )
+  }
+
+  // Make sure target exists and is STAFF (not another ADMIN)
+  const { data: target } = await supabaseAdmin
+    .from('users')
+    .select('id, role')
+    .eq('id', id)
+    .single()
+
+  if (!target) {
+    return NextResponse.json({ error: 'Staff member not found' }, { status: 404 })
+  }
+
+  if (target.role === 'ADMIN') {
+    return NextResponse.json(
+      { error: 'Cannot delete admin accounts via this endpoint' },
+      { status: 400 }
+    )
+  }
+
+  // Delete from Supabase Auth first
+  const { error: authDeleteError } = await supabaseAdmin.auth.admin.deleteUser(id)
+
+  if (authDeleteError) {
+    return NextResponse.json({ error: authDeleteError.message }, { status: 500 })
+  }
+
+  // public.users row is cascade deleted by the DB foreign key,
+  // but if you don't have ON DELETE CASCADE set up, delete manually
+  const { error: dbError } = await supabaseAdmin
+    .from('users')
+    .delete()
+    .eq('id', id)
+
+  if (dbError) {
+    return NextResponse.json({ error: dbError.message }, { status: 500 })
+  }
+
+  return new Response(null, { status: 204 })
+})
