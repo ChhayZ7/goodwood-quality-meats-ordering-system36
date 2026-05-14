@@ -132,3 +132,37 @@ export const PATCH = withHandler(async (request, { params }) => {
 
     return Response.json({ product: full })
 })
+
+// DELETE /api/admin/products/[id] - delete a product and its weight options
+export const DELETE = withHandler(async (request, { params }) => {
+  const supabase = await createClient()
+  const { id } = await params
+
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+  if (authError || !user) {
+    return Response.json({ error: 'Unauthorised' }, { status: 401 })
+  }
+
+  const role = user.app_metadata?.role
+  if (role !== 'ADMIN') {
+    return Response.json({ error: 'Forbidden — admin only' }, { status: 403 })
+  }
+
+  // Delete weight options first (foreign key constraint)
+  const { error: woError } = await supabase
+    .from('product_weight_options')
+    .delete()
+    .eq('product_id', id)
+
+  if (woError) return Response.json({ error: woError.message }, { status: 500 })
+
+  // Delete the product
+  const { error: productError } = await supabase
+    .from('products')
+    .delete()
+    .eq('id', id)
+
+  if (productError) return Response.json({ error: productError.message }, { status: 500 })
+
+  return new Response(null, { status: 204 })
+})
