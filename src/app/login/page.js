@@ -18,7 +18,10 @@ export default function LoginPage() {
       const supabase = createClient()
       const { data: { session } } = await supabase.auth.getSession()
       if (session) {
-        router.replace('/')
+        const role = session.user?.app_metadata?.role
+        if (role === 'ADMIN') router.replace('/admin/orders')
+        else if (role === 'STAFF') router.replace('/staff/orders')
+        else router.replace('/')
       }
     }
     checkSession()
@@ -26,7 +29,7 @@ export default function LoginPage() {
 
   const handleLogin = async (e) => {
     e.preventDefault()
-    setErrors(null)
+    setErrors({})
 
     const validationErrors = validate()
     if (Object.keys(validationErrors).length > 0) {
@@ -54,7 +57,15 @@ export default function LoginPage() {
 
     const redirectTo = new URLSearchParams(window.location.search).get('redirectTo')
     const isSafe = redirectTo?.startsWith('/') && !redirectTo?.startsWith('//')
-    router.replace(isSafe ? redirectTo : '/')
+    if (isSafe && redirectTo) {
+      router.replace(redirectTo)
+    } 
+    else {
+      const role = data.user?.app_metadata?.role
+      if (role === 'ADMIN') router.replace('/admin/orders')
+      else if (role === 'STAFF') router.replace('/staff/orders')
+      else router.replace('/')
+    }
   }
 
   function validate() {

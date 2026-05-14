@@ -13,7 +13,7 @@ export default async function AdminLayout({ children }) {
   const role = user.app_metadata?.role
 
   // Not admin or staff — redirect away
-  if (role !== 'ADMIN' && role !== 'STAFF') redirect('/')
+  if (role !== 'ADMIN') redirect('/')
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', background: '#FAF3E0' }}>
