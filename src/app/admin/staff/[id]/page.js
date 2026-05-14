@@ -130,12 +130,9 @@ export default function EditStaffPage() {
     setDeleteError(null)
     try {
       const res = await fetch(`/api/admin/staff/${id}`, { method: 'DELETE' })
-      if (res.status === 204 || res.ok) {
-        router.push('/admin/staff')
-        return
-      }
       const data = await res.json()
-      throw new Error(data.error ?? 'Failed to delete account')
+      if (!res.ok) throw new Error(data.error ?? 'Failed to delete account')
+      router.push('/admin/staff')
     } catch (err) {
       setDeleteError(err.message)
       setDeleting(false)
