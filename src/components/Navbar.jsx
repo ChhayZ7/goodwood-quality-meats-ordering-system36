@@ -12,6 +12,7 @@ export default function Navbar() {
     const [mounted, setMounted] = useState(false)
     const [isLoggedIn, setIsLoggedIn] = useState(false)
     const [firstName, setFirstName] = useState('')
+    const [userRole, setUserRole] = useState(null)  
     const [loadingName, setLoadingName] = useState(false)
 
     useEffect(() => {
@@ -29,7 +30,10 @@ export default function Navbar() {
                 return
             }
             const json = await res.json()
-            if (json.user) setFirstName(json.user.first_name ?? '')
+            if (json.user) {
+            setFirstName(json.user.first_name ?? '')
+            setUserRole(json.user.role ?? null)
+        }
             setLoadingName(false)
         }
 
@@ -120,7 +124,7 @@ export default function Navbar() {
 
                         {mounted && isLoggedIn ? (
                             <div className="flex items-center gap-3">
-                                <Link href="/account" className="flex items-center gap-2 text-sm text-gray-700 hover:opacity-70">
+                                <Link href={userRole === 'ADMIN' ? '/admin/orders' : userRole === 'STAFF' ? '/staff/orders' : '/account'} className="flex items-center gap-2 text-sm text-gray-700 hover:opacity-70">
                                     <UserIcon className="w-6 h-6" style={{ color: '#060606' }} />
                                     <span>
                                         Hi,{' '}
