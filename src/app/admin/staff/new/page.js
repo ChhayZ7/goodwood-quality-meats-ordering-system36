@@ -87,7 +87,7 @@ export default function NewStaffPage() {
         if (!password.trim()) newErrors.password = 'Password is required'
         else if (password.length < 8) newErrors.password = 'Password must be at least 8 characters'
 
-        // if there are any errors, update state and stop — do not send the request
+        // if there are any errors, update state and stop, do not send the request
         if (Object.keys(newErrors).length > 0) {
             setErrors(newErrors)
             return
