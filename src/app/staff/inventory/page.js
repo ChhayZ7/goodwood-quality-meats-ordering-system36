@@ -2,13 +2,6 @@
 import { useState, useEffect } from 'react'
 const LOW_STOCK = 5
 
-const [inventory, setInventory] = useState([])
-
-useEffect(() => {
-  fetch('/api/admin/inventory')
-    .then(r => r.json())
-    .then(d => setInventory(d.inventory ?? []))
-}, [])
 
 const CATEGORY_COLOURS = {
   Pork:    { bg: '#FEE2E2', color: '#991B1B' },
@@ -20,6 +13,13 @@ const CATEGORY_COLOURS = {
 }
 
 export default function StaffInventoryPage() {
+
+  const [inventory, setInventory] = useState([])
+  useEffect(() => {
+    fetch('/api/admin/inventory')
+      .then(r => r.json())
+      .then(d => setInventory(d.inventory ?? []))
+  }, [])
   const showPlaceholders = inventory.length === 0
   const lowCount = inventory.filter(i => i.stock_quantity <= LOW_STOCK).length
 
