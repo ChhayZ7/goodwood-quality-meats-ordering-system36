@@ -14,6 +14,7 @@ import {
   getTotalDepositsCollected,
   getOrdersByPickupDate,
   getLowStockProducts,
+  getTopProducts,
 } from '@/lib/db/reports'
 
 export const GET = withHandler(async (request) => {
@@ -42,6 +43,12 @@ export const GET = withHandler(async (request) => {
     )
   }
 
+  // parse period params
+  const { searchParams } = new URL(request.url)
+  const period = ['today', 'month'].includes(searchParams.get('period'))
+    ? searchParams.get('period')
+    : 'month'
+
   // Run all report queries
   const [
     orders_by_status,
@@ -49,12 +56,14 @@ export const GET = withHandler(async (request) => {
     deposits,
     orders_by_pickup_date,
     low_stock_products,
+    top_products,
   ] = await Promise.all([ // run at same time
     getOrderCountsByStatus(),
     getTotalRevenue(),
     getTotalDepositsCollected(),
     getOrdersByPickupDate(),
     getLowStockProducts(),
+    getTopProducts(period),
   ])
 
   return NextResponse.json({
@@ -64,5 +73,6 @@ export const GET = withHandler(async (request) => {
     deposits,
     orders_by_pickup_date,
     low_stock_products,
+    top_products,
   })
 })
