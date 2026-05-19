@@ -1,5 +1,5 @@
 // GET /api/admin/orders
-// Admin-only, returns all orders with optional filters.
+// Admin and staff only, returns all orders with optional filters.
 
 import { NextResponse } from 'next/server'
 import { withHandler } from '@/lib/middleware/withHandler'
@@ -26,9 +26,9 @@ export const GET = withHandler(async (request) => {
     .eq('id', user.id)
     .single()
 
-  if (profile?.role !== 'ADMIN') {
+  if (!['ADMIN', 'STAFF'].includes(profile?.role)) {
     return NextResponse.json(
-      { error: 'Access denied — admin only', status: 403 },
+      { error: 'Access denied — staff or admin only', status: 403 },
       { status: 403 }
     )
   }

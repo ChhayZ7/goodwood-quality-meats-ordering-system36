@@ -18,8 +18,12 @@ export const GET = withHandler(async (request) => {
     return NextResponse.json({ error: 'Unauthorised' }, { status: 401 })
   }
 
-  const role = user.app_metadata?.role
-  if (role !== 'ADMIN' && role !== 'STAFF') {
+  const { data: profile } = await supabaseAdmin
+  .from('users')
+  .select('role')
+  .eq('id', user.id)
+  .single()
+  if (!['ADMIN', 'STAFF'].includes(profile?.role)) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
@@ -53,8 +57,12 @@ export const PATCH = withHandler(async (request) => {
     return NextResponse.json({ error: 'Unauthorised' }, { status: 401 })
   }
 
-  const role = user.app_metadata?.role
-  if (role !== 'ADMIN' && role !== 'STAFF') {
+  const { data: profile } = await supabaseAdmin
+  .from('users')
+  .select('role')
+  .eq('id', user.id)
+  .single()
+  if (!['ADMIN', 'STAFF'].includes(profile?.role)) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
