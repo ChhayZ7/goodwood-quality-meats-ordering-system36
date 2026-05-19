@@ -1,7 +1,7 @@
 'use client'
 
 
-import { useState } from 'react'
+import { useState, useEffect, useCallback  } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
 
@@ -21,32 +21,64 @@ function StatusBadge({ status }) {
   return <span style={{ display: 'inline-block', background: cfg.bg, color: cfg.color, fontSize: '12px', fontWeight: 700, padding: '4px 14px', borderRadius: '20px' }}>{cfg.label}</span>
 }
 
-const order = null
-
 export default function StaffOrderDetailPage() {
   const { id } = useParams()
 
   // BACKEND TEAM: pre-fill these from real order data in your useEffect
+  const [order,          setOrder]          = useState(null)
+  const [loading,        setLoading]        = useState(true)
   const [selectedStatus, setSelectedStatus] = useState('CONFIRMED')
-  const [weights, setWeights]               = useState({})
-  const [saving, setSaving]                 = useState(false)
-  const [saved, setSaved]                   = useState(false)
+  const [weights,        setWeights]        = useState({})
+  const [saving,         setSaving]         = useState(false)
+  const [saved,          setSaved]          = useState(false)
+  const [saveError,      setSaveError]      = useState(null)
 
   // Weights lock when order is Ready or Completed
   const isLocked = selectedStatus === 'READY' || selectedStatus === 'COMPLETED'
 
+  const loadOrder = useCallback(async () => {
+    setLoading(true)
+    try {
+      const res  = await fetch(`/api/admin/orders/${id}`)
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error ?? 'Failed to load order')
+      setOrder(data.order)
+      setSelectedStatus(data.order.status)
+    } catch (err) {
+      console.error(err)
+    } finally {
+      setLoading(false)
+    }
+  }, [id])
+
+  useEffect(() => { loadOrder() }, [loadOrder])
+
   async function handleSave() {
     setSaving(true)
-    await new Promise(r => setTimeout(r, 700))
-    setSaving(false); setSaved(true)
-    setTimeout(() => setSaved(false), 3000)
+    setSaveError(null)
+    try {
+      const res  = await fetch(`/api/admin/orders/${id}`, {
+        method:  'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ status: selectedStatus }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error ?? 'Failed to update status')
+      setSaved(true)
+      setTimeout(() => setSaved(false), 3000)
+      await loadOrder()
+    } catch (err) {
+      setSaveError(err.message)
+    } finally {
+      setSaving(false)
+    }
   }
 
   const formatDate  = d => new Date(d).toLocaleDateString('en-AU', { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' })
   const formatCents = c => `$${(c / 100).toFixed(2)}`
 
     // ── PLACEHOLDER — shown when order = null ────────────────────
-  if (!order) {
+  if (loading || !order) {
     return (
       <div style={{ padding: '32px', maxWidth: '900px' }}>
         <Link href="/staff/orders" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontFamily: '"Lato",sans-serif', fontSize: '13px', color: '#888', textDecoration: 'none', marginBottom: '20px' }}>← Back to Orders</Link>
@@ -103,7 +135,7 @@ export default function StaffOrderDetailPage() {
       <Link href="/staff/orders" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontFamily: '"Lato",sans-serif', fontSize: '13px', color: '#888', textDecoration: 'none', marginBottom: '20px' }}>← Back to Orders</Link>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
-        <h1 style={{ fontFamily: '"Playfair Display",serif', fontSize: '24px', fontWeight: 700, color: '#1A1A1A', margin: 0 }}>Order #{order.order_number}</h1>
+        <h1 style={{ fontFamily: '"Playfair Display",serif', fontSize: '24px', fontWeight: 700, color: '#1A1A1A', margin: 0 }}>Order #{order.id.slice(0, 8).toUpperCase()}</h1>
         <StatusBadge status={order.status} />
       </div>
 
@@ -118,7 +150,7 @@ export default function StaffOrderDetailPage() {
       {/* Summary */}
       <div style={{ background: '#fff', borderRadius: '12px', border: '1px solid #E5E7EB', padding: '24px', marginBottom: '20px' }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: '24px' }}>
-          {[['Order Number',`#${order.order_number}`],['Customer',`${order.customer?.first_name} ${order.customer?.last_name}`],['Pickup Date',formatDate(order.pickup_date)],['Deposit Paid',formatCents(order.deposit_paid_cents)]].map(([l,v]) => (
+          {[['Order Number',`#${order.id.slice(0, 8).toUpperCase()}`],['Customer',`${order.customer?.first_name} ${order.customer?.last_name}`],['Pickup Date',formatDate(order.pickup_date)],['Deposit Paid',formatCents(order.deposit_paid_cents)]].map(([l,v]) => (
             <div key={l}>
               <p style={{ fontFamily: '"Lato",sans-serif', fontSize: '11px', fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '.08em', margin: '0 0 6px' }}>{l}</p>
               <p style={{ fontFamily: '"Lato",sans-serif', fontSize: '14px', fontWeight: 600, color: '#1A1A1A', margin: 0 }}>{v}</p>

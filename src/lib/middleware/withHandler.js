@@ -124,7 +124,7 @@ export const schemas = {
     },
     validators: {
       status: (val) => {
-        const valid = ['PENDING', 'CONFIRMED', 'READY', 'COMPLETED', 'CANCELLED']
+        const valid = ['PENDING', 'CONFIRMED', 'IN_PROGRESS', 'READY', 'COMPLETED', 'CANCELLED']
         return valid.includes(val) ? null : `Must be one of: ${valid.join(', ')}`
       },
     },
