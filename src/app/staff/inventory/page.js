@@ -1,9 +1,14 @@
 'use client'
-
+import { useState, useEffect } from 'react'
 const LOW_STOCK = 5
 
-// BACKEND TEAM: replace with useState([]) + useEffect fetch (see notes above)
-const inventory = []
+const [inventory, setInventory] = useState([])
+
+useEffect(() => {
+  fetch('/api/admin/inventory')
+    .then(r => r.json())
+    .then(d => setInventory(d.inventory ?? []))
+}, [])
 
 const CATEGORY_COLOURS = {
   Pork:    { bg: '#FEE2E2', color: '#991B1B' },

@@ -5,14 +5,14 @@ import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 
 const STATUS_CONFIG = {
-  PENDING:   { label: 'Pending',          bg: '#F3F4F6', color: '#374151' },
   CONFIRMED: { label: 'Confirmed',        bg: '#FEF3C7', color: '#92400E' },
+  IN_PROGRESS: { label: 'In Progress',      bg: '#3B82F6', color: '#fff' },
   READY:     { label: 'Ready for Pickup', bg: '#DBEAFE', color: '#1E40AF' },
   COMPLETED: { label: 'Completed',        bg: '#DCFCE7', color: '#166534' },
   CANCELLED: { label: 'Cancelled',        bg: '#FEE2E2', color: '#991B1B' },
 }
 
-const ORDER_STATUSES = ['PENDING', 'CONFIRMED', 'READY', 'COMPLETED']
+const ORDER_STATUSES = ['CONFIRMED', 'IN_PROGRESS', 'READY', 'COMPLETED']
 
 function StatusBadge({ status }) {
   const cfg = STATUS_CONFIG[status] || { label: status, bg: '#6B7280', color: '#fff' }
