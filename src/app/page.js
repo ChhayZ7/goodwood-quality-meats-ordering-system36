@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import HeroImage from '../assets/heroImage.jpg'
-
+import AwardWinning from '../assets/awardWinning.png'
 const teamMembers = [
   {
     name: 'David Armstrong',
@@ -35,16 +35,16 @@ const teamMembers = [
 ]
 
 const awards = [
-  '2019 — SA Best Retail Shop',
-  '2018 — SA Award of Excellence, Best Retail Butcher Shop',
-  '2017 — SA Retail Gold Standard Award of Excellence',
-  '2016 — SA Retail Gold Standard Award of Excellence',
-  '2018 — World Butchers Challenge Ireland — Mexican Jalapeño and Sour Cream Sausage',
-  '2019 — Sausage King — Butchers Own Thin Beef, Traditional Australian',
-  '2017 — Sausage King — Vietnamese Chicken, Poultry Category',
-  '2019 — SA Best Continental Sausage — Smoked Spanish Chorizo',
-  'SA Innovative Product Awards of Excellence — Duck and Shiitake Mushroom Pate',
-  'SA Innovative Product Awards of Excellence — Hot Smoked Salmon',
+  { bold: '2019', rest: 'SA Best Retail Shop' },
+  { bold: '2018', rest: 'SA Award of Excellence, Best Retail Butcher Shop' },
+  { bold: '2017', rest: ' SA Retail Gold Standard Award of Excellence' },
+  { bold: '2016', rest: 'SA Retail Gold Standard Award of Excellence' },
+  { bold: '2018', rest: 'World Butchers Challenge Ireland - Mexican Jalapeño and Sour Cream Sausage' },
+  { bold: '2019', rest: 'Sausage King - Butchers Own Thin Beef, Traditional Australian' },
+  { bold: '2017', rest: 'Sausage King - Vietnamese Chicken, Poultry Category' },
+  { bold: '2019', rest: 'SA Best Continental Sausage - Smoked Spanish Chorizo' },
+  { bold: 'SA Innovative Product Awards of Excellence', rest: 'Duck and Shiitake Mushroom Pate' },
+  { bold: 'SA Innovative Product Awards of Excellence', rest: 'Hot Smoked Salmon' },
 ]
 
 export default function HomePage() {
@@ -145,7 +145,7 @@ export default function HomePage() {
           <p className="text-lg leading-relaxed mb-6" style={{ color: '#353535' }}>
             Mick Hammond the previous owner had this place for 49 years. For the first 6 months, people wouldn’t even let me serve them or talk to me. So my goal was to be better than he was. We used similar or the same suppliers and looked to make everything we were doing one step better than it was and people started to warm to our approach.
 
-Then we started to give the shop a warmer feel so when you came in the timber gave it a more comfortable feel and we focussed on changing our uniforms to create a professional feel.
+            Then we started to give the shop a warmer feel so when you came in the timber gave it a more comfortable feel and we focussed on changing our uniforms to create a professional feel.
           </p>
           <blockquote
             className="text-xl italic mt-8"
@@ -203,24 +203,39 @@ Then we started to give the shop a warmer feel so when you came in the timber ga
 
       {/* Awards */}
       <section className="py-20 bg-white">
-        <div className="max-w-4xl mx-auto px-6">
-          <h2 className="text-4xl mb-4 text-center" style={{ color: '#8B1A1A' }}>
+        <div className="max-w-6xl mx-auto px-6">
+          <h2 className="text-4xl mb-4 text-center  font-bold" style={{ color: '#8B1A1A' }}>
             Award Winning Butchers
           </h2>
-          <p className="text-center mb-12" style={{ color: '#717182' }}>
-            Goodwood Quality Meats has entered teams and competitions both locally, nationally, and internationally.
+          <p className="text-center text-sm italic mb-12" style={{ color: '#717182' }}>
+            Goodwood Quality Meats has entered teams and competitions both locally, nationally, and internationally
           </p>
-          <div className="grid grid-cols-2 gap-4">
-            {awards.map((award, index) => (
-              <div
-                key={index}
-                className="flex items-start gap-3 p-4 rounded-lg"
-                style={{ backgroundColor: '#FDF8F0' }}
-              >
-                <span style={{ color: '#D4AF37' }}>★</span>
-                <p className="text-sm" style={{ color: '#2C2C2A' }}>{award}</p>
-              </div>
-            ))}
+          <div className="flex flex-col gap-10 md:flex-row md:gap-16 md:items-center">
+
+               {/*Image on the right ot shows on top first on mobile */}
+
+            <div className="flex justify-center md:order-2 md:w-1/2">
+              <img
+                src={AwardWinning.src}
+                alt="Award Winning"
+                className="w-full max-w-sm md:max-w-sm object-contain"
+              />
+            </div>
+
+            {/*Award List on left */}
+
+            <div className="flex flex-col gap-2  md:order-1 md:w-1/2">
+              {awards.map((award, index) => (
+                <p key={index} className="text-sm" style={{ color: '#2C2C2A' }}>
+                  <span className="font-bold">{award.bold}</span>
+                  {' | '}
+                  {award.rest}
+                </p>
+              ))}
+            </div>
+
+         
+
           </div>
         </div>
       </section>
