@@ -45,7 +45,7 @@ export const POST = withHandler(async (request) => {
     .from('feedback')
     .select('id')
     .eq('order_id', order_id)
-    .single()
+    .maybeSingle()
 
   if (existing) {
     return NextResponse.json({ error: 'Feedback already submitted for this order' }, { status: 409 })
