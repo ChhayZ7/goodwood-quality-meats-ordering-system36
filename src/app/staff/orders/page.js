@@ -1,7 +1,7 @@
 'use client'
 
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 
 const STATUS_CONFIG = {
@@ -20,18 +20,26 @@ function StatusBadge({ status }) {
 const ALL_TABS   = ['All', 'CONFIRMED', 'IN_PROGRESS', 'READY', 'COMPLETED', 'CANCELLED']
 const TAB_LABELS = { All: 'All', CONFIRMED: 'Confirmed', IN_PROGRESS: 'In Progress', READY: 'Ready for Pickup', COMPLETED: 'Completed', CANCELLED: 'Cancelled' }
 
-const orders = []
 
 export default function StaffOrdersPage() {
+  const [orders, setOrders] = useState([])
   const [activeTab, setActiveTab] = useState('All')
   const [search, setSearch]       = useState('')
+
+  useEffect(() => {
+    fetch('/api/admin/orders')
+      .then(r => r.json())
+      .then(d => setOrders(d.orders ?? []))
+  }, [])
 
   const showPlaceholders = orders.length === 0
 
   const filtered = orders.filter(o => {
     const tabMatch = activeTab === 'All' || o.status === activeTab
     const q = search.toLowerCase()
-    const searchMatch = !q || o.order_number.toLowerCase().includes(q) || o.customer_name.toLowerCase().includes(q)
+    const customerName = `${o.customer?.first_name ?? ''} ${o.customer?.last_name ?? ''}`.toLowerCase()
+    const orderNum = `GW${o.id.slice(0, 8).toUpperCase()}`.toLowerCase()
+    const searchMatch = !q || customerName.includes(q) || orderNum.includes(q)
     return tabMatch && searchMatch
   })
 
@@ -83,8 +91,8 @@ export default function StaffOrdersPage() {
         {/* REAL DATA ROWS — rendered once orders has data */}
         {!showPlaceholders && filtered.map((order, i) => (
           <div key={order.id} style={{ display: 'grid', gridTemplateColumns: '150px 1fr 160px 180px 120px 80px', padding: '15px 20px', borderBottom: i < filtered.length - 1 ? '1px solid #F3F4F6' : 'none', alignItems: 'center' }}>
-            <span style={{ fontFamily: 'monospace', fontSize: '13px', fontWeight: 700, color: '#1A1A1A' }}>{order.order_number}</span>
-            <span style={{ fontFamily: '"Lato",sans-serif', fontSize: '13px', color: '#374151' }}>{order.customer_name}</span>
+            <span style={{ fontFamily: 'monospace', fontSize: '13px', fontWeight: 700, color: '#1A1A1A' }}>{`#GW${order.id.slice(0, 8).toUpperCase()}`}</span>
+            <span style={{ fontFamily: '"Lato",sans-serif', fontSize: '13px', color: '#374151' }}>{order.customer?.first_name} {order.customer?.last_name}</span>
             <span style={{ fontFamily: '"Lato",sans-serif', fontSize: '13px', color: '#374151' }}>{formatDate(order.pickup_date)}</span>
             <StatusBadge status={order.status} />
             <span style={{ fontFamily: '"Lato",sans-serif', fontSize: '12px', color: '#9CA3AF' }}>{formatDate(order.updated_at)}</span>

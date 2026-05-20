@@ -49,8 +49,23 @@ export async function getAllOrders({
         type,
         status,
         created_at
+      ),
+      last_audit:order_audit_logs (
+        id,
+        field,
+        old_value,
+        new_value,
+        reason,
+        created_at,
+        changed_by_user:users!changed_by (
+          id,
+          first_name,
+          last_name,
+          role
+        )
       )
     `)
+    .neq('status', 'PENDING')
     .order('created_at', { ascending: false })
     .range(offset, offset + limit - 1)
 

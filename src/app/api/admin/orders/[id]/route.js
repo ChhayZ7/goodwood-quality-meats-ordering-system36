@@ -1,8 +1,8 @@
 // GET   /api/admin/orders/:id
-// Returns full order detail including the complete audit log for admin only.
+// Returns full order detail including the complete audit log for staff and admin only.
 //
 // PATCH /api/admin/orders/:id
-// Updates an order and writes an audit log entry for every changed field for admin only.
+// Updates an order and writes an audit log entry for every changed field for staff and admin only.
 
 import { NextResponse } from 'next/server'
 import { withHandler } from '@/lib/middleware/withHandler'
@@ -24,7 +24,7 @@ async function getAdminUser() {
     .eq('id', user.id)
     .single()
 
-  if (profile?.role !== 'ADMIN') return { user: null, error: 'forbidden' }
+  if (!['ADMIN', 'STAFF'].includes(profile?.role)) return { user: null, error: 'forbidden' }
 
   return { user, error: null }
 }
@@ -39,7 +39,7 @@ export const GET = withHandler(async (request, { params }) => {
     return NextResponse.json({ error: 'Unauthorised — please log in', status: 401 }, { status: 401 })
   }
   if (authErr === 'forbidden') {
-    return NextResponse.json({ error: 'Access denied — admin only', status: 403 }, { status: 403 })
+    return NextResponse.json({ error: 'Access denied — admin and staff only', status: 403 }, { status: 403 })
   }
 
   const { data, error } = await getAdminOrderById(id)
