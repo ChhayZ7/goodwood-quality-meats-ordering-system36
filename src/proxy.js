@@ -53,8 +53,11 @@ export async function proxy(request) {
 
   if (isCustomerRoute && user) {
     const role = user.app_metadata?.role
-    if (role === 'STAFF' || role === 'ADMIN') {
+    if (role === 'ADMIN') {
       const homeUrl = new URL('/admin/orders', request.url)
+      return NextResponse.redirect(homeUrl)
+    } else if (role === 'STAFF'){
+      const homeUrl = new URL('/staff/orders', request.url)
       return NextResponse.redirect(homeUrl)
     }
   }
