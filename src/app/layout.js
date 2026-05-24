@@ -15,7 +15,6 @@ export const metadata = {
   title: "Goodwood Quality Meats",
   description: "Christmas Ordering System — Pre-order your Christmas meats online.",
 };
-/// suppressHydrationWarning
 
 export default function RootLayout({ children }) {
   return (

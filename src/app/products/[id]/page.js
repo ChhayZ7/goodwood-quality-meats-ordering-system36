@@ -374,52 +374,54 @@ export default function ProductDetailPage() {
   }
 
   return (
-    <div 
-      style={{ 
-        minHeight: '100vh', 
-        display: 'flex', 
-        flexDirection: 'column', 
-        background: '#FAF3E0' 
-      }}>
+    <>
+      <style>{`
+        .product-layout {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 48px;
+          align-items: start;
+        }
+        .product-image {
+          width: 100%;
+          height: 450px;
+          object-fit: cover;
+          display: block;
+          border-radius: 10px;
+        }
+        @media (max-width: 768px) {
+          .product-layout {
+            grid-template-columns: 1fr;
+            gap: 24px;
+          }
+          .product-image {
+            height: 280px;
+          }
+        }
+      `}</style>
 
+      <main>
+        <div style={{ maxWidth: '1200px', width: '100%', margin: '0 auto', padding: '32px 48px' }}>
+          <Link 
+            href="/products" 
+            style={{ 
+              display: 'inline-block', 
+              marginBottom: '24px', 
+              fontSize: '14px', 
+              color: '#555', 
+              textDecoration: 'none' 
+            }}> 
+            ← Back to Products
+          </Link>
 
-      <main 
-        style={{ 
-          flex: 1 
-      }}>
-      <div 
-        style={{ 
-          maxWidth: '960px', 
-          margin: '0 auto', 
-          padding: '32px 24px' 
-        }}>
-      <Link 
-        href="/products" 
-        style={{ 
-          display: 'inline-block', 
-          marginBottom: '24px', 
-          fontSize: '14px', 
-          color: '#555', 
-          textDecoration: 'none' 
-          }}> 
-          ← Back to Products
-      </Link>
+          <div className="product-layout">
 
-      <div>
-        <div 
-          style={{ 
-            borderRadius: '10px', 
-            overflow: 'hidden', 
-            maxHeight: '420px' 
-          }}>
+            {/* LEFT — image */}
+            <div>
               <img
                 src={product.image_url}
                 alt={product.name}
-                style={{ 
-                  width: '100%', 
-                  height: '100%', 
-                  objectFit: 'cover' 
-                }}
+                className="product-image"
               />
             </div>
 
@@ -434,7 +436,7 @@ export default function ProductDetailPage() {
                   color: '#1A1A1A', 
                   margin: '0 0 8px', 
                   lineHeight: 1.2 
-                  }}>
+                }}>
                 {product.name}
               </h1>
 
@@ -450,10 +452,7 @@ export default function ProductDetailPage() {
 
               {/* Weight dropdown — only for WEIGHT_RANGE products */}
               {product.product_type === 'WEIGHT_RANGE' && product.product_weight_options?.length > 0 && (
-                <div 
-                  style={{ 
-                    marginBottom: '16px' 
-                  }}>
+                <div style={{ marginBottom: '16px' }}>
                   <label 
                     style={{ 
                       display: 'block', 
@@ -570,9 +569,9 @@ export default function ProductDetailPage() {
               </div>
 
             </div>
-      </div>
-      </div>
+          </div>
+        </div>
       </main>
-    </div>
+    </>
   )
 }
