@@ -223,7 +223,7 @@ export default function DailyPrepPage() {
           )}
         </div>
       )}
-            {/* Error state */}
+      {/* Error state */}
       {error && (
         <div style={{
           padding: '12px 16px', borderRadius: '8px',
@@ -234,7 +234,7 @@ export default function DailyPrepPage() {
           {error}
         </div>
       )}
-            {/* Loading skeleton */}
+     {/* Loading skeleton */}
       {loading && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           {[1,2,3].map(i => (
@@ -248,7 +248,7 @@ export default function DailyPrepPage() {
           ))}
         </div>
       )}
-            {/* Empty state  */}
+      {/* Empty state  */}
       {!loading && !error && ordersWithItems.length === 0 && selectedDate && (
         <div style={{
           padding:    '48px',
@@ -267,7 +267,7 @@ export default function DailyPrepPage() {
           }
         </div>
       )}
-            {/* ── Order cards ──────────────────────────────────────── */}
+      {/*  Order cards */}
       {!loading && ordersWithItems.length > 0 && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '32px' }}>
           {ordersWithItems.map(order => (
@@ -304,7 +304,7 @@ export default function DailyPrepPage() {
                 </span>
                 <StatusBadge status={order.status} />
               </div>
-                            {/* Items list */}
+             {/* Items list */}
               <div>
                 {/* Column headers */}
                 <div style={{
@@ -359,5 +359,110 @@ export default function DailyPrepPage() {
           ))}
         </div>
       )}
-
+      {/*Day Summary*/}
+      {/* Always shown once data is loaded, even with 0 orders */}
+      {!loading && !error && selectedDate && (
+        <div style={{
+          background:   '#fff',
+          borderRadius: '12px',
+          border:       '1px solid #E5E7EB',
+          overflow:     'hidden',
+        }}>
+          {/* Summary heading */}
+          <div style={{
+            padding:      '14px 20px',
+            background:   '#7B1A1A',
+            display:      'flex',
+            alignItems:   'center',
+            gap:          '10px',
+          }}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2">
+              <line x1="8"  y1="6"  x2="21" y2="6"/>
+              <line x1="8"  y1="12" x2="21" y2="12"/>
+              <line x1="8"  y1="18" x2="21" y2="18"/>
+              <line x1="3"  y1="6"  x2="3.01" y2="6"/>
+              <line x1="3"  y1="12" x2="3.01" y2="12"/>
+              <line x1="3"  y1="18" x2="3.01" y2="18"/>
+            </svg>
+            <h3 style={{
+              fontFamily: '"Playfair Display", serif',
+              fontSize:   '15px',
+              fontWeight: 700,
+              color:      '#fff',
+              margin:     0,
+            }}>
+              Day Summary — {formatDateDisplay(selectedDate)}
+              {category !== 'All' && ` (${category} only)`}
+            </h3>
+          </div>
+         {/* Summary table header */}
+          {summary.length > 0 && (
+            <div style={{
+              display:             'grid',
+              gridTemplateColumns: '1fr 120px 100px',
+              padding:             '10px 20px',
+              background:          '#F9FAFB',
+              borderBottom:        '1px solid #E5E7EB',
+            }}>
+              {['Product', 'Category', 'Total Qty'].map(h => (
+                <span key={h} style={{
+                  fontFamily:    '"Lato", sans-serif',
+                  fontSize:      '10px',
+                  fontWeight:    700,
+                  color:         '#9CA3AF',
+                  textTransform: 'uppercase',
+                  letterSpacing: '.06em',
+                }}>
+                  {h}
+                </span>
+              ))}
+            </div>
+          )}
+         {/* Summary rows */}
+          {summary.length === 0 ? (
+            <div style={{
+              padding:   '24px',
+              textAlign: 'center',
+              fontFamily:'"Lato", sans-serif',
+              fontSize:  '13px',
+              color:     '#9CA3AF',
+            }}>
+              No items to prepare for this day
+            </div>
+          ) : (
+            summary.map((item, i) => (
+              <div key={item.product_name} style={{
+                display:             'grid',
+                gridTemplateColumns: '1fr 120px 100px',
+                padding:             '12px 20px',
+                borderBottom:        i < summary.length - 1 ? '1px solid #F9F6EF' : 'none',
+                alignItems:          'center',
+                background:          i % 2 === 0 ? '#FAFAF8' : '#fff',
+              }}>
+                <span style={{
+                  fontFamily: '"Lato", sans-serif',
+                  fontSize:   '13px',
+                  fontWeight: 600,
+                  color:      '#1A1A1A',
+                }}>
+                  {item.product_name}
+                </span>
+                <CategoryBadge category={item.category} />
+                <span style={{
+                  fontFamily: '"Lato", sans-serif',
+                  fontSize:   '16px',
+                  fontWeight: 700,
+                  color:      '#7B1A1A',
+                }}>
+                  ×{item.total_quantity}
+                </span>
+              </div>
+            ))
+          )}
+        </div>
+      )}
+    </div>
+  )
 }
+
+
