@@ -45,3 +45,58 @@ function CategoryBadge({ category }) {
     </span>
   )
 }
+
+// Format YYYY-MM-DD → "Mon 25 Dec 2025"
+function formatDateDisplay(dateStr) {
+  if (!dateStr) return ''
+  return new Date(dateStr + 'T00:00:00').toLocaleDateString('en-AU', {
+    weekday: 'short', day: '2-digit', month: 'short', year: 'numeric',
+  })
+}
+
+// Returns today's date as YYYY-MM-DD string (local time, not UTC)
+function todayString() {
+  const d   = new Date()
+  const pad = n => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
+}
+
+export default function DailyPrepPage() {
+  // Default to today
+  const [selectedDate, setSelectedDate] = useState(todayString)
+  const [category,     setCategory]     = useState('All')
+  const [data,         setData]         = useState(null)   // { orders, summary }
+  const [loading,      setLoading]      = useState(false)
+  const [error,        setError]        = useState(null)
+
+  // Fetch orders whenever date or category changes
+  const fetchPrep = useCallback(async (date, cat) => {
+    if (!date) return
+    setLoading(true)
+    setError(null)
+    try {
+      const params = new URLSearchParams({ date })
+      if (cat && cat !== 'All') params.set('category', cat)
+
+      const res  = await fetch(`/api/staff/daily-prep?${params}`)
+      const json = await res.json()
+
+      if (!res.ok) throw new Error(json.error ?? 'Failed to load prep data')
+      setData(json)
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    fetchPrep(selectedDate, category)
+  }, [selectedDate, category, fetchPrep])
+
+  const orders  = data?.orders  ?? []
+  const summary = data?.summary ?? []
+
+  // Orders that have items after filtering (some orders may have no items of the selected category)
+  const ordersWithItems = orders.filter(o => o.order_items.length > 0)
+}
