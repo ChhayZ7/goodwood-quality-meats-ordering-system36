@@ -13,6 +13,28 @@ const statusColors = {
   'CANCELLED':        'bg-red-500',
 }
 
+function OrderCardSkeleton() {
+  return (
+    <div className="bg-white p-6 rounded-2xl shadow-sm border flex justify-between items-center animate-pulse">
+      <div className="flex-1">
+        {/* Order ID + status badge */}
+        <div className="flex items-center gap-3 mb-3">
+          <div className="h-5 w-36 bg-gray-200 rounded" />
+          <div className="h-5 w-20 bg-gray-200 rounded-full" />
+        </div>
+        {/* Placed / Pickup / Total */}
+        <div className="flex gap-6">
+          <div className="h-4 w-24 bg-gray-200 rounded" />
+          <div className="h-4 w-28 bg-gray-200 rounded" />
+          <div className="h-4 w-20 bg-gray-200 rounded" />
+        </div>
+      </div>
+      {/* Button placeholder */}
+      <div className="h-9 w-28 bg-gray-200 rounded-lg ml-6" />
+    </div>
+  )
+}
+
 export default function OrdersPage() {
   const router = useRouter()
   const [orders, setOrders]   = useState([])
@@ -39,22 +61,36 @@ export default function OrdersPage() {
     return acc
   }, {})
 
-  if (loading) return null
-  if (error)   return <p className="text-red-600 p-8">{error}</p>
+  if (error) return <p className="text-red-600 p-8">{error}</p>
 
   return (
     <div className="max-w-5xl mx-auto">
 
       <h1 className="text-3xl font-semibold mb-8 text-red-900">My Orders</h1>
 
-      {orders.length === 0 ? (
+      {/* ── Skeleton while loading ── */}
+      {loading && (
+        <div>
+          {/* Fake month label */}
+          <div className="h-5 w-24 bg-gray-200 rounded animate-pulse mb-4" />
+          <div className="space-y-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <OrderCardSkeleton key={i} />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ── Empty state ── */}
+      {!loading && orders.length === 0 && (
         <p className="text-gray-500">You have no orders yet.</p>
-      ) : (
+      )}
+
+      {/* ── Orders grouped by month ── */}
+      {!loading && orders.length > 0 && (
         Object.entries(grouped).map(([month, monthOrders]) => (
           <div key={month} className="mb-8">
-
             <p className="text-lg font-semibold text-gray-700 mb-4">{month}</p>
-
             <div className="space-y-4">
               {monthOrders.map((order) => (
                 <div
@@ -88,7 +124,6 @@ export default function OrdersPage() {
                 </div>
               ))}
             </div>
-
           </div>
         ))
       )}

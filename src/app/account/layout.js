@@ -22,7 +22,11 @@ export default function AccountLayout({ children }) {
       {/* SIDEBAR */}
       <aside className="w-56 bg-white border-r border-gray-200 px-6 py-8 flex flex-col flex-shrink-0">
 
-        <p className="text-gray-400 text-sm mb-8">Hi, {firstName} </p>
+        {firstName ? (
+          <p className="text-gray-400 text-sm mb-8">Hi, {firstName}</p>
+        ) : (
+          <div className="h-4 w-24 bg-gray-200 rounded animate-pulse mb-8" />
+        )}
 
         <nav className="space-y-1">
           

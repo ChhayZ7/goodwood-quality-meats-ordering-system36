@@ -33,9 +33,81 @@ export default function OrderDetailPage() {
     load()
   }, [id, router])
 
-  if (loading) return null
-  if (error)   return <p className="text-red-600 p-8">{error}</p>
-  if (!order)  return <p className="text-gray-500 p-8">Order not found.</p>
+  if (loading) return (
+    <div className="max-w-5xl mx-auto animate-pulse">
+
+      {/* Header skeleton */}
+      <div className="flex items-start justify-between mb-8">
+        <div className="mt-2">
+          <h1 className="text-3xl font-bold text-[#8B1A1A] mb-3">
+            Order #{id.slice(0, 8).toUpperCase()}
+          </h1>
+          <div className="flex gap-4">
+            <div className="h-4 w-28 bg-gray-200 rounded" />
+            <div className="h-4 w-28 bg-gray-200 rounded" />
+          </div>
+        </div>
+        <div className="h-9 w-28 bg-gray-200 rounded-full" />
+      </div>
+
+      {/* Order Items card skeleton */}
+      <div className="bg-white rounded-xl border border-gray-200 p-8 mb-6">
+        <div className="h-6 w-32 bg-gray-200 rounded mb-6" />
+        {/* Table header */}
+        <div className="flex gap-4 pb-3 border-b border-gray-200 mb-2">
+          <div className="h-4 w-24 bg-gray-200 rounded" />
+          <div className="h-4 w-36 bg-gray-200 rounded ml-auto" />
+          <div className="h-4 w-16 bg-gray-200 rounded" />
+          <div className="h-4 w-20 bg-gray-200 rounded" />
+        </div>
+        {/* Table rows */}
+        {[1, 2].map(i => (
+          <div key={i} className="flex gap-4 py-4 border-b border-gray-100 last:border-0">
+            <div className="h-4 w-40 bg-gray-200 rounded" />
+            <div className="h-4 w-20 bg-gray-200 rounded ml-auto" />
+            <div className="h-4 w-8 bg-gray-200 rounded" />
+            <div className="h-4 w-16 bg-gray-200 rounded" />
+          </div>
+        ))}
+      </div>
+
+      {/* Payment Summary card skeleton */}
+      <div className="bg-white rounded-xl border border-gray-200 p-8 mb-8">
+        <div className="h-6 w-44 bg-gray-200 rounded mb-6" />
+        <div className="space-y-4">
+          <div className="flex justify-between">
+            <div className="h-4 w-28 bg-gray-200 rounded" />
+            <div className="h-4 w-16 bg-gray-200 rounded" />
+          </div>
+          <div className="flex justify-between">
+            <div className="h-4 w-36 bg-gray-200 rounded" />
+            <div className="h-4 w-16 bg-gray-200 rounded" />
+          </div>
+          <div className="border-t border-gray-200 pt-4 space-y-4">
+            <div className="flex justify-between">
+              <div className="h-4 w-24 bg-gray-200 rounded" />
+              <div className="h-4 w-16 bg-gray-200 rounded" />
+            </div>
+            <div className="flex justify-between">
+              <div className="h-5 w-28 bg-gray-200 rounded" />
+              <div className="h-5 w-20 bg-gray-200 rounded" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Buttons skeleton */}
+      <div className="flex gap-4">
+        <div className="h-11 w-56 bg-gray-200 rounded-lg" />
+        <div className="h-11 w-36 bg-gray-200 rounded-lg" />
+        <div className="h-11 w-36 bg-gray-200 rounded-lg" />
+      </div>
+
+    </div>
+  )
+
+  if (error)  return <p className="text-red-600 p-8">{error}</p>
+  if (!order) return <p className="text-gray-500 p-8">Order not found.</p>
 
   const payment = order.payments?.[0] ?? order.payment ?? {}
 
@@ -82,16 +154,13 @@ export default function OrderDetailPage() {
                 <td className="py-4 text-gray-600">{item.weight_preference ?? '—'}</td>
                 <td className="py-4 text-center text-gray-800">{item.quantity}</td>
                 <td className="py-4 text-right text-gray-800">
-                  {item.unit_price_cents
-                    ? `$${(item.unit_price_cents / 100).toFixed(2)}`
-                    : '—'}
+                  {item.unit_price_cents ? `$${(item.unit_price_cents / 100).toFixed(2)}` : '—'}
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
 
-        {/* Order level notes */}
         {order.notes && (
           <div className="mt-6 pt-4 border-t border-gray-100">
             <p className="text-sm font-semibold text-gray-700 mb-1">Order Notes</p>
@@ -115,14 +184,13 @@ export default function OrderDetailPage() {
           </div>
 
           <div className="border-t border-gray-200 pt-3 mt-3 space-y-3">
-            <div className="flex justify-between text-gray-700">
-              <span>Final Total:</span>
-              <span>{payment.total_cents != null ? `$${(payment.total_cents / 100).toFixed(2)}` : '—'}</span>
-            </div>
+            
             <div className="flex justify-between font-semibold">
               <span>Balance Due:</span>
               <span className="text-[#8B1A1A]">
-                {payment.balance_cents != null ? `$${(payment.balance_cents / 100).toFixed(2)}` : '—'}
+                {order.total_cents != null && order.deposit_paid_cents != null
+                  ? `$${((order.total_cents - order.deposit_paid_cents) / 100).toFixed(2)}`
+                  : '—'}
               </span>
             </div>
           </div>
@@ -152,7 +220,6 @@ export default function OrderDetailPage() {
           </svg>
           Leave a Review
         </Link>
-
 
         <Link
           href="/account/orders"
