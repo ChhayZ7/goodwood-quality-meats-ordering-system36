@@ -267,5 +267,97 @@ export default function DailyPrepPage() {
           }
         </div>
       )}
+            {/* ── Order cards ──────────────────────────────────────── */}
+      {!loading && ordersWithItems.length > 0 && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '32px' }}>
+          {ordersWithItems.map(order => (
+            <div key={order.id} style={{
+              background:   '#fff',
+              borderRadius: '12px',
+              border:       '1px solid #E5E7EB',
+              overflow:     'hidden',
+            }}>
+              {/* Order header */}
+              <div style={{
+                display:    'flex',
+                alignItems: 'center',
+                gap:        '12px',
+                padding:    '14px 20px',
+                background: '#FAFAF8',
+                borderBottom: '1px solid #F3F4F6',
+              }}>
+                <span style={{
+                  fontFamily: 'monospace',
+                  fontSize:   '14px',
+                  fontWeight: 700,
+                  color:      '#1A1A1A',
+                }}>
+                  #{order.order_number}
+                </span>
+                <span style={{
+                  fontFamily: '"Lato", sans-serif',
+                  fontSize:   '13px',
+                  color:      '#374151',
+                  flex:       1,
+                }}>
+                  {order.customer_name}
+                </span>
+                <StatusBadge status={order.status} />
+              </div>
+                            {/* Items list */}
+              <div>
+                {/* Column headers */}
+                <div style={{
+                  display:             'grid',
+                  gridTemplateColumns: '1fr 120px 80px',
+                  padding:             '8px 20px',
+                  borderBottom:        '1px solid #F3F4F6',
+                }}>
+                  {['Product', 'Category', 'Qty'].map(h => (
+                    <span key={h} style={{
+                      fontFamily:    '"Lato", sans-serif',
+                      fontSize:      '10px',
+                      fontWeight:    700,
+                      color:         '#9CA3AF',
+                      textTransform: 'uppercase',
+                      letterSpacing: '.06em',
+                    }}>
+                      {h}
+                    </span>
+                  ))}
+                </div>
+
+                {order.order_items.map((item, i) => (
+                  <div key={item.id} style={{
+                    display:             'grid',
+                    gridTemplateColumns: '1fr 120px 80px',
+                    padding:             '10px 20px',
+                    borderBottom:        i < order.order_items.length - 1 ? '1px solid #F9F6EF' : 'none',
+                    alignItems:          'center',
+                  }}>
+                    <span style={{
+                      fontFamily: '"Lato", sans-serif',
+                      fontSize:   '13px',
+                      fontWeight: 600,
+                      color:      '#1A1A1A',
+                    }}>
+                      {item.product_name}
+                    </span>
+                    <CategoryBadge category={item.category} />
+                    <span style={{
+                      fontFamily: '"Lato", sans-serif',
+                      fontSize:   '14px',
+                      fontWeight: 700,
+                      color:      '#1A1A1A',
+                    }}>
+                      x{item.quantity}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
 }
