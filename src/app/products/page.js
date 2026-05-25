@@ -250,27 +250,6 @@ export default function ProductsPage() {
                         }
                       </p>
 
-                      {/* Clear search CTA */}
-                      {searchQuery && (
-                        <button
-                          type="button"
-                          onClick={() => setSearchQuery('')}
-                          style={{
-                            marginTop: '8px',
-                            padding: '10px 22px',
-                            backgroundColor: '#7b1a1a',
-                            color: '#fff',
-                            border: 'none',
-                            borderRadius: '6px',
-                            fontSize: '13px',
-                            fontWeight: 600,
-                            cursor: 'pointer',
-                            letterSpacing: '0.3px',
-                          }}
-                        >
-                          Clear Search
-                        </button>
-                      )}
                     </div>
                   )
               }
