@@ -99,4 +99,101 @@ export default function DailyPrepPage() {
 
   // Orders that have items after filtering (some orders may have no items of the selected category)
   const ordersWithItems = orders.filter(o => o.order_items.length > 0)
+    return (
+    <div style={{ padding: '32px', maxWidth: '1000px' }}>
+
+      {/* ── Page heading ────────────────────────────────────── */}
+      <div style={{ marginBottom: '28px' }}>
+        <h1 style={{
+          fontFamily: '"Playfair Display", serif',
+          fontSize:   '26px',
+          fontWeight: 700,
+          color:      '#1A1A1A',
+          margin:     '0 0 6px',
+        }}>
+          Daily Prep
+        </h1>
+        <p style={{ fontFamily: '"Lato", sans-serif', fontSize: '14px', color: '#888', margin: 0 }}>
+          Select a date to see all orders and their items for that day
+        </p>
+      </div>
+
+      {/* ── Controls row: date picker + category filter ─────── */}
+      <div style={{
+        display:      'flex',
+        alignItems:   'flex-end',
+        gap:          '16px',
+        marginBottom: '24px',
+        flexWrap:     'wrap',
+      }}>
+
+        {/* Date picker */}
+        <div>
+          <label style={{
+            display:      'block',
+            fontFamily:   '"Lato", sans-serif',
+            fontSize:     '11px',
+            fontWeight:   700,
+            color:        '#9CA3AF',
+            textTransform:'uppercase',
+            letterSpacing:'.06em',
+            marginBottom: '6px',
+          }}>
+            Pickup Date
+          </label>
+          <input
+            type="date"
+            value={selectedDate}
+            onChange={e => {
+              setSelectedDate(e.target.value)
+              setCategory('All') // reset category filter when date changes
+            }}
+            className="gw-input"
+            style={{ width: '180px' }}
+          />
+        </div>
+
+        {/* Product type filter */}
+        <div>
+          <label style={{
+            display:      'block',
+            fontFamily:   '"Lato", sans-serif',
+            fontSize:     '11px',
+            fontWeight:   700,
+            color:        '#9CA3AF',
+            textTransform:'uppercase',
+            letterSpacing:'.06em',
+            marginBottom: '6px',
+          }}>
+            Product Type
+          </label>
+          <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+            {CATEGORIES.map(cat => {
+              const isActive = cat === category
+              return (
+                <button
+                  key={cat}
+                  onClick={() => setCategory(cat)}
+                  style={{
+                    padding:      '7px 14px',
+                    borderRadius: '20px',
+                    border:       `1.5px solid ${isActive ? '#7B1A1A' : '#E5E7EB'}`,
+                    background:   isActive ? '#7B1A1A' : '#fff',
+                    color:        isActive ? '#fff' : '#555',
+                    fontSize:     '12px',
+                    fontWeight:   isActive ? 700 : 400,
+                    cursor:       'pointer',
+                    fontFamily:   '"Lato", sans-serif',
+                    transition:   'all .15s',
+                  }}
+                >
+                  {cat}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      </div>
+      
+
 }
