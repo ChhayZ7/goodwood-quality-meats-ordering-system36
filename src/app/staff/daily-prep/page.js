@@ -102,7 +102,6 @@ export default function DailyPrepPage() {
     return (
     <div style={{ padding: '32px', maxWidth: '1000px' }}>
 
-      {/* ── Page heading ────────────────────────────────────── */}
       <div style={{ marginBottom: '28px' }}>
         <h1 style={{
           fontFamily: '"Playfair Display", serif',
@@ -118,7 +117,7 @@ export default function DailyPrepPage() {
         </p>
       </div>
 
-      {/* ── Controls row: date picker + category filter ─────── */}
+      
       <div style={{
         display:      'flex',
         alignItems:   'flex-end',
@@ -195,5 +194,78 @@ export default function DailyPrepPage() {
         </div>
       </div>
       
+      {/* Date display heading  */}
+      {selectedDate && (
+        <div style={{
+          display:      'flex',
+          alignItems:   'center',
+          gap:          '12px',
+          marginBottom: '20px',
+        }}>
+          <h2 style={{
+            fontFamily: '"Playfair Display", serif',
+            fontSize:   '18px',
+            fontWeight: 700,
+            color:      '#1A1A1A',
+            margin:     0,
+          }}>
+            {formatDateDisplay(selectedDate)}
+          </h2>
+          {!loading && (
+            <span style={{
+              fontFamily:  '"Lato", sans-serif',
+              fontSize:    '13px',
+              color:       '#9CA3AF',
+            }}>
+              {ordersWithItems.length} {ordersWithItems.length === 1 ? 'order' : 'orders'}
+              {category !== 'All' ? ` with ${category} items` : ''}
+            </span>
+          )}
+        </div>
+      )}
+            {/* Error state */}
+      {error && (
+        <div style={{
+          padding: '12px 16px', borderRadius: '8px',
+          background: '#FEE2E2', border: '1px solid #FECACA',
+          fontFamily: '"Lato", sans-serif', fontSize: '13px', color: '#991B1B',
+          marginBottom: '20px',
+        }}>
+          {error}
+        </div>
+      )}
+            {/* Loading skeleton */}
+      {loading && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          {[1,2,3].map(i => (
+            <div key={i} style={{
+              background: '#fff', borderRadius: '12px',
+              border: '1px solid #E5E7EB', padding: '20px',
+            }}>
+              <div style={{ width: '160px', height: '14px', background: '#F0E8D0', borderRadius: '4px', marginBottom: '10px' }} />
+              <div style={{ width: '100%', height: '10px', background: '#F3F4F6', borderRadius: '4px' }} />
+            </div>
+          ))}
+        </div>
+      )}
+            {/* Empty state  */}
+      {!loading && !error && ordersWithItems.length === 0 && selectedDate && (
+        <div style={{
+          padding:    '48px',
+          textAlign:  'center',
+          background: '#fff',
+          borderRadius: '12px',
+          border:     '1px solid #E5E7EB',
+          fontFamily: '"Lato", sans-serif',
+          fontSize:   '14px',
+          color:      '#9CA3AF',
+          marginBottom: '24px',
+        }}>
+          {category !== 'All'
+            ? `No ${category} items found for ${formatDateDisplay(selectedDate)}`
+            : `No orders found for ${formatDateDisplay(selectedDate)}`
+          }
+        </div>
+      )}
 
 }
