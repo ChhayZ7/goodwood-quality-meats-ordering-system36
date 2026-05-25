@@ -32,9 +32,10 @@ function typeLabel(type) {
 export default function AdminProductsPage() {
   const router = useRouter()
 
-  const [products,   setProducts]   = useState([])
-  const [loading,    setLoading]    = useState(true)
-  const [fetchError, setFetchError] = useState(null)
+  const [products,    setProducts]   = useState([])
+  const [loading,     setLoading]    = useState(true)
+  const [fetchError,  setFetchError] = useState(null)
+  const [searchQuery, setSearchQuery] = useState('')
 
   const loadProducts = useCallback(async () => {
     setLoading(true)
@@ -52,6 +53,10 @@ export default function AdminProductsPage() {
   }, [])
 
   useEffect(() => { loadProducts() }, [loadProducts])
+
+  const filteredProducts = products.filter(p =>
+    p.name?.toLowerCase().includes(searchQuery.toLowerCase())
+  )
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: COLOR.cream, fontFamily: '"Lato", sans-serif' }}>
@@ -87,12 +92,61 @@ export default function AdminProductsPage() {
         {/* Gold divider */}
         <div style={{ height: '2px', background: `linear-gradient(90deg, ${COLOR.gold}, transparent)`, marginBottom: '32px', borderRadius: '1px' }} />
 
-        {/* Loading */}
-        {loading && (
-          <div style={{ textAlign: 'center', padding: '60px 0', color: COLOR.muted, fontSize: '15px' }}>
-            Loading products…
+        {/* Search bar */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '20px' }}>
+          <div style={{ position: 'relative', width: '400px' }}>
+            <svg
+              style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: '#9CA3AF' }}
+              width="15" height="15" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+            >
+              <circle cx="11" cy="11" r="8" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+            <input
+              type="text"
+              placeholder="Search products..."
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && e.preventDefault()}
+              style={{
+                width: '100%',
+                padding: '9px 12px 9px 36px',
+                border: '1.5px solid #CCCCCC',
+                borderRadius: '8px',
+                fontSize: '13px',
+                fontFamily: '"Lato", sans-serif',
+                color: COLOR.text,
+                background: COLOR.white,
+                outline: 'none',
+                boxSizing: 'border-box',
+                transition: 'border-color 0.2s',
+              }}
+              onFocus={e => e.target.style.borderColor = COLOR.red}
+              onBlur={e => e.target.style.borderColor = '#CCCCCC'}
+            />
           </div>
-        )}
+          {searchQuery && (
+            <button
+              type="button"
+              onClick={() => setSearchQuery('')}
+              style={{
+                padding: '9px 18px',
+                background: 'transparent',
+                color: COLOR.muted,
+                border: '1.5px solid #CCCCCC',
+                borderRadius: '8px',
+                fontSize: '13px',
+                fontWeight: 700,
+                cursor: 'pointer',
+                fontFamily: '"Lato", sans-serif',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              Clear Search
+            </button>
+          )}
+        </div>
 
         {/* Error */}
         {fetchError && (
@@ -108,7 +162,7 @@ export default function AdminProductsPage() {
         )}
 
         {/* Table */}
-        {!loading && !fetchError && (
+        {!fetchError && (
           <div style={{ background: COLOR.white, borderRadius: '12px', overflow: 'hidden', boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
 
             {/* Table header */}
@@ -129,82 +183,130 @@ export default function AdminProductsPage() {
               ))}
             </div>
 
-            {/* Rows */}
-            {products.length === 0 ? (
-              <div style={{ padding: '48px', textAlign: 'center', color: COLOR.muted, fontSize: '14px' }}>
-                No products yet. Click &ldquo;+ Add New Product&rdquo; to get started.
+            {/* Skeleton rows while loading */}
+            {loading && Array.from({ length: 7 }).map((_, i) => (
+              <div
+                key={i}
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: '60px 2fr 1fr 1fr 1fr 100px',
+                  padding: '16px 28px',
+                  borderBottom: i < 6 ? `1px solid ${COLOR.border}` : 'none',
+                  alignItems: 'center',
+                }}
+              >
+                {/* Thumbnail placeholder */}
+                <div style={{ width: 44, height: 44, borderRadius: 8, background: '#F0E8D0' }} />
+                {/* Name placeholder */}
+                <div style={{ width: '160px', height: '14px', background: '#F0E8D0', borderRadius: '4px' }} />
+                {/* Category placeholder */}
+                <div style={{ width: '80px', height: '14px', background: '#F3F4F6', borderRadius: '4px' }} />
+                {/* Type placeholder */}
+                <div style={{ width: '90px', height: '14px', background: '#F3F4F6', borderRadius: '4px' }} />
+                {/* Price placeholder */}
+                <div style={{ width: '70px', height: '14px', background: '#F3F4F6', borderRadius: '4px' }} />
+                {/* Button placeholder */}
+                <div style={{ width: '60px', height: '30px', background: '#F3F4F6', borderRadius: '8px', margin: '0 auto' }} />
               </div>
-            ) : (
-              products.map((product, idx) => (
-                <div
-                  key={product.id}
-                  style={{
-                    display: 'grid',
-                    gridTemplateColumns: '60px 2fr 1fr 1fr 1fr 100px',
-                    padding: '16px 28px',
-                    borderBottom: idx < products.length - 1 ? `1px solid ${COLOR.border}` : 'none',
-                    alignItems: 'center',
-                    transition: 'background .1s',
-                  }}
-                  onMouseEnter={e => e.currentTarget.style.background = '#FDFAF3'}
-                  onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-                >
-                  {/* Thumbnail */}
-                  <div style={{ width: 44, height: 44, borderRadius: 8, overflow: 'hidden', background: COLOR.sidebar, flexShrink: 0 }}>
-                    {product.image_url
-                      ? <img src={product.image_url} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                      : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 }}>🥩</div>
-                    }
-                  </div>
+            ))}
 
-                  {/* Name */}
-                  <div>
-                    <span style={{ fontSize: '15px', fontWeight: 600, color: COLOR.text }}>{product.name}</span>
-                    {!product.is_available && (
-                      <span style={{
-                        marginLeft: '10px', fontSize: '11px', fontWeight: 700,
-                        background: '#F3F4F6', color: COLOR.muted,
-                        padding: '2px 8px', borderRadius: '99px', textTransform: 'uppercase',
-                      }}>
-                        Unavailable
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Category */}
-                  <span style={{ fontSize: '14px', color: COLOR.muted }}>{product.category}</span>
-
-                  {/* Type */}
-                  <span style={{ fontSize: '14px', color: COLOR.muted }}>{typeLabel(product.product_type)}</span>
-
-                  {/* Price */}
-                  <span style={{ fontSize: '15px', fontWeight: 600, color: COLOR.text }}>{priceDisplay(product)}</span>
-
-                  {/* Edit button -> navigates to separate page */}
-                  <div style={{ textAlign: 'center' }}>
-                    <button
-                      onClick={() => router.push(`/admin/products/${product.id}`)}
-                      style={{
-                        padding: '7px 20px',
-                        border: `1.5px solid ${COLOR.red}`,
-                        borderRadius: '8px',
-                        background: 'transparent',
-                        color: COLOR.red,
-                        fontSize: '13px',
-                        fontWeight: 700,
-                        fontFamily: '"Lato", sans-serif',
-                        cursor: 'pointer',
-                        transition: 'all .12s',
-                      }}
-                      onMouseEnter={e => { e.currentTarget.style.background = COLOR.red; e.currentTarget.style.color = COLOR.white }}
-                      onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = COLOR.red }}
-                    >
-                      Edit
-                    </button>
-                  </div>
+            {/* No search results */}
+            {!loading && filteredProducts.length === 0 && (
+              <div style={{ padding: '60px 20px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
+                <div style={{
+                  width: '72px', height: '72px', borderRadius: '50%',
+                  backgroundColor: COLOR.red, display: 'flex', alignItems: 'center',
+                  justifyContent: 'center', marginBottom: '4px',
+                  boxShadow: '0 4px 16px rgba(123,26,26,0.25)',
+                }}>
+                  <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="11" cy="11" r="8" />
+                    <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                    <line x1="8" y1="11" x2="14" y2="11" />
+                  </svg>
                 </div>
-              ))
+                <p style={{ fontFamily: '"Lato", sans-serif', fontSize: '18px', fontWeight: 700, color: COLOR.red, margin: 0 }}>
+                  No products found
+                </p>
+                <p style={{ fontFamily: '"Lato", sans-serif', fontSize: '13px', color: COLOR.muted, margin: 0, maxWidth: '300px', lineHeight: 1.6 }}>
+                  {searchQuery
+                    ? `We couldn't find anything matching "${searchQuery}". Try a different search term.`
+                    : 'No products yet. Click "+ Add New Product" to get started.'
+                  }
+                </p>
+              </div>
             )}
+
+            {/* Rows */}
+            {!loading && filteredProducts.map((product, idx) => (
+              <div
+                key={product.id}
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: '60px 2fr 1fr 1fr 1fr 100px',
+                  padding: '16px 28px',
+                  borderBottom: idx < filteredProducts.length - 1 ? `1px solid ${COLOR.border}` : 'none',
+                  alignItems: 'center',
+                  transition: 'background .1s',
+                }}
+                onMouseEnter={e => e.currentTarget.style.background = '#FDFAF3'}
+                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+              >
+                {/* Thumbnail */}
+                <div style={{ width: 44, height: 44, borderRadius: 8, overflow: 'hidden', background: COLOR.sidebar, flexShrink: 0 }}>
+                  {product.image_url
+                    ? <img src={product.image_url} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 }}>🥩</div>
+                  }
+                </div>
+
+                {/* Name */}
+                <div>
+                  <span style={{ fontSize: '15px', fontWeight: 600, color: COLOR.text }}>{product.name}</span>
+                  {!product.is_available && (
+                    <span style={{
+                      marginLeft: '10px', fontSize: '11px', fontWeight: 700,
+                      background: '#F3F4F6', color: COLOR.muted,
+                      padding: '2px 8px', borderRadius: '99px', textTransform: 'uppercase',
+                    }}>
+                      Unavailable
+                    </span>
+                  )}
+                </div>
+
+                {/* Category */}
+                <span style={{ fontSize: '14px', color: COLOR.muted }}>{product.category}</span>
+
+                {/* Type */}
+                <span style={{ fontSize: '14px', color: COLOR.muted }}>{typeLabel(product.product_type)}</span>
+
+                {/* Price */}
+                <span style={{ fontSize: '15px', fontWeight: 600, color: COLOR.text }}>{priceDisplay(product)}</span>
+
+                {/* Edit button */}
+                <div style={{ textAlign: 'center' }}>
+                  <button
+                    onClick={() => router.push(`/admin/products/${product.id}`)}
+                    style={{
+                      padding: '7px 20px',
+                      border: `1.5px solid ${COLOR.red}`,
+                      borderRadius: '8px',
+                      background: 'transparent',
+                      color: COLOR.red,
+                      fontSize: '13px',
+                      fontWeight: 700,
+                      fontFamily: '"Lato", sans-serif',
+                      cursor: 'pointer',
+                      transition: 'all .12s',
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.background = COLOR.red; e.currentTarget.style.color = COLOR.white }}
+                    onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = COLOR.red }}
+                  >
+                    Edit
+                  </button>
+                </div>
+              </div>
+            ))}
           </div>
         )}
       </main>
