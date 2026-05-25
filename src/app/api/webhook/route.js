@@ -102,7 +102,7 @@ console.log('[webhook] Attempting to send email to:', customer.email)
 console.log('[webhook] PDF attached:', !!pdfBuffer)
 try {
   const emailPayload = {
-    from:    'Goodwood Quality Meats <onboarding@resend.dev>',
+    from:    'Goodwood Quality Meats <orders@mail.goodwoodqualitymeats.com.au>',
     to:      customer.email,
     subject: `Order confirmed — ${invoiceNumber} — pickup ${pickupDate}`,
     html:    orderConfirmationHtml({
