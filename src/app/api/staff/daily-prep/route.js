@@ -21,4 +21,24 @@ export const GET = withHandler(async (request) => {
     return NextResponse.json({ error: 'Access denied — staff or admin only' }, { status: 403 })
   }
 
+    // Fetch all non-cancelled orders for this pickup date
+  const { data: orders, error: ordersError } = await supabaseAdmin
+    .from('orders')
+    .select(`
+      id,
+      status,
+      pickup_date,
+      customer:users ( id, first_name, last_name ),
+      order_items (
+        id,
+        quantity,
+        product:products ( id, name, category, product_type )
+      )
+    `)
+    .eq('pickup_date', date)
+    .not('status', 'eq', 'CANCELLED')
+    .order('created_at', { ascending: true })
+
+  if (ordersError) throw ordersError
+
 })
