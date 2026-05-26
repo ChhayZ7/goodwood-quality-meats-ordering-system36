@@ -348,20 +348,41 @@ export default function AdminFeedbackPage() {
     }, [activeFilter, sortKey])
 
     return (
-        <div style={{ minHeight: '100vh', background: COLOR.cream, fontFamily: '"Lato", sans-serif' }}>
-            <div style={{ maxWidth: '960px', margin: '0 auto', padding: '40px 48px' }}>
+    <div style={{ minHeight: '100vh', background: COLOR.cream, fontFamily: '"Lato", sans-serif' }}>
+        <div style={{ maxWidth: '1180px', margin: '0 auto', padding: '48px 40px 80px' }}>
 
-                {/* Page title */}
-                <h1 style={{ fontSize: '32px', fontWeight: 700, color: COLOR.red, margin: '0 0 8px' }}>
+            {/* Page title */}
+            <div
+                style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    gap: '18px',
+                    marginBottom: '28px',
+                }}
+            >
+                <h1
+                    style={{
+                        fontFamily: '"Lato", serif',
+                        fontSize: '36px',
+                        fontWeight: 700,
+                        color: COLOR.red,
+                        margin: 0,
+                    }}
+                >
                     Feedback
                 </h1>
-                <p style={{ fontSize: '14px', color: COLOR.muted, margin: '0 0 8px' }}>
-                    Customer reviews and ratings
-                </p>
+            </div>
 
-                {/* Gold divider */}
-                <div style={{ height: '2px', background: `linear-gradient(90deg, ${COLOR.gold}, transparent)`, marginBottom: '32px', borderRadius: '1px' }} />
-
+            {/* Gold divider */}
+            <div
+                style={{
+                    height: '2px',
+                    background: `linear-gradient(90deg, ${COLOR.gold}, transparent)`,
+                    marginBottom: '32px',
+                    borderRadius: '1px',
+                }}
+            />
                 {/*Section 1: Overall Rating */}
                 <SectionLabel>Overall rating</SectionLabel>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '24px', alignItems: 'center', marginBottom: '4px' }}>
