@@ -4,12 +4,14 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase-browser'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import logo from '@/assets/logoWithoutBrand.png'
+
 
 function EyeIcon() {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-      <circle cx="12" cy="12" r="3"/>
+      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+      <circle cx="12" cy="12" r="3" />
     </svg>
   )
 }
@@ -17,9 +19,9 @@ function EyeIcon() {
 function EyeOffIcon() {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
-      <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
-      <line x1="1" y1="1" x2="23" y2="23"/>
+      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" />
+      <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" />
+      <line x1="1" y1="1" x2="23" y2="23" />
     </svg>
   )
 }
@@ -90,23 +92,24 @@ export default function LoginPage() {
         <div className="w-full max-w-lg">
 
           {/* LOGO */}
-          <div className="flex flex-col items-center mb-6">
-            <div className="flex items-center gap-4">
-              <div className="bg-red-800 text-white px-4 py-2 rounded-lg font-bold text-lg">G</div>
-              <div>
-                <h1 className="font-bold text-2xl tracking-wide text-[#7b1e1e]">GOODWOOD</h1>
-                <p className="text-sm text-gray-500 tracking-[3px]">QUALITY MEATS</p>
-              </div>
+          <div className="flex justify-left mb-6">
+            <img
+              src={logo.src}
+              alt="Goodwood Quality Meats"
+              style={{ height: '90px', width: 'auto' }}
+            />
+            <div className="flex flex-col justify-center">
+              <h1 style={{ fontFamily: '"Lato", sans-serif', fontWeight: 700, fontSize: '22px', color: '#7B1A1A', letterSpacing: '2px', margin: 0 }}>GOODWOOD</h1>
+              <p style={{ fontFamily: '"Lato", sans-serif', fontSize: '12px', color: '#888', letterSpacing: '3px', margin: 0 }}>QUALITY MEATS</p>
             </div>
           </div>
 
-          <div className="w-full h-[4px] bg-yellow-600 mb-10"></div>
-
+          <div style={{ height: '2px', background: 'linear-gradient(90deg, #D4AF37, transparent)', borderRadius: '1px', marginBottom: '40px' }} />
           <h2 className="text-5xl font-bold mb-2 text-black">Welcome Back</h2>
 
-          <p className="mb-8 text-gray-600 text-lg">
+          <p className="mb-8 text-gray-600 text-lg italic">
             Don't have an account?{" "}
-            <Link href="/signup" className="text-red-700 font-semibold">Sign up</Link>
+            <Link href="/signup" className="text-red-700 underline italic">Sign up</Link>
           </p>
 
           {authError && <p className="text-red-500 text-sm mb-4">{authError}</p>}
