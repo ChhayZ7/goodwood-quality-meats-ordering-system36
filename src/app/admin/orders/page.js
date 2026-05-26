@@ -39,14 +39,11 @@ const formatDate = d => new Date(d).toLocaleDateString('en-AU', {
   day: '2-digit', month: 'short', year: 'numeric',
 })
 
-// Derive a short order number from the UUID
 const shortNum = id => id ? `GW${id.slice(0, 8).toUpperCase()}` : '—'
 
-// Get the last audit log entry's actor name
 function lastUpdatedBy(order) {
   const logs = order.last_audit ?? []
   if (logs.length === 0) return '   —'
-  // Sort desc to get the most recent
   const sorted = [...logs].sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
   const u = sorted[0]?.changed_by_user
   if (!u) return '   —'
@@ -77,7 +74,6 @@ export default function AdminOrdersPage() {
 
   useEffect(() => { loadOrders() }, [loadOrders])
 
-  // Filter by tab and search
   const filtered = orders.filter(o => {
     const tabMatch = activeTab === 'All' || o.status === activeTab
     const q = search.toLowerCase()
@@ -87,19 +83,17 @@ export default function AdminOrdersPage() {
     return tabMatch && searchMatch
   })
 
-const COLS = '160px 1fr 140px 160px 160px 120px'
+  const COLS = '160px 1fr 140px 160px 160px 120px'
 
   return (
     <div style={{ padding: '32px', maxWidth: '1200px' }}>
 
-      {/* Heading */}
-      <div style={{ marginBottom: '28px' }}>
-        <h1 style={{ fontFamily: '"Playfair Display",serif', fontSize: '26px', fontWeight: 700, color: '#1A1A1A', margin: '0 0 6px' }}>
+      {/* Heading + gold divider */}
+      <div style={{ marginBottom: '32px' }}>
+        <h1 style={{ fontFamily: '"Lato", serif', fontSize: '36px', fontWeight: 700, color: '#7B1A1A', margin: '0 0 32px 0' }}>
           Order Management
         </h1>
-        <p style={{ fontFamily: '"Lato",sans-serif', fontSize: '14px', color: '#888', margin: 0 }}>
-          All customer orders with complete audit trail
-        </p>
+        <div style={{ height: '2px', background: 'linear-gradient(90deg, #C9A84C, transparent)', borderRadius: '1px' }} />
       </div>
 
       {/* Filter tabs */}
