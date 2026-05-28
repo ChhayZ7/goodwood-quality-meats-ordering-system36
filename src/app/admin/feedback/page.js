@@ -1,15 +1,3 @@
-//display all the feedback that has been submitted by the customer after they placed the order - evelyn
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Admin: Feedback Page  (/admin/feedback)
-//
-// Fetches real feedback from /api/admin/feedback
-//
-// Sections:
-// Summary:  average rating + star breakdown histogram
-// Controls: star rating filter (from histogram) + sort dropdown
-// Feedback cards: customer name, rating, comment, date
-
 'use client'
 
 import { useState, useMemo, useEffect } from 'react'
@@ -29,19 +17,6 @@ const COLOR = {
     white: '#FFFFFF',
     sidebar: '#F5EDD8',
 }
-
-// Sort options array
-//
-// Each object has:
-//   value: key stored in sortKey state
-//   label is shown in the dropdown
-//   compareFn is a function(a, b) used to sort the feedback array
-//
-// Options:
-//   newest:  sort descending by date (most recent first)
-//   oldest:  sort ascending by date (oldest first)
-//   highest: sort descending by rating (5 stars first)
-//   lowest:  sort ascending by rating (1 star first)
 
 const SORT_OPTIONS = [
     {
@@ -66,8 +41,6 @@ const SORT_OPTIONS = [
     },
 ]
 
-// Utility functions
-
 function renderStars(rating) {
     return Array.from({ length: 5 }, (_, i) =>
         i < rating
@@ -84,24 +57,11 @@ function ratingColor(rating) {
     return COLOR.red
 }
 
-// Formats an ISO date string to readable AU format
-// e.g. '2025-12-28' → '28 Dec 2025'
 function formatDate(iso) {
     return new Date(iso).toLocaleDateString('en-AU', {
         day: 'numeric', month: 'short', year: 'numeric',
     })
 }
-
-// StarBreakdown component
-//
-// Shows a clickable horizontal bar for each star rating (5 down to 1).
-// Bar width is proportional to how many reviews have that rating.
-// Clicking a row toggles the star filter: clicking the active row resets to 'all'.
-//
-// Props:
-//   feedback:     full feedback array (always all reviews, not filtered)
-//   activeFilter: currently selected star filter ('all' or integer 1–5)
-//   onFilter:     callback to update the star filter in the parent
 
 function StarBreakdown({ feedback, activeFilter, onFilter }) {
     const total = feedback.length
@@ -147,17 +107,6 @@ function StarBreakdown({ feedback, activeFilter, onFilter }) {
     )
 }
 
-// FeedbackCard component
-//
-// Displays a single customer feedback entry as a white card.
-// Layout:
-//   Top row:  customer name + orderRef on the left, date on the right
-//   Middle:   star rating rendered as ★ characters, coloured by ratingColor()
-//   Bottom:   comment text, or italic "No comment left." if comment is empty
-//
-// Props:
-//   item: one feedback object with { id, customer, rating, comment, date, orderRef }
-
 function FeedbackCard({ item }) {
     return (
         <div style={{
@@ -195,8 +144,6 @@ function FeedbackCard({ item }) {
     )
 }
 
-// SectionLabel component
-
 function SectionLabel({ children }) {
     return (
         <p style={{ fontSize: '12px', fontWeight: 700, color: COLOR.muted, textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: '12px' }}>
@@ -205,28 +152,38 @@ function SectionLabel({ children }) {
     )
 }
 
-// Divider component
-
 function Divider() {
     return <div style={{ height: '1px', background: COLOR.border, margin: '28px 0' }} />
 }
 
-// Main page component
+// SkeletonBox component — reusable shimmer block
+function SkeletonBox({ w, h, style = {} }) {
+    return (
+        <div style={{
+            width: w,
+            height: h,
+            borderRadius: '6px',
+            background: 'linear-gradient(90deg, #E5DCC8 25%, #F5EDD8 50%, #E5DCC8 75%)',
+            backgroundSize: '600px 100%',
+            animation: 'shimmer 1.5s infinite',
+            ...style,
+        }} />
+    )
+}
 
 export default function AdminFeedbackPage() {
 
-    const [feedback,    setFeedback]    = useState([])
-    const [loading,     setLoading]     = useState(true)
-    const [fetchError,  setFetchError]  = useState(null)
+    const [feedback,     setFeedback]    = useState([])
+    const [loading,      setLoading]     = useState(true)
+    const [fetchError,   setFetchError]  = useState(null)
     const [activeFilter, setActiveFilter] = useState('all')
-    const [sortKey,     setSortKey]     = useState('newest')
+    const [sortKey,      setSortKey]     = useState('newest')
 
     useEffect(() => {
         fetch('/api/admin/feedback')
             .then(r => r.json())
             .then(d => {
                 if (d.error) { setFetchError(d.error); return }
-                // Map API shape to what the components expect
                 setFeedback((d.feedback ?? []).map(f => ({
                     id:       f.id,
                     customer: `${f.customer?.first_name ?? ''} ${f.customer?.last_name ?? ''}`.trim() || 'Unknown',
@@ -240,16 +197,10 @@ export default function AdminFeedbackPage() {
             .finally(() => setLoading(false))
     }, [])
 
-    // Average rating across all reviews
     const avgRating = feedback.length
         ? feedback.reduce((sum, f) => sum + f.rating, 0) / feedback.length
         : 0
 
-    // Final list shown to the admin
-    // Step 1: filter by activeFilter
-    // Step 2: sort using the compareFn from the matching SORT_OPTIONS entry
-    // slice() before sort() avoids mutating the original array
-    // useMemo recalculates only when activeFilter, sortKey, or feedback changes
     const processedFeedback = useMemo(() => {
         const filtered = activeFilter === 'all'
             ? feedback
@@ -258,13 +209,91 @@ export default function AdminFeedbackPage() {
         return [...filtered].sort(sortOption.compareFn)
     }, [activeFilter, sortKey, feedback])
 
+    // ─── Skeleton loading state ───────────────────────────────────────────────
     if (loading) {
         return (
-            <div style={{ padding: '48px', textAlign: 'center', color: COLOR.muted, fontFamily: '"Lato", sans-serif' }}>
-                Loading feedback…
+            <div style={{ minHeight: '100vh', background: COLOR.cream, fontFamily: '"Lato", sans-serif' }}>
+                <style>{`
+                    @keyframes shimmer {
+                        0%   { background-position: -600px 0; }
+                        100% { background-position:  600px 0; }
+                    }
+                `}</style>
+
+                <div style={{ maxWidth: '1180px', margin: '0 auto', padding: '48px 40px 80px' }}>
+
+                    {/* Page title — kept real */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '18px', marginBottom: '28px' }}>
+                        <h1 style={{ fontFamily: '"Lato", serif', fontSize: '36px', fontWeight: 700, color: COLOR.red, margin: 0 }}>
+                            Feedback
+                        </h1>
+                    </div>
+
+                    {/* Gold divider */}
+                    <div style={{ height: '2px', background: `linear-gradient(90deg, ${COLOR.gold}, transparent)`, marginBottom: '32px', borderRadius: '1px' }} />
+
+                    {/* Overall rating label */}
+                    <SectionLabel>Overall rating</SectionLabel>
+
+                    {/* Summary grid */}
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '24px', marginBottom: '4px' }}>
+
+                        {/* Average score card */}
+                        <div style={{ background: COLOR.white, border: `1px solid ${COLOR.border}`, borderRadius: '12px', padding: '24px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
+                            <SkeletonBox w="72px" h="56px" style={{ borderRadius: '8px' }} />
+                            <SkeletonBox w="110px" h="18px" />
+                            <SkeletonBox w="90px" h="13px" />
+                        </div>
+
+                        {/* Star breakdown bars */}
+                        <div style={{ background: COLOR.white, border: `1px solid ${COLOR.border}`, borderRadius: '12px', padding: '24px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                            <SkeletonBox w="160px" h="13px" />
+                            {[80, 55, 30, 15, 5].map((pct, i) => (
+                                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                    <SkeletonBox w="20px" h="13px" style={{ flexShrink: 0 }} />
+                                    <SkeletonBox w="14px" h="13px" style={{ flexShrink: 0 }} />
+                                    <div style={{ flex: 1, height: '8px', background: COLOR.border, borderRadius: '4px', overflow: 'hidden' }}>
+                                        <SkeletonBox w={`${pct}%`} h="100%" style={{ borderRadius: '4px' }} />
+                                    </div>
+                                    <SkeletonBox w="20px" h="12px" style={{ flexShrink: 0 }} />
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    <Divider />
+
+                    {/* Controls row */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '12px' }}>
+                        <SkeletonBox w="130px" h="13px" />
+                        <SkeletonBox w="160px" h="34px" style={{ borderRadius: '8px' }} />
+                    </div>
+
+                    {/* Feedback card skeletons */}
+                    {[1, 2, 3].map(n => (
+                        <div key={n} style={{ background: COLOR.white, border: `1px solid ${COLOR.border}`, borderRadius: '12px', padding: '20px 24px', marginBottom: '12px' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                    <SkeletonBox w="130px" h="15px" />
+                                    <SkeletonBox w="80px" h="12px" />
+                                </div>
+                                <SkeletonBox w="70px" h="12px" />
+                            </div>
+                            <div style={{ display: 'flex', gap: '4px', marginBottom: '10px' }}>
+                                {[...Array(5)].map((_, i) => (
+                                    <SkeletonBox key={i} w="16px" h="16px" style={{ borderRadius: '3px' }} />
+                                ))}
+                            </div>
+                            <SkeletonBox w="100%" h="14px" style={{ marginBottom: '6px' }} />
+                            <SkeletonBox w="65%" h="14px" />
+                        </div>
+                    ))}
+
+                </div>
             </div>
         )
     }
+    // ─────────────────────────────────────────────────────────────────────────
 
     if (fetchError) {
         return (
@@ -338,7 +367,6 @@ export default function AdminFeedbackPage() {
                                 }
                             </SectionLabel>
 
-                            {/* Star filter tag — only shown when a filter is active */}
                             {activeFilter !== 'all' && (
                                 <button
                                     onClick={() => setActiveFilter('all')}

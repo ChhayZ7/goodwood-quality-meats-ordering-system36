@@ -4,14 +4,23 @@ import Link from 'next/link'
 import { useCart } from '@/context/CartContext'
 
 const BLOCKED_DATES = ['2026-12-25', '2026-12-26', '2027-01-01']
-const MIN_DATE = '2026-12-01'
-const MAX_DATE = '2027-02-01'
+const MIN_DATE = '2026-11-25'
+const MAX_DATE = '2027-01-10'
 
 function isValidDate(dateStr) {
     if (!dateStr) return false
     if (BLOCKED_DATES.includes(dateStr)) return false
     const date = new Date(dateStr)
     if (date.getDay() === 0) return false // Sunday
+
+    // Must be within Nov 25 – Jan 10 window
+    const month = date.getMonth() + 1 // 1-indexed
+    const day   = date.getDate()
+    const afterNov25  = month === 11 && day >= 25
+    const inDecember  = month === 12
+    const beforeJan10 = month === 1  && day <= 10
+    if (!afterNov25 && !inDecember && !beforeJan10) return false
+
     return true
 }
 

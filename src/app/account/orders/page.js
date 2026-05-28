@@ -66,7 +66,13 @@ export default function OrdersPage() {
   return (
     <div className="max-w-5xl mx-auto">
 
-      <h1 className="text-3xl font-semibold mb-8 text-red-900">My Orders</h1>
+      {/* ── Header (matches Inventory Management style) ── */}
+      <div style={{ marginBottom: '32px' }}>
+        <h1 style={{ fontFamily: '"Lato",serif', fontSize: '36px', fontWeight: 700, color: '#7B1A1A', margin: '0 0 32px 0' }}>
+          My Orders
+        </h1>
+        <div style={{ height: '2px', background: 'linear-gradient(90deg, #C9A84C, transparent)', borderRadius: '1px' }} />
+      </div>
 
       {/* ── Skeleton while loading ── */}
       {loading && (

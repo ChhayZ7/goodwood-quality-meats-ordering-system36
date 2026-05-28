@@ -5,6 +5,9 @@ import { useState } from "react";
 import { createClient } from '@/lib/supabase-browser'
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
+import logo from '@/assets/logoWithoutBrand.png'
+
+
 
 const AUS_PHONE = /^(\+?61|0)[2-9]\d{8}$/;
 
@@ -25,10 +28,10 @@ export default function SignUp() {
 
   // Redirect to account if already logged in
   useEffect(() => {
-    async function checkSession(){
+    async function checkSession() {
       const supabase = createClient()
       const { data: { session } } = await supabase.auth.getSession()
-      if (session){
+      if (session) {
         router.replace('/account')
       }
     }
@@ -97,7 +100,7 @@ export default function SignUp() {
     setErrors({});
     setAuthError('')
     setSubmitting(true)
-  
+
     const supabase = createClient()
 
     // Sign up with Supabase Auth
@@ -114,18 +117,18 @@ export default function SignUp() {
         }
       }
     })
-    
+
     if (error) {
       if (error.message.includes('already registered')) {
-        setErrors({ email: 'An account with this email already exists.'})
+        setErrors({ email: 'An account with this email already exists.' })
       } else if (error.message.includes('users_phone_key')) {
-        setErrors({ phone: 'This phone number is already linked to an account.'})
+        setErrors({ phone: 'This phone number is already linked to an account.' })
       } else if (
         error.message.toLowerCase().includes('database') ||
         error.message.toLowerCase().includes('saving new user') ||
         error.message.toLowerCase().includes('unexpected') ||
         error.message.toLowerCase().includes('internal')
-      ){
+      ) {
         setAuthError('Something went wrong creating your account. Please try again.')
       } else {
         setAuthError(error.message)
@@ -138,10 +141,10 @@ export default function SignUp() {
   };
 
   return (
-    <div className="h-screen flex bg-[#f4f1ec] overflow-hidden">
+    <div className="min-h-screen flex bg-[#f4f1ec]">
 
       {/* LEFT IMAGE */}
-      <div className="w-[55%] relative h-full">
+      <div className="w-[55%] relative h-full ">
         <img
           src="/signupImage.png"
           alt="meat"
@@ -151,35 +154,26 @@ export default function SignUp() {
       </div>
 
       {/* RIGHT FORM */}
-      <div className="w-[45%] flex items-center justify-center px-20 -mt-20">
+      <div className="w-[45%] flex items-center px-20 py-10 overflow-y-auto">
         <div className="w-full max-w-lg">
 
           {/* LOGO */}
-          <div className="flex flex-col items-center mb-6">
-            <div className="flex items-center gap-4">
-              <div className="bg-red-800 text-white px-4 py-2 rounded-lg font-bold text-lg">
-                G
-              </div>
-              <div>
-                <h1 className="font-bold text-2xl tracking-wide text-[#7b1e1e]">
-                  GOODWOOD
-                </h1>
-                <p className="text-sm text-gray-500 tracking-[3px]">
-                  QUALITY MEATS
-                </p>
-              </div>
+          <div className="flex items-center gap-4 justify-left mb-6">
+            <img src={logo.src} alt="Goodwood Quality Meats" style={{ height: '90px', width: 'auto' }} />
+            <div className="flex flex-col justify-left">
+              <h1 style={{ fontFamily: '"Lato", sans-serif', fontWeight: 700, fontSize: '22px', color: '#7B1A1A', letterSpacing: '2px', margin: 0 }}>GOODWOOD</h1>
+              <p style={{ fontFamily: '"Lato", sans-serif', fontSize: '12px', color: '#888', letterSpacing: '3px', margin: 0 }}>QUALITY MEATS</p>
             </div>
           </div>
 
-          <div className="w-full h-[4px] bg-yellow-600 mb-10"></div>
-
+<div style={{ height: '2px', background: 'linear-gradient(90deg, #D4AF37, transparent)', borderRadius: '1px', marginBottom: '40px' }} />
           <h2 className="text-5xl font-bold mb-2 text-black">
             Create an Account
           </h2>
 
-          <p className="mb-8 text-gray-600 text-lg">
+          <p className="mb-8 text-gray-600 text-lg italic">
             Already have an account?{" "}
-            <Link href="/login" className="text-red-700 font-semibold">
+            <Link href="/login" className="text-red-700 underline italic">
               Log in
             </Link>
           </p>

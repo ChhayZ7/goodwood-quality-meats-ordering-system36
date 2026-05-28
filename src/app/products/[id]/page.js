@@ -151,7 +151,6 @@ export default function ProductDetailPage() {
           <div>
                 <h1 
                   style={{ 
-                    fontFamily: '"Playfair Display", serif', 
                     fontSize: '26px', 
                     fontWeight: 700, 
                     color: '#CCCCCC', 
@@ -248,7 +247,6 @@ export default function ProductDetailPage() {
                   </p>
                   <p 
                     style={{ 
-                      fontFamily: '"Playfair Display", serif', 
                       fontSize: '20px', 
                       fontWeight: 700, 
                       color: '#DDDDDD', 
@@ -281,7 +279,6 @@ export default function ProductDetailPage() {
                   }}>
                   <h2 
                     style={{ 
-                      fontFamily: '"Playfair Display", serif', 
                       fontSize: '16px', 
                       fontWeight: 700, 
                       color: '#1A1A1A', 
@@ -308,13 +305,12 @@ export default function ProductDetailPage() {
                   }}>
                   <h2 
                     style={{ 
-                      fontFamily: '"Playfair Display", serif', 
                       fontSize: '14px', 
                       fontWeight: 700, 
                       color: '#1A1A1A', 
                       margin: '0 0 6px' 
                     }}>
-                    How You&apos;ll Be Charged
+                    How You Will Be Charged
                   </h2>
                   <p 
                     style={{ 
@@ -432,11 +428,10 @@ export default function ProductDetailPage() {
 
               <h1 
                 style={{ 
-                  fontFamily: '"Playfair Display", serif', 
-                  fontSize: '26px', 
-                  fontWeight: 700, 
+                  fontSize: '28px', 
+                  fontWeight: '1000', 
                   color: '#1A1A1A', 
-                  margin: '0 0 8px', 
+                  margin: '0 0 20px', 
                   lineHeight: 1.2 
                 }}>
                 {product.name}
@@ -444,10 +439,10 @@ export default function ProductDetailPage() {
 
               <p 
                 style={{ 
-                  fontSize: '20px', 
-                  fontWeight: 700, 
+                  fontSize: '18px', 
+                  fontWeight: '700', 
                   color: '#7B1A1A',
-                  margin: '0 0 24px' 
+                  margin: '0 0 20px' 
                 }}>
                 {priceDisplay}
               </p>
@@ -534,7 +529,6 @@ export default function ProductDetailPage() {
                   width: '100%',
                   padding: '14px',
                   fontSize: '14px',
-                  fontFamily: '"Lato", sans-serif',
                   fontWeight: 700,
                   border: 'none',
                   borderRadius: '8px',
@@ -550,7 +544,7 @@ export default function ProductDetailPage() {
 
               {/* Description */}
               <div style={{ borderTop: '1px solid #E8D48A', paddingTop: '20px', marginBottom: '16px' }}>
-                <h2 style={{ fontFamily: '"Playfair Display", serif', fontSize: '16px', fontWeight: 700, color: '#1A1A1A', margin: '0 0 8px' }}>
+                <h2 style={{ fontSize: '16px', fontWeight: 700, color: '#1A1A1A', margin: '0 0 8px' }}>
                   Description
                 </h2>
                 <p style={{ fontSize: '13px', color: '#555', lineHeight: 1.7, margin: 0 }}>
@@ -560,7 +554,7 @@ export default function ProductDetailPage() {
 
               {/* How You'll Be Charged */}
               <div style={{ background: '#F0E8D0', borderRadius: '8px', padding: '14px 16px' }}>
-                <h2 style={{ fontFamily: '"Playfair Display", serif', fontSize: '14px', fontWeight: 700, color: '#1A1A1A', margin: '0 0 6px' }}>
+                <h2 style={{fontSize: '14px', fontWeight: 700, color: '#1A1A1A', margin: '0 0 6px' }}>
                   How You&apos;ll Be Charged
                 </h2>
                 {product.product_type === 'FIXED' ? (
