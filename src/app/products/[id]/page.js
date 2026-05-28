@@ -151,7 +151,6 @@ export default function ProductDetailPage() {
           <div>
                 <h1 
                   style={{ 
-                    fontFamily: '"Playfair Display", serif', 
                     fontSize: '26px', 
                     fontWeight: 700, 
                     color: '#CCCCCC', 
@@ -248,7 +247,6 @@ export default function ProductDetailPage() {
                   </p>
                   <p 
                     style={{ 
-                      fontFamily: '"Playfair Display", serif', 
                       fontSize: '20px', 
                       fontWeight: 700, 
                       color: '#DDDDDD', 
@@ -281,7 +279,6 @@ export default function ProductDetailPage() {
                   }}>
                   <h2 
                     style={{ 
-                      fontFamily: '"Playfair Display", serif', 
                       fontSize: '16px', 
                       fontWeight: 700, 
                       color: '#1A1A1A', 
@@ -308,13 +305,12 @@ export default function ProductDetailPage() {
                   }}>
                   <h2 
                     style={{ 
-                      fontFamily: '"Playfair Display", serif', 
                       fontSize: '14px', 
                       fontWeight: 700, 
                       color: '#1A1A1A', 
                       margin: '0 0 6px' 
                     }}>
-                    How You&apos;ll Be Charged
+                    How You Will Be Charged
                   </h2>
                   <p 
                     style={{ 
@@ -362,6 +358,7 @@ export default function ProductDetailPage() {
     ? '$' + ((product.price_per_kg_cents * selectedWeight.min_weight_kg * quantity) / 100).toFixed(2)
     : null
 
+    //evelyn 
   const estMax = product.product_type === 'WEIGHT_RANGE' && selectedWeight
     ? '$' + ((product.price_per_kg_cents * selectedWeight.max_weight_kg * quantity) / 100).toFixed(2)
     : null
@@ -430,11 +427,10 @@ export default function ProductDetailPage() {
 
               <h1 
                 style={{ 
-                  fontFamily: '"Playfair Display", serif', 
-                  fontSize: '26px', 
-                  fontWeight: 700, 
+                  fontSize: '28px', 
+                  fontWeight: '1000', 
                   color: '#1A1A1A', 
-                  margin: '0 0 8px', 
+                  margin: '0 0 20px', 
                   lineHeight: 1.2 
                 }}>
                 {product.name}
@@ -442,10 +438,10 @@ export default function ProductDetailPage() {
 
               <p 
                 style={{ 
-                  fontSize: '20px', 
-                  fontWeight: 700, 
+                  fontSize: '18px', 
+                  fontWeight: '700', 
                   color: '#7B1A1A',
-                  margin: '0 0 24px' 
+                  margin: '0 0 20px' 
                 }}>
                 {priceDisplay}
               </p>
@@ -516,7 +512,7 @@ export default function ProductDetailPage() {
               {product.product_type === 'WEIGHT_RANGE' && estMin && estMax && (
                 <div style={{ marginBottom: '20px' }}>
                   <p style={{ fontSize: '12px', color: '#888', margin: '0 0 3px', textTransform: 'uppercase', letterSpacing: '.05em' }}>Estimated Price Range</p>
-                  <p style={{ fontFamily: '"Playfair Display", serif', fontSize: '20px', fontWeight: 700, color: '#1A1A1A', margin: 0 }}>{estMin} — {estMax}</p>
+                  <p style={{ fontSize: '20px', fontWeight: 700, color: '#1A1A1A', margin: 0 }}>{estMin} — {estMax}</p>
                 </div>
               )}
 
@@ -528,7 +524,6 @@ export default function ProductDetailPage() {
                   width: '100%',
                   padding: '14px',
                   fontSize: '14px',
-                  fontFamily: '"Lato", sans-serif',
                   fontWeight: 700,
                   border: 'none',
                   borderRadius: '8px',
@@ -544,7 +539,7 @@ export default function ProductDetailPage() {
 
               {/* Description */}
               <div style={{ borderTop: '1px solid #E8D48A', paddingTop: '20px', marginBottom: '16px' }}>
-                <h2 style={{ fontFamily: '"Playfair Display", serif', fontSize: '16px', fontWeight: 700, color: '#1A1A1A', margin: '0 0 8px' }}>
+                <h2 style={{ fontSize: '16px', fontWeight: 700, color: '#1A1A1A', margin: '0 0 8px' }}>
                   Description
                 </h2>
                 <p style={{ fontSize: '13px', color: '#555', lineHeight: 1.7, margin: 0 }}>
@@ -554,7 +549,7 @@ export default function ProductDetailPage() {
 
               {/* How You'll Be Charged */}
               <div style={{ background: '#F0E8D0', borderRadius: '8px', padding: '14px 16px' }}>
-                <h2 style={{ fontFamily: '"Playfair Display", serif', fontSize: '14px', fontWeight: 700, color: '#1A1A1A', margin: '0 0 6px' }}>
+                <h2 style={{fontSize: '14px', fontWeight: 700, color: '#1A1A1A', margin: '0 0 6px' }}>
                   How You&apos;ll Be Charged
                 </h2>
                 {product.product_type === 'FIXED' ? (
