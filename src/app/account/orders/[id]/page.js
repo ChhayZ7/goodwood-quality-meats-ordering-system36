@@ -37,15 +37,16 @@ export default function OrderDetailPage() {
     <div className="max-w-5xl mx-auto animate-pulse">
 
       {/* Header skeleton */}
-      <div className="flex items-start justify-between mb-8">
-        <div className="mt-2">
-          <h1 className="text-3xl font-bold text-[#8B1A1A] mb-3">
-            Order #{id.slice(0, 8).toUpperCase()}
-          </h1>
-          <div className="flex gap-4">
-            <div className="h-4 w-28 bg-gray-200 rounded" />
-            <div className="h-4 w-28 bg-gray-200 rounded" />
-          </div>
+      <div style={{ marginBottom: '32px' }}>
+        <div style={{ height: '40px', width: '320px', background: '#F0E8D0', borderRadius: '6px', marginBottom: '32px' }} />
+        <div style={{ height: '2px', background: 'linear-gradient(90deg, #C9A84C, transparent)', borderRadius: '1px' }} />
+      </div>
+
+      {/* Status badge skeleton */}
+      <div className="flex justify-between items-center mb-8">
+        <div className="flex gap-4">
+          <div className="h-4 w-28 bg-gray-200 rounded" />
+          <div className="h-4 w-28 bg-gray-200 rounded" />
         </div>
         <div className="h-9 w-28 bg-gray-200 rounded-full" />
       </div>
@@ -114,24 +115,27 @@ export default function OrderDetailPage() {
   return (
     <div className="max-w-5xl mx-auto">
 
-      {/* Header */}
-      <div className="flex items-start justify-between mb-8">
-        <div>
-          <h1 className="text-3xl font-bold text-[#8B1A1A] mt-2 mb-1">
+      {/* ── Header (matches Inventory Management style) ── */}
+      <div style={{ marginBottom: '32px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '32px' }}>
+          <h1 style={{ fontFamily: '"Lato",serif', fontSize: '36px', fontWeight: 700, color: '#7B1A1A', margin: 0 }}>
             Order #{order.id.slice(0, 8).toUpperCase()}
           </h1>
-          <div className="text-sm text-gray-500 flex gap-4">
-            {order.created_at && (
-              <span>Placed: {new Date(order.created_at).toLocaleDateString()}</span>
-            )}
-            {order.pickup_date && (
-              <span>Pickup: {new Date(order.pickup_date).toLocaleDateString()}</span>
-            )}
-          </div>
+          <span className={`text-white text-sm px-4 py-2 rounded-full ${statusColors[order.status] ?? 'bg-gray-400'}`}>
+            {order.status}
+          </span>
         </div>
-        <span className={`text-white text-sm px-4 py-2 rounded-full ${statusColors[order.status] ?? 'bg-gray-400'}`}>
-          {order.status}
-        </span>
+        <div style={{ height: '2px', background: 'linear-gradient(90deg, #C9A84C, transparent)', borderRadius: '1px' }} />
+      </div>
+
+      {/* Placed / Pickup dates */}
+      <div className="text-sm text-gray-500 flex gap-4 mb-8">
+        {order.created_at && (
+          <span>Placed: {new Date(order.created_at).toLocaleDateString()}</span>
+        )}
+        {order.pickup_date && (
+          <span>Pickup: {new Date(order.pickup_date).toLocaleDateString()}</span>
+        )}
       </div>
 
       {/* Order Items Card */}
@@ -184,7 +188,6 @@ export default function OrderDetailPage() {
           </div>
 
           <div className="border-t border-gray-200 pt-3 mt-3 space-y-3">
-            
             <div className="flex justify-between font-semibold">
               <span>Balance Due:</span>
               <span className="text-[#8B1A1A]">
