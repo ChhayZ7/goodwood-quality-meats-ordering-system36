@@ -85,7 +85,7 @@ function WeightRow({ opt, onChange, onRemove }) {
     >
       <input
         style={inputSt}
-        placeholder="Label e.g. 1–1.5kg"
+        placeholder="Label (e.g. 1–1.5kg, 2.5kg)"
         value={opt.label}
         onChange={e => onChange({ ...opt, label: e.target.value })}
       />
@@ -105,7 +105,7 @@ function WeightRow({ opt, onChange, onRemove }) {
         type="number"
         min="0"
         step="0.1"
-        placeholder="Max kg"
+        placeholder="Max kg (leave blank if NA)"
         value={opt.max_weight_kg}
         onChange={e => onChange({ ...opt, max_weight_kg: e.target.value })}
       />
