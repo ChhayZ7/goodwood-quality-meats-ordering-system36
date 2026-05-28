@@ -358,6 +358,7 @@ export default function ProductDetailPage() {
     ? '$' + ((product.price_per_kg_cents * selectedWeight.min_weight_kg * quantity) / 100).toFixed(2)
     : null
 
+    //evelyn 
   const estMax = product.product_type === 'WEIGHT_RANGE' && selectedWeight
     ? '$' + ((product.price_per_kg_cents * selectedWeight.max_weight_kg * quantity) / 100).toFixed(2)
     : null
