@@ -129,7 +129,6 @@ export default function StaffOrderDetailPage() {
     )
   }
 
-    // ── REAL DATA LAYOUT ─────────────────────────────────────────
   return (
     <div style={{ padding: '32px', maxWidth: '900px' }}>
       <Link href="/staff/orders" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontFamily: '"Lato",sans-serif', fontSize: '13px', color: '#888', textDecoration: 'none', marginBottom: '20px' }}>← Back to Orders</Link>

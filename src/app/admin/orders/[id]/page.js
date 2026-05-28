@@ -5,11 +5,11 @@ import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 
 const STATUS_CONFIG = {
-  CONFIRMED:   { label: 'Confirmed',        bg: '#FEF3C7', color: '#92400E' },
-  IN_PROGRESS: { label: 'In Progress',      bg: '#3B82F6', color: '#fff' },
-  READY:       { label: 'Ready for Pickup', bg: '#DBEAFE', color: '#1E40AF' },
-  COMPLETED:   { label: 'Completed',        bg: '#DCFCE7', color: '#166534' },
-  CANCELLED:   { label: 'Cancelled',        bg: '#FEE2E2', color: '#991B1B' },
+  CONFIRMED: { label: 'Confirmed', bg: '#FEF3C7', color: '#92400E' },
+  IN_PROGRESS: { label: 'In Progress', bg: '#3B82F6', color: '#fff' },
+  READY: { label: 'Ready for Pickup', bg: '#DBEAFE', color: '#1E40AF' },
+  COMPLETED: { label: 'Completed', bg: '#DCFCE7', color: '#166534' },
+  CANCELLED: { label: 'Cancelled', bg: '#FEE2E2', color: '#991B1B' },
 }
 
 const ORDER_STATUSES = ['CONFIRMED', 'IN_PROGRESS', 'READY', 'COMPLETED']
@@ -27,10 +27,10 @@ function StatusBadge({ status }) {
   )
 }
 
-const formatDate  = d => new Date(d).toLocaleDateString('en-AU', { day: '2-digit', month: '2-digit', year: 'numeric' })
+const formatDate = d => new Date(d).toLocaleDateString('en-AU', { day: '2-digit', month: '2-digit', year: 'numeric' })
 const formatSmall = d => new Date(d).toLocaleString('en-AU', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })
 const formatCents = c => c != null ? `$${(c / 100).toFixed(2)}` : '—'
-const shortNum    = id => id ? `GW${id.slice(0, 8).toUpperCase()}` : '—'
+const shortNum = id => id ? `GW${id.slice(0, 8).toUpperCase()}` : '—'
 
 function SkeletonBlock({ width, height, radius = '4px', style = {} }) {
   return (
@@ -42,25 +42,25 @@ export default function AdminOrderDetailPage() {
   const { id } = useParams()
   const router = useRouter()
 
-  const [order,            setOrder]            = useState(null)
-  const [loading,          setLoading]          = useState(true)
-  const [fetchError,       setFetchError]       = useState(null)
-  const [selectedStatus,   setSelectedStatus]   = useState('')
-  const [weights,          setWeights]          = useState({})
-  const [saving,           setSaving]           = useState(false)
-  const [saved,            setSaved]            = useState(false)
-  const [saveError,        setSaveError]        = useState(null)
-  const [showCancelForm,   setShowCancelForm]   = useState(false)
-  const [cancelReason,     setCancelReason]     = useState('')
-  const [cancelReasonErr,  setCancelReasonErr]  = useState(false)
-  const [cancelling,       setCancelling]       = useState(false)
-  const [cancelError,      setCancelError]      = useState(null)
+  const [order, setOrder] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [fetchError, setFetchError] = useState(null)
+  const [selectedStatus, setSelectedStatus] = useState('')
+  const [weights, setWeights] = useState({})
+  const [saving, setSaving] = useState(false)
+  const [saved, setSaved] = useState(false)
+  const [saveError, setSaveError] = useState(null)
+  const [showCancelForm, setShowCancelForm] = useState(false)
+  const [cancelReason, setCancelReason] = useState('')
+  const [cancelReasonErr, setCancelReasonErr] = useState(false)
+  const [cancelling, setCancelling] = useState(false)
+  const [cancelError, setCancelError] = useState(null)
 
   const loadOrder = useCallback(async () => {
     setLoading(true)
     setFetchError(null)
     try {
-      const res  = await fetch(`/api/admin/orders/${id}`)
+      const res = await fetch(`/api/admin/orders/${id}`)
       if (res.status === 401) { router.replace('/login'); return }
       const data = await res.json()
       if (!res.ok) throw new Error(data.error ?? 'Failed to load order')
@@ -80,10 +80,10 @@ export default function AdminOrderDetailPage() {
     setSaving(true)
     setSaveError(null)
     try {
-      const res  = await fetch(`/api/admin/orders/${id}`, {
-        method:  'PATCH',
+      const res = await fetch(`/api/admin/orders/${id}`, {
+        method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ status: selectedStatus }),
+        body: JSON.stringify({ status: selectedStatus }),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error ?? 'Failed to update status')
@@ -103,10 +103,10 @@ export default function AdminOrderDetailPage() {
     setCancelling(true)
     setCancelError(null)
     try {
-      const res  = await fetch(`/api/admin/orders/${id}`, {
-        method:  'PATCH',
+      const res = await fetch(`/api/admin/orders/${id}`, {
+        method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ status: 'CANCELLED', reason: cancelReason.trim() }),
+        body: JSON.stringify({ status: 'CANCELLED', reason: cancelReason.trim() }),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error ?? 'Failed to cancel order')
@@ -172,8 +172,8 @@ export default function AdminOrderDetailPage() {
   }
 
   const isCancelled = order.status === 'CANCELLED'
-  const isLocked    = ['READY', 'COMPLETED'].includes(order.status)
-  const auditLog    = order.audit_log ?? []
+  const isLocked = ['READY', 'COMPLETED'].includes(order.status)
+  const auditLog = order.audit_log ?? []
 
   const lastStatusEntry = auditLog.find(e => e.field === 'status')
   const lastWeightEntry = auditLog.find(e => e.field === 'actual_weight')
@@ -265,7 +265,7 @@ export default function AdminOrderDetailPage() {
 
         {(order.order_items ?? []).map((item, i) => {
           const isWeightBased = item.product?.product_type === 'WEIGHT_RANGE'
-          const weightRange   = item.weight_option
+          const weightRange = item.weight_option
             ? `${item.weight_option.min_weight_kg}–${item.weight_option.max_weight_kg} kg`
             : item.weight_preference ?? '—'
           return (
@@ -312,7 +312,16 @@ export default function AdminOrderDetailPage() {
           </div>
         </div>
       </div>
-
+      {/*Overall Notes */}
+      <div style={{ background: '#fff', borderRadius: '12px', border: '1px solid #E5E7EB', padding: '24px', marginBottom: '20px' }}>
+        <h2 style={{ fontFamily: '"Lato", serif', fontSize: '20px', fontWeight: 700, color: '#1A1A1A', margin: '0 0 16px' }}>
+          Notes
+        </h2>
+        {order.notes
+          ? <p style={{ fontSize: '14px', color: '#1A1A1A', fontStyle: 'italic', margin: 0 }}>{order.notes}</p>
+          : <p style={{ fontSize: '14px', color: '#9CA3AF', margin: 0 }}>No specific requirement for this order</p>
+        }
+      </div>
       {/* Update Status */}
       {!isCancelled && (
         <div style={{ background: '#fff', borderRadius: '12px', border: '1px solid #E5E7EB', padding: '24px', marginBottom: '20px' }}>
@@ -341,7 +350,7 @@ export default function AdminOrderDetailPage() {
             </button>
             {saved && (
               <span style={{ fontSize: '13px', color: '#16A34A', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '5px' }}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12" /></svg>
                 Saved
               </span>
             )}
@@ -425,9 +434,9 @@ export default function AdminOrderDetailPage() {
               onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#7B1A1A' }}
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                <polyline points="7 10 12 15 17 10"/>
-                <line x1="12" y1="15" x2="12" y2="3"/>
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="7 10 12 15 17 10" />
+                <line x1="12" y1="15" x2="12" y2="3" />
               </svg>
               View / Print Final Invoice
             </button>
