@@ -7,7 +7,7 @@ import { CartProvider } from "@/context/CartContext";
 
 // Root Layout Page - navbar, footer, font, cart provider
 const lato = Lato({
-  weight: ['400', '700'],
+  weight: ['400', '500','700', '800'],
   subsets: ["latin"],
   variable: "--font-lato",
 });
