@@ -24,7 +24,8 @@ const TAB_LABELS = { All: 'All', CONFIRMED: 'Confirmed', IN_PROGRESS: 'In Progre
 export default function StaffOrdersPage() {
   const [orders, setOrders] = useState([])
   const [activeTab, setActiveTab] = useState('All')
-  const [search, setSearch]       = useState('')
+  const [search, setSearch] = useState('')
+  const [sortAsc, setSortAsc] = useState(true) 
 
   useEffect(() => {
     fetch('/api/admin/orders')
@@ -43,6 +44,11 @@ export default function StaffOrdersPage() {
     return tabMatch && searchMatch
   })
 
+    const sorted = [...filtered].sort((a, b) => sortAsc
+      ? new Date(a.pickup_date) - new Date(b.pickup_date)
+      : new Date(b.pickup_date) - new Date(a.pickup_date)
+  )
+
   const formatDate = d => new Date(d).toLocaleDateString('en-AU', { day: '2-digit', month: 'short', year: 'numeric' })
 
   return (
@@ -58,6 +64,21 @@ export default function StaffOrdersPage() {
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#AAAAAA" strokeWidth="2" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
           <input className="gw-input" type="text" placeholder="Search order # or customer name…" value={search} onChange={e => setSearch(e.target.value)} style={{ paddingLeft: '38px', width: '340px' }} />
         </div>
+      </div>
+
+      <div style={{ marginBottom: '16px' }}>
+        <button
+          onClick={() => setSortAsc(p => !p)}
+          style={{
+            padding: '10px 16px', borderRadius: '8px',
+            border: '1.5px solid #E5E7EB', background: '#fff',
+            fontSize: '13px', fontWeight: 600, color: '#374151',
+            cursor: 'pointer', display: 'inline-flex', alignItems: 'center',
+            gap: '6px', fontFamily: '"Lato", sans-serif',
+          }}
+        >
+          {sortAsc ? '↑ Soonest First' : '↓ Latest First'}
+        </button>
       </div>
 
         {/* Filter tabs */}
@@ -89,8 +110,8 @@ export default function StaffOrdersPage() {
         ))}
 
         {/* REAL DATA ROWS — rendered once orders has data */}
-        {!showPlaceholders && filtered.map((order, i) => (
-          <div key={order.id} style={{ display: 'grid', gridTemplateColumns: '150px 1fr 160px 180px 120px 80px', padding: '15px 20px', borderBottom: i < filtered.length - 1 ? '1px solid #F3F4F6' : 'none', alignItems: 'center' }}>
+        {!showPlaceholders && sorted.map((order, i) => (
+          <div key={order.id} style={{ display: 'grid', gridTemplateColumns: '150px 1fr 160px 180px 120px 80px', padding: '15px 20px', borderBottom: i < sorted.length - 1 ? '1px solid #F3F4F6' : 'none', alignItems: 'center' }}>
             <span style={{ fontFamily: 'monospace', fontSize: '13px', fontWeight: 700, color: '#1A1A1A' }}>{`#GW${order.id.slice(0, 8).toUpperCase()}`}</span>
             <span style={{ fontFamily: '"Lato",sans-serif', fontSize: '13px', color: '#374151' }}>{order.customer?.first_name} {order.customer?.last_name}</span>
             <span style={{ fontFamily: '"Lato",sans-serif', fontSize: '13px', color: '#374151' }}>{formatDate(order.pickup_date)}</span>
