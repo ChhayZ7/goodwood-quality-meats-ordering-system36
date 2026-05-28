@@ -42,6 +42,86 @@ function StatusBadge({ isActive }) {
     </span>
   )
 }
+
+function SkeletonBox({ height = 18, width = '100%', radius = 8 }) {
+  return (
+    <div
+      style={{
+        height,
+        width,
+        borderRadius: radius,
+        background:
+          'linear-gradient(90deg, #EFE6D1 25%, #F7EFD9 50%, #EFE6D1 75%)',
+        backgroundSize: '200% 100%',
+        animation: 'staffPulse 1.4s ease-in-out infinite',
+      }}
+    />
+  )
+}
+
+function StaffTableSkeleton() {
+  return (
+    <>
+      <style>
+        {`
+          @keyframes staffPulse {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+          }
+        `}
+      </style>
+
+      <div
+        style={{
+          background: COLOR.white,
+          borderRadius: '12px',
+          overflow: 'hidden',
+          boxShadow: '0 2px 12px rgba(0,0,0,0.06)',
+        }}
+      >
+        {/* Skeleton table header */}
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: COLS,
+            padding: '14px 28px',
+            borderBottom: `2px solid ${COLOR.border}`,
+          }}
+        >
+          {[1, 2, 3, 4, 5].map(item => (
+            <SkeletonBox
+              key={`header-skeleton-${item}`}
+              height={14}
+              width={item === 5 ? '70%' : '60%'}
+            />
+          ))}
+        </div>
+
+        {/* Skeleton rows */}
+        {[1, 2, 3, 4, 5].map((row, idx) => (
+          <div
+            key={`staff-skeleton-row-${row}`}
+            style={{
+              display: 'grid',
+              gridTemplateColumns: COLS,
+              padding: '16px 28px',
+              borderBottom: idx < 4 ? `1px solid ${COLOR.border}` : 'none',
+              alignItems: 'center',
+            }}
+          >
+            <SkeletonBox height={18} width="70%" />
+            <SkeletonBox height={16} width="85%" />
+            <SkeletonBox height={24} width="70px" radius={6} />
+            <SkeletonBox height={22} width="78px" radius={99} />
+            <div style={{ display: 'flex', justifyContent: 'center' }}>
+              <SkeletonBox height={34} width="72px" radius={8} />
+            </div>
+          </div>
+        ))}
+      </div>
+    </>
+  )
+}
  
 const COLS = '2fr 2fr 120px 110px 100px'
  
@@ -100,14 +180,10 @@ export default function AdminStaffPage() {
         </div>
  
         {/* Gold divider */}
-        <div style={{ height: '2px', background: `linear-gradient(90deg, ${COLOR.gold}, transparent)`, marginBottom: '32px', borderRadius: '1px' }} />
+        <div style={{ height: '2px', background: `linear-gradient(90deg, ${COLOR.gold}, transparent)`, marginBottom: '40px', borderRadius: '1px' }} />
  
-        {/* Loading */}
-        {loading && (
-          <div style={{ textAlign: 'center', padding: '60px 0', color: COLOR.muted, fontSize: '15px' }}>
-            Loading staff…
-          </div>
-        )}
+        {/* Loading skeleton */}
+        {loading && <StaffTableSkeleton />}
  
         {/* Error */}
         {fetchError && (

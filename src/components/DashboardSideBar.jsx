@@ -16,6 +16,7 @@ const NAV_ITEMS = [
   { href: { ADMIN: '/admin/profile', STAFF: '/staff/profile' }, label: 'My Account', roles: ['ADMIN', 'STAFF'] },
 ]
 
+
 const LogoutSVG = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" />
@@ -24,17 +25,20 @@ const LogoutSVG = () => (
   </svg>
 )
 
+
 export default function DashboardSidebar({ role }) {
   const pathname = usePathname()
   const router = useRouter()
 
   const visibleNav = NAV_ITEMS.filter(item => item.roles.includes(role))
 
+
   async function handleLogout() {
     const supabase = createClient()
     await supabase.auth.signOut()
     router.push('/login')
   }
+
 
   return (
     <aside style={{
@@ -61,10 +65,12 @@ export default function DashboardSidebar({ role }) {
         {role === 'ADMIN' ? 'Admin Portal' : role === 'STAFF' ? 'Staff Portal' : 'My Account'}
       </div>
 
+
       <nav style={{ flex: 1 }}>
         {visibleNav.map(item => {
           const href = item.href[role]
           const isActive = pathname.startsWith(href)
+
           return (
             <Link
               key={href}
@@ -80,8 +86,12 @@ export default function DashboardSidebar({ role }) {
                 textDecoration: 'none',
                 transition: 'background .15s',
               }}
-              onMouseEnter={e => { if (!isActive) e.currentTarget.style.background = '#F5F5F5' }}
-              onMouseLeave={e => { if (!isActive) e.currentTarget.style.background = 'transparent' }}
+              onMouseEnter={e => {
+                if (!isActive) e.currentTarget.style.background = '#F5F5F5'
+              }}
+              onMouseLeave={e => {
+                if (!isActive) e.currentTarget.style.background = 'transparent'
+              }}
             >
               {item.label}
             </Link>
