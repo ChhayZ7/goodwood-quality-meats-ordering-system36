@@ -17,23 +17,50 @@ function formatCents(cents) {
   return `$${(cents / 100).toFixed(2)}`
 }
 
-// Generate a short human-readable order number from the UUID
 function shortOrderNumber(id) {
   return id ? `GW-${id.slice(0, 8).toUpperCase()}` : '—'
 }
 
-function getItemPriceDisplay(item) {
-  if (item.product?.product_type === 'FIXED') {
-    return formatCents(item.subtotal_cents)
+// calculate price range estimate based on price per kg
+function getPriceRange(items) {
+  let minTotal = 0
+  let maxTotal = 0
+
+  for (const item of items) {
+    const qty = item.quantity ?? 1
+    if (item.product?.product_type === 'FIXED') {
+      const price = item.unit_price_cents * qty
+      minTotal += price
+      maxTotal += price
+    } else {
+      const pricePerKg = item.product?.price_per_kg_cents ?? 0
+      const opt = item.weight_option
+      if (opt) {
+        minTotal += pricePerKg * opt.min_weight_kg * qty
+        maxTotal += pricePerKg * (opt.max_weight_kg ?? opt.min_weight_kg) * qty
+      }
+    }
   }
-  // WEIGHT_RANGE, show estimated range
+
+  return { minTotal, maxTotal }
+}
+
+
+function getItemPriceDisplay(item) {
+  const qty = item.quantity ?? 1
+  if (item.product?.product_type === 'FIXED') {
+    return formatCents(item.unit_price_cents * qty)
+  }
+  const pricePerKg = item.product?.price_per_kg_cents
   const opt = item.weight_option
-  if (opt && item.product?.price_per_kg_cents) {
-    const min = (item.product.price_per_kg_cents * opt.min_weight_kg * item.quantity) / 100
+  if (pricePerKg && opt) {
+    const min = (pricePerKg * opt.min_weight_kg * qty) / 100
     const max = opt.max_weight_kg
-      ? (item.product.price_per_kg_cents * opt.max_weight_kg * item.quantity) / 100
+      ? (pricePerKg * opt.max_weight_kg * qty) / 100
       : null
-    return max ? `$${min.toFixed(2)} — $${max.toFixed(2)}` : `$${min.toFixed(2)}+`
+    return max && max !== min
+      ? `$${min.toFixed(2)} — $${max.toFixed(2)}`
+      : `$${min.toFixed(2)}`
   }
   return formatCents(item.subtotal_cents)
 }
@@ -49,9 +76,9 @@ export default function OrderConfirmationPage() {
   const searchParams = useSearchParams()
   const orderId = searchParams.get('order_id')
 
-  const [order, setOrder] = useState(null)
+  const [order, setOrder]     = useState(null)
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
+  const [error, setError]     = useState(null)
 
   useEffect(() => {
     if (!orderId) {
@@ -74,12 +101,10 @@ export default function OrderConfirmationPage() {
       }
     }
 
-
     fetchOrder()
   }, [orderId])
 
   // Loading
-
   if (loading) {
     return (
       <main className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#FDF8F0' }}>
@@ -89,7 +114,6 @@ export default function OrderConfirmationPage() {
   }
 
   // Error but order was placed
-
   if (error || !order) {
     return (
       <main className="min-h-screen py-12" style={{ backgroundColor: '#FDF8F0' }}>
@@ -100,9 +124,7 @@ export default function OrderConfirmationPage() {
           >
             ✓
           </div>
-          <h1 className="text-4xl font-bold mb-3" style={{ color: '#8B1A1A' }}>
-            Order Placed!
-          </h1>
+          <h1 className="text-4xl font-bold mb-3" style={{ color: '#8B1A1A' }}>Order Placed!</h1>
           <p className="text-lg mb-6" style={{ color: '#717182' }}>
             {error ?? 'Your deposit has been secured.'}
           </p>
@@ -119,8 +141,13 @@ export default function OrderConfirmationPage() {
   }
 
   // Success with real order data
-
   const depositPaid = order.payments?.find(p => p.type === 'DEPOSIT' && p.status === 'PAID')
+  const depositAmount = depositPaid?.amount_cents ?? 2000
+  const { minTotal, maxTotal } = getPriceRange(order.order_items ?? [])
+  const minBalance = Math.max(0, minTotal - depositAmount)
+  const maxBalance = Math.max(0, maxTotal - depositAmount)
+  const hasRange = minBalance !== maxBalance
+  const hasPrice = minTotal > 0
 
   return (
     <main className="min-h-screen py-12" style={{ backgroundColor: '#FDF8F0' }}>
@@ -134,9 +161,7 @@ export default function OrderConfirmationPage() {
           >
             ✓
           </div>
-          <h1 className="text-4xl font-bold mb-3" style={{ color: '#8B1A1A' }}>
-            Order Placed!
-          </h1>
+          <h1 className="text-4xl font-bold mb-3" style={{ color: '#8B1A1A' }}>Order Placed!</h1>
           <p className="text-lg" style={{ color: '#717182' }}>
             Thank you for your order. We have received your request and your deposit has been secured.
           </p>
@@ -144,15 +169,10 @@ export default function OrderConfirmationPage() {
 
         {/* Order details card */}
         <div className="bg-white rounded-lg p-6 mb-6" style={{ border: '1px solid #e5e5e5' }}>
-          <h2 className="text-lg font-semibold mb-4" style={{ color: '#2C2C2A' }}>
-            Order Summary
-          </h2>
+          <h2 className="text-lg font-semibold mb-4" style={{ color: '#2C2C2A' }}>Order Summary</h2>
 
           {/* Order number */}
-          <div
-            className="flex justify-between items-center py-3"
-            style={{ borderBottom: '1px solid #e5e5e5' }}
-          >
+          <div className="flex justify-between items-center py-3" style={{ borderBottom: '1px solid #e5e5e5' }}>
             <span className="text-sm" style={{ color: '#717182' }}>Order Number</span>
             <span className="text-sm font-semibold" style={{ color: '#2C2C2A' }}>
               {shortOrderNumber(order.id)}
@@ -160,10 +180,7 @@ export default function OrderConfirmationPage() {
           </div>
 
           {/* Pickup date */}
-          <div
-            className="flex justify-between items-center py-3"
-            style={{ borderBottom: '1px solid #e5e5e5' }}
-          >
+          <div className="flex justify-between items-center py-3" style={{ borderBottom: '1px solid #e5e5e5' }}>
             <span className="text-sm" style={{ color: '#717182' }}>Pickup Date</span>
             <span className="text-sm font-semibold" style={{ color: '#2C2C2A' }}>
               {formatDate(order.pickup_date)}
@@ -193,28 +210,28 @@ export default function OrderConfirmationPage() {
           </div>
 
           {/* Deposit paid */}
-          <div
-            className="flex justify-between items-center py-3"
-            style={{ borderBottom: '1px solid #e5e5e5' }}
-          >
+          <div className="flex justify-between items-center py-3" style={{ borderBottom: '1px solid #e5e5e5' }}>
             <span className="text-sm" style={{ color: '#717182' }}>Deposit Paid</span>
             <span className="text-sm font-semibold" style={{ color: '#2D6A2D' }}>
               {depositPaid ? formatCents(depositPaid.amount_cents) : '$20.00'}
             </span>
           </div>
 
-          {/* Balance due */}
+          {/* Estimated balance due */}
           <div className="flex justify-between items-center pt-3">
             <span className="text-sm font-semibold" style={{ color: '#2C2C2A' }}>
-              Estimated Minimum Balance Due at Pickup
+              Estimated Balance Due at Pickup
             </span>
             <span className="text-lg font-bold" style={{ color: '#8B1A1A' }}>
-              {order.total_cents > 0
-                ? formatCents(order.total_cents - (depositPaid?.amount_cents ?? 2000))
-                : 'To be confirmed'}
+              {!hasPrice
+                ? 'To be confirmed'
+                : hasRange
+                  ? `${formatCents(minBalance)} — ${formatCents(maxBalance)}`
+                  : formatCents(minBalance)
+              }
             </span>
           </div>
-        </div>
+        </div>{/* end order details card */}
 
         {/* Info box */}
         <div
