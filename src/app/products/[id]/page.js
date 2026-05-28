@@ -358,11 +358,13 @@ export default function ProductDetailPage() {
     ? '$' + ((product.price_cents * quantity) / 100).toFixed(2)
     : null
 
+  const isRange = selectedWeight && selectedWeight.max_weight_kg && selectedWeight.max_weight_kg !== selectedWeight.min_weight_kg
+
   const estMin = product.product_type === 'WEIGHT_RANGE' && selectedWeight
     ? '$' + ((product.price_per_kg_cents * selectedWeight.min_weight_kg * quantity) / 100).toFixed(2)
     : null
 
-  const estMax = product.product_type === 'WEIGHT_RANGE' && selectedWeight
+  const estMax = isRange
     ? '$' + ((product.price_per_kg_cents * selectedWeight.max_weight_kg * quantity) / 100).toFixed(2)
     : null
 
@@ -513,10 +515,14 @@ export default function ProductDetailPage() {
               )}
 
               {/* WEIGHT_RANGE — estimated min and max */}
-              {product.product_type === 'WEIGHT_RANGE' && estMin && estMax && (
+              {product.product_type === 'WEIGHT_RANGE' && estMin && (
                 <div style={{ marginBottom: '20px' }}>
-                  <p style={{ fontSize: '12px', color: '#888', margin: '0 0 3px', textTransform: 'uppercase', letterSpacing: '.05em' }}>Estimated Price Range</p>
-                  <p style={{ fontFamily: '"Playfair Display", serif', fontSize: '20px', fontWeight: 700, color: '#1A1A1A', margin: 0 }}>{estMin} — {estMax}</p>
+                  <p style={{ fontSize: '12px', color: '#888', margin: '0 0 3px', textTransform: 'uppercase', letterSpacing: '.05em' }}>
+                    Estimated Price
+                  </p>
+                  <p style={{ fontFamily: '"Playfair Display", serif', fontSize: '20px', fontWeight: 700, color: '#1A1A1A', margin: 0 }}>
+                    {isRange ? `${estMin} — ${estMax}` : `~${estMin}`}
+                  </p>
                 </div>
               )}
 

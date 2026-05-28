@@ -20,8 +20,13 @@ function formatCents(cents) {
 function shortOrderNumber(id) {
   return id ? `GW-${id.slice(0, 8).toUpperCase()}` : '—'
 }
+function getTargetKg(opt) {
+  if (!opt.max_weight_kg || opt.max_weight_kg === opt.min_weight_kg) {
+    return { type: 'single', kg: opt.min_weight_kg }
+  }
+  return { type: 'range', minKg: opt.min_weight_kg, maxKg: opt.max_weight_kg }
+}
 
-// calculate price range estimate based on price per kg
 function getPriceRange(items) {
   let minTotal = 0
   let maxTotal = 0
@@ -36,15 +41,21 @@ function getPriceRange(items) {
       const pricePerKg = item.product?.price_per_kg_cents ?? 0
       const opt = item.weight_option
       if (opt) {
-        minTotal += pricePerKg * opt.min_weight_kg * qty
-        maxTotal += pricePerKg * (opt.max_weight_kg ?? opt.min_weight_kg) * qty
+        const target = getTargetKg(opt)
+        if (target.type === 'range') {
+          minTotal += pricePerKg * target.minKg * qty
+          maxTotal += pricePerKg * target.maxKg * qty
+        } else {
+          const price = pricePerKg * target.kg * qty
+          minTotal += price
+          maxTotal += price
+        }
       }
     }
   }
 
   return { minTotal, maxTotal }
 }
-
 
 function getItemPriceDisplay(item) {
   const qty = item.quantity ?? 1
@@ -54,13 +65,15 @@ function getItemPriceDisplay(item) {
   const pricePerKg = item.product?.price_per_kg_cents
   const opt = item.weight_option
   if (pricePerKg && opt) {
-    const min = (pricePerKg * opt.min_weight_kg * qty) / 100
-    const max = opt.max_weight_kg
-      ? (pricePerKg * opt.max_weight_kg * qty) / 100
-      : null
-    return max && max !== min
-      ? `$${min.toFixed(2)} — $${max.toFixed(2)}`
-      : `$${min.toFixed(2)}`
+    const target = getTargetKg(opt)
+    if (target.type === 'range') {
+      const min = (pricePerKg * target.minKg * qty) / 100
+      const max = (pricePerKg * target.maxKg * qty) / 100
+      return `$${min.toFixed(2)} — $${max.toFixed(2)}`
+    } else {
+      const estimate = (pricePerKg * target.kg * qty) / 100
+      return `~$${estimate.toFixed(2)}`
+    }
   }
   return formatCents(item.subtotal_cents)
 }
