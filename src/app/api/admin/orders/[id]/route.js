@@ -3,15 +3,17 @@
 //
 // PATCH /api/admin/orders/:id
 // Updates an order and writes an audit log entry for every changed field for staff and admin only.
+// When status is changed to COMPLETED, sends a feedback request email to the customer.
 
 import { NextResponse } from 'next/server'
 import { withHandler } from '@/lib/middleware/withHandler'
 import { createClient } from '@/lib/supabase-server'
 import { supabaseAdmin } from '@/lib/supabase-admin'
 import { getAdminOrderById, adminUpdateOrder } from '@/lib/db/admin'
+import { sendFeedbackRequestEmail } from '@/lib/email/feedbackRequest'
 
 
-// Shared admin auth helper
+// Shared staff/admin auth helper
 async function getAdminUser() {
   const supabase = await createClient()
   const { data: { user }, error: authError } = await supabase.auth.getUser()
@@ -39,7 +41,7 @@ export const GET = withHandler(async (request, { params }) => {
     return NextResponse.json({ error: 'Unauthorised — please log in', status: 401 }, { status: 401 })
   }
   if (authErr === 'forbidden') {
-    return NextResponse.json({ error: 'Access denied — admin and staff only', status: 403 }, { status: 403 })
+    return NextResponse.json({ error: 'Access denied — staff and admin only', status: 403 }, { status: 403 })
   }
 
   const { data, error } = await getAdminOrderById(id)
@@ -64,7 +66,7 @@ const adminUpdateSchema = {
   },
   validators: {
     status: (val) => {
-      const valid = ['PENDING', 'CONFIRMED', 'READY', 'COMPLETED', 'CANCELLED']
+      const valid = ['PENDING', 'CONFIRMED', 'IN_PROGRESS', 'READY', 'COMPLETED', 'CANCELLED']
       return valid.includes(val) ? null : `Must be one of: ${valid.join(', ')}`
     },
   },
@@ -79,7 +81,7 @@ export const PATCH = withHandler(
       return NextResponse.json({ error: 'Unauthorised — please log in', status: 401 }, { status: 401 })
     }
     if (authErr === 'forbidden') {
-      return NextResponse.json({ error: 'Access denied — admin only', status: 403 }, { status: 403 })
+      return NextResponse.json({ error: 'Access denied — staff and admin only', status: 403 }, { status: 403 })
     }
 
     const { reason, ...fields } = request._body
@@ -94,6 +96,28 @@ export const PATCH = withHandler(
     const { data, error } = await adminUpdateOrder(id, fields, user.id, reason ?? null)
 
     if (error) throw error
+
+    // Send feedback request email when order is marked as COMPLETED
+    if (fields.status === 'COMPLETED') {
+      try {
+        const { data: orderDetail } = await supabaseAdmin
+          .from('orders')
+          .select('customer:users ( email, first_name )')
+          .eq('id', id)
+          .single()
+
+        if (orderDetail?.customer?.email) {
+          await sendFeedbackRequestEmail({
+            customerEmail:     orderDetail.customer.email,
+            customerFirstName: orderDetail.customer.first_name ?? 'there',
+            orderId:           id,
+          })
+        }
+      } catch (emailErr) {
+        // Log but don't fail the request — order update already succeeded
+        console.error('[feedback email] failed to send:', emailErr)
+      }
+    }
 
     return NextResponse.json({ order: data })
   },
