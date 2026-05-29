@@ -53,11 +53,12 @@ function lastUpdatedBy(order) {
 const COLS = '160px 1fr 140px 160px 160px 120px'
 
 export default function StaffOrdersPage() {
-  const [orders,     setOrders]     = useState([])
+  const [orders, setOrders] = useState([])
+  const [activeTab, setActiveTab] = useState('All')
+  const [search, setSearch] = useState('')
+  const [sortAsc, setSortAsc] = useState(true)
   const [loading,    setLoading]    = useState(true)
   const [fetchError, setFetchError] = useState(null)
-  const [activeTab,  setActiveTab]  = useState('All')
-  const [search,     setSearch]     = useState('')
 
   const loadOrders = useCallback(async () => {
     setLoading(true)
@@ -85,10 +86,16 @@ export default function StaffOrdersPage() {
     return tabMatch && searchMatch
   })
 
+    const sorted = [...filtered].sort((a, b) =>
+    sortAsc
+      ? new Date(a.pickup_date) - new Date(b.pickup_date)
+      : new Date(b.pickup_date) - new Date(a.pickup_date)
+  )
+
   return (
     <div style={{ padding: '32px', maxWidth: '1200px' }}>
 
-      {/* Heading + gold divider */}
+      {/* Heading */}
       <div style={{ marginBottom: '32px' }}>
         <h1 style={{ fontFamily: '"Lato", serif', fontSize: '36px', fontWeight: 700, color: '#7B1A1A', margin: '0 0 32px 0' }}>
           Order Management
@@ -120,10 +127,11 @@ export default function StaffOrdersPage() {
         })}
       </div>
 
-      {/* Search */}
-      <div style={{ marginBottom: '20px' }}>
+      {/* Search + Sort row */}
+      <div style={{ display: 'flex', gap: '12px', alignItems: 'center', marginBottom: '20px' }}>
         <div style={{ position: 'relative', display: 'inline-block', width: '340px' }}>
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#AAAAAA" strokeWidth="2" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#AAAAAA" strokeWidth="2"
+            style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}>
             <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
           </svg>
           <input
@@ -135,6 +143,20 @@ export default function StaffOrdersPage() {
             style={{ paddingLeft: '38px', width: '340px' }}
           />
         </div>
+
+        {/* Sort toggle — GMOS-154 */}
+        <button
+          onClick={() => setSortAsc(p => !p)}
+          style={{
+            padding: '10px 16px', borderRadius: '8px',
+            border: '1.5px solid #E5E7EB', background: '#fff',
+            fontSize: '13px', fontWeight: 600, color: '#374151',
+            cursor: 'pointer', display: 'inline-flex', alignItems: 'center',
+            gap: '6px', fontFamily: '"Lato", sans-serif',
+          }}
+        >
+          {sortAsc ? '↑ Soonest First' : '↓ Latest First'}
+        </button>
       </div>
 
       {/* Fetch error */}
@@ -159,7 +181,7 @@ export default function StaffOrdersPage() {
           ))}
         </div>
 
-        {/* Skeleton */}
+        {/* Skeleton rows */}
         {loading && Array.from({ length: 6 }).map((_, i) => (
           <div key={i} style={{ display: 'grid', gridTemplateColumns: COLS, padding: '15px 20px', borderBottom: i < 5 ? '1px solid #F3F4F6' : 'none', alignItems: 'center', gap: '8px' }}>
             <div style={{ height: '13px', width: '110px', background: '#F0E8D0', borderRadius: '4px' }} />
@@ -171,14 +193,14 @@ export default function StaffOrdersPage() {
           </div>
         ))}
 
-        {/* Rows */}
-        {!loading && filtered.map((order, i) => (
+        {/* Data rows — uses sorted (GMOS-154) */}
+        {!loading && sorted.map((order, i) => (
           <div
             key={order.id}
             style={{
               display: 'grid', gridTemplateColumns: COLS,
               padding: '15px 20px',
-              borderBottom: i < filtered.length - 1 ? '1px solid #F3F4F6' : 'none',
+              borderBottom: i < sorted.length - 1 ? '1px solid #F3F4F6' : 'none',
               alignItems: 'center',
             }}
           >
@@ -198,17 +220,11 @@ export default function StaffOrdersPage() {
             <Link href={`/staff/orders/${order.id}`} style={{ textDecoration: 'none' }}>
               <div
                 style={{
-                  padding: '6px 14px',
-                  borderRadius: '6px',
-                  border: '1.5px solid #7B1A1A',
-                  background: '#7B1A1A',
-                  color: '#fff',
-                  fontSize: '12px',
-                  fontWeight: 700,
-                  textAlign: 'center',
-                  cursor: 'pointer',
-                  fontFamily: '"Lato",sans-serif',
-                  transition: 'box-shadow .15s',
+                  padding: '6px 14px', borderRadius: '6px',
+                  border: '1.5px solid #7B1A1A', background: '#7B1A1A',
+                  color: '#fff', fontSize: '12px', fontWeight: 700,
+                  textAlign: 'center', cursor: 'pointer',
+                  fontFamily: '"Lato",sans-serif', transition: 'box-shadow .15s',
                 }}
                 onMouseEnter={e => e.currentTarget.style.boxShadow = '0 0 12px rgba(123,26,26,0.5)'}
                 onMouseLeave={e => e.currentTarget.style.boxShadow = 'none'}
@@ -220,11 +236,12 @@ export default function StaffOrdersPage() {
         ))}
 
         {/* Empty state */}
-        {!loading && filtered.length === 0 && !fetchError && (
+        {!loading && sorted.length === 0 && !fetchError && (
           <div style={{ padding: '48px', textAlign: 'center', fontFamily: '"Lato",sans-serif', fontSize: '14px', color: '#9CA3AF' }}>
             {search || activeTab !== 'All' ? 'No orders match your current filter.' : 'No orders yet.'}
           </div>
         )}
+
       </div>
     </div>
   )

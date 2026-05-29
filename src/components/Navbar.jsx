@@ -13,6 +13,8 @@ export default function Navbar() {
     const [isLoggedIn, setIsLoggedIn] = useState(false)
     const [firstName, setFirstName] = useState('')
     const [loadingName, setLoadingName] = useState(false)
+    const [role, setRole] = useState('')
+    const [dropdownOpen, setDropdownOpen] = useState(false)
 
     useEffect(() => {
         setMounted(true)
@@ -29,7 +31,10 @@ export default function Navbar() {
                 return
             }
             const json = await res.json()
-            if (json.user) setFirstName(json.user.first_name ?? '')
+            if (json.user) {
+                setFirstName(json.user.first_name ?? '')
+                setRole(json.user.role ?? '')
+            }
             setLoadingName(false)
         }
 
@@ -119,8 +124,14 @@ export default function Navbar() {
                         </Link>
 
                         {mounted && isLoggedIn ? (
-                            <div className="flex items-center gap-3">
-                                <Link href="/account" className="flex items-center gap-2 text-sm text-gray-700 hover:opacity-70">
+                            <div style={{ position: 'relative' }}>
+
+                                {/* Profile button — clicking opens/closes dropdown */}
+                                <button
+                                    onClick={() => setDropdownOpen(p => !p)}
+                                    className="flex items-center gap-2 text-sm text-gray-700 hover:opacity-70"
+                                    style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+                                >
                                     <UserIcon className="w-6 h-6" style={{ color: '#060606' }} />
                                     <span>
                                         Hi,{' '}
@@ -129,14 +140,66 @@ export default function Navbar() {
                                             : firstName
                                         }
                                     </span>
-                                </Link>
-                                <button onClick={handleSignOut} className="hover:opacity-70">
-                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-                                        <polyline points="16 17 21 12 16 7"/>
-                                        <line x1="21" y1="12" x2="9" y2="12"/>
-                                    </svg>
                                 </button>
+
+                                {/* Dropdown */}
+                                {dropdownOpen && (
+                                    <>
+                                        {/* Click outside to close */}
+                                        <div
+                                            style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 98 }}
+                                            onClick={() => setDropdownOpen(false)}
+                                        />
+                                        <div style={{
+                                            position: 'absolute',
+                                            top: 'calc(100% + 10px)',
+                                            right: 0,
+                                            background: '#fff',
+                                            border: '1px solid #E5E7EB',
+                                            borderRadius: '10px',
+                                            boxShadow: '0 8px 24px rgba(0,0,0,0.10)',
+                                            minWidth: '160px',
+                                            zIndex: 99,
+                                            overflow: 'hidden',
+                                        }}>
+
+                                            {/* Profile */}
+                                            <Link
+                                                href={role === 'ADMIN' ? '/admin/profile' : role === 'STAFF' ? '/staff/profile' : '/account'}
+                                                onClick={() => setDropdownOpen(false)}
+                                                style={{ display: 'block', padding: '12px 16px', fontSize: '14px', color: '#1A1A1A', textDecoration: 'none', borderBottom: '1px solid #F3F4F6' }}
+                                                onMouseEnter={e => e.currentTarget.style.background = '#FAF3E0'}
+                                                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                                            >
+                                                Profile
+                                            </Link>
+
+                                            {/* Dashboard — only for ADMIN and STAFF */}
+                                            {(role === 'ADMIN' || role === 'STAFF') && (
+                                                <Link
+                                                    href={role === 'ADMIN' ? '/admin/orders' : '/staff/orders'}
+                                                    onClick={() => setDropdownOpen(false)}
+                                                    style={{ display: 'block', padding: '12px 16px', fontSize: '14px', color: '#1A1A1A', textDecoration: 'none', borderBottom: '1px solid #F3F4F6' }}
+                                                    onMouseEnter={e => e.currentTarget.style.background = '#FAF3E0'}
+                                                    onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                                                >
+                                                    Dashboard
+                                                </Link>
+                                            )}
+
+                                            {/* Sign Out */}
+                                            <button
+                                                onClick={() => { setDropdownOpen(false); handleSignOut() }}
+                                                style={{ display: 'block', width: '100%', padding: '12px 16px', fontSize: '14px', color: '#7B1A1A', textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer' }}
+                                                onMouseEnter={e => e.currentTarget.style.background = '#FEF2F2'}
+                                                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                                            >
+                                                Sign Out
+                                            </button>
+
+                                        </div>
+                                    </>
+                                )}
                             </div>
                         ) : (
                             <Link href="/login" className="flex items-center gap-2 text-sm text-gray-700 hover:opacity-70">
