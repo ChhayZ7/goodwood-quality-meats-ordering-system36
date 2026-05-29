@@ -5,35 +5,36 @@ import { usePathname, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase-browser'
 
 const NAV_ITEMS = [
-  { href: {ADMIN: '/admin/orders', STAFF: '/staff/orders'},    label: 'Orders',             roles: ['ADMIN', 'STAFF'] },
-  { href: {ADMIN: '/admin/inventory', STAFF: '/staff/inventory'}, label: 'Inventory',          roles: ['ADMIN', 'STAFF'] },
-  { href: {ADMIN: '/admin/products'},  label: 'Products & Pricing', roles: ['ADMIN'] },
-  { href: {ADMIN: '/admin/reports'},   label: 'Reports',            roles: ['ADMIN'] },
-  { href: {ADMIN: '/admin/staff'},     label: 'Staff Management',   roles: ['ADMIN'] },
-  { href: {ADMIN: '/admin/feedback'},  label: 'Feedback',           roles: ['ADMIN'] },
-  { href: {ADMIN: '/admin/profile', STAFF: '/staff/profile'},   label: 'My Account',         roles: ['ADMIN', 'STAFF'] },
+  { href: { ADMIN: '/admin/orders', STAFF: '/staff/orders' }, label: 'Orders', roles: ['ADMIN', 'STAFF'] },
+  { href: { ADMIN: '/admin/inventory', STAFF: '/staff/inventory' }, label: 'Inventory', roles: ['ADMIN', 'STAFF'] },
+  { href: { ADMIN: '/admin/daily-prep', STAFF: '/staff/daily-prep' }, label: 'Daily Prep', roles: ['ADMIN', 'STAFF'] },
+  { href: { ADMIN: '/admin/products' }, label: 'Products & Pricing', roles: ['ADMIN'] },
+  { href: { ADMIN: '/admin/reports' }, label: 'Reports', roles: ['ADMIN'] },
+  { href: { ADMIN: '/admin/staff' }, label: 'Staff Management', roles: ['ADMIN'] },
+  { href: { ADMIN: '/admin/feedback' }, label: 'Feedback', roles: ['ADMIN'] },
+  { href: { ADMIN: '/admin/profile', STAFF: '/staff/profile' }, label: 'My Account', roles: ['ADMIN', 'STAFF'] },
 ]
- 
+
 const LogoutSVG = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
-    <polyline points="16 17 21 12 16 7"/>
-    <line x1="21" y1="12" x2="9" y2="12"/>
+    <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" />
+    <polyline points="16 17 21 12 16 7" />
+    <line x1="21" y1="12" x2="9" y2="12" />
   </svg>
 )
- 
+
 export default function DashboardSidebar({ role }) {
   const pathname = usePathname()
-  const router   = useRouter()
- 
+  const router = useRouter()
+
   const visibleNav = NAV_ITEMS.filter(item => item.roles.includes(role))
- 
+
   async function handleLogout() {
     const supabase = createClient()
     await supabase.auth.signOut()
     router.push('/login')
   }
- 
+
   return (
     <aside style={{
       width: '240px',
@@ -42,7 +43,7 @@ export default function DashboardSidebar({ role }) {
       display: 'flex',
       flexDirection: 'column',
     }}>
- 
+
       {/* Portal label: changes based on role */}
       <div style={{
         padding: '20px 20px 16px',
@@ -57,7 +58,7 @@ export default function DashboardSidebar({ role }) {
       }}>
         {role === 'ADMIN' ? 'Admin Portal' : 'Staff Portal'}
       </div>
- 
+
       <nav style={{ flex: 1 }}>
         {visibleNav.map(item => {
           const href = item.href[role]
@@ -85,7 +86,7 @@ export default function DashboardSidebar({ role }) {
           )
         })}
       </nav>
- 
+
       <button
         onClick={handleLogout}
         style={{
