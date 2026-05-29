@@ -149,7 +149,7 @@ export default function LoginPage() {
 
             {/* FORGOT PASSWORD */}
             <div className="text-right mb-6">
-              <Link href="/dev/forgetPassword" className="text-sm text-gray-500">Forgot password?</Link>
+              <Link href="/forgetPassword" className="text-sm text-gray-500">Forgot password?</Link>
             </div>
 
             {/* BUTTON */}
