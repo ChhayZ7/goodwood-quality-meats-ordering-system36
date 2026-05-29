@@ -72,31 +72,47 @@ export default function ProfilePage() {
   }
 
   if (loading) return (
-    <div className="max-w-4xl mx-auto animate-pulse">
-        <div className="h-10 w-48 bg-gray-200 rounded-lg mb-8 mt-4" />
+    <div className="max-w-4xl mx-auto">
+
+      {/* ── Header (matches Inventory Management style) ── */}
+      <div style={{ marginBottom: '32px' }}>
+        <div style={{ height: '40px', width: '240px', background: '#F0E8D0', borderRadius: '6px', marginBottom: '32px' }} />
+        <div style={{ height: '2px', background: 'linear-gradient(90deg, #C9A84C, transparent)', borderRadius: '1px' }} />
+      </div>
+
+      {/* Skeleton for the cards below */}
+      <div className="animate-pulse">
         <div className="bg-white rounded-xl border border-gray-200 p-8 mb-6">
-        <div className="h-6 w-36 bg-gray-200 rounded mb-6" />
-        <div className="flex gap-4 mb-5">
+          <div className="h-6 w-36 bg-gray-200 rounded mb-6" />
+          <div className="flex gap-4 mb-5">
             <div className="flex-1 h-12 bg-gray-200 rounded-lg" />
             <div className="flex-1 h-12 bg-gray-200 rounded-lg" />
-        </div>
-        <div className="h-12 bg-gray-200 rounded-lg mb-5" />
-        <div className="h-12 bg-gray-200 rounded-lg mb-5" />
-        <div className="h-10 w-32 bg-gray-200 rounded-lg" />
+          </div>
+          <div className="h-12 bg-gray-200 rounded-lg mb-5" />
+          <div className="h-12 bg-gray-200 rounded-lg mb-5" />
+          <div className="h-10 w-32 bg-gray-200 rounded-lg" />
         </div>
         <div className="bg-white rounded-xl border border-gray-200 p-8">
-        <div className="h-6 w-24 bg-gray-200 rounded mb-4" />
-        <div className="h-4 w-20 bg-gray-200 rounded mb-2" />
-        <div className="h-4 w-52 bg-gray-200 rounded mb-4" />
-        <div className="h-10 w-36 bg-gray-200 rounded-lg" />
+          <div className="h-6 w-24 bg-gray-200 rounded mb-4" />
+          <div className="h-4 w-20 bg-gray-200 rounded mb-2" />
+          <div className="h-4 w-52 bg-gray-200 rounded mb-4" />
+          <div className="h-10 w-36 bg-gray-200 rounded-lg" />
         </div>
+      </div>
+
     </div>
-    )
+  )
 
   return (
     <div className="max-w-4xl mx-auto">
 
-      <h1 className="text-3xl font-bold text-[#8B1A1A] mt-4 mb-8">My Account</h1>
+      {/* ── Header (matches Inventory Management style) ── */}
+      <div style={{ marginBottom: '32px' }}>
+        <h1 style={{ fontFamily: '"Lato",serif', fontSize: '36px', fontWeight: 700, color: '#7B1A1A', margin: '0 0 32px 0' }}>
+          My Account
+        </h1>
+        <div style={{ height: '2px', background: 'linear-gradient(90deg, #C9A84C, transparent)', borderRadius: '1px' }} />
+      </div>
 
       {/* Personal Details Card */}
       <div className="bg-white rounded-xl border border-gray-200 p-8 mb-6">
@@ -225,7 +241,6 @@ export default function ProfilePage() {
           </form>
         )}
       </div>
-
 
     </div>
   )

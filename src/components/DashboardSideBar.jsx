@@ -8,12 +8,17 @@ const NAV_ITEMS = [
   { href: { ADMIN: '/admin/orders', STAFF: '/staff/orders' }, label: 'Orders', roles: ['ADMIN', 'STAFF'] },
   { href: { ADMIN: '/admin/inventory', STAFF: '/staff/inventory' }, label: 'Inventory', roles: ['ADMIN', 'STAFF'] },
   { href: { ADMIN: '/admin/daily-prep', STAFF: '/staff/daily-prep' }, label: 'Daily Prep', roles: ['ADMIN', 'STAFF'] },
+  { href: { CUSTOMER: '/account/orders' }, label: 'My Orders', roles: ['CUSTOMER'] },
+  { href: { CUSTOMER: '/account/profile' }, label: 'My Profile', roles: ['CUSTOMER'] },
+  { href: { ADMIN: '/admin/orders', STAFF: '/staff/orders' }, label: 'Orders', roles: ['ADMIN', 'STAFF'] },
+  { href: { ADMIN: '/admin/inventory', STAFF: '/staff/inventory' }, label: 'Inventory', roles: ['ADMIN', 'STAFF'] },
   { href: { ADMIN: '/admin/products' }, label: 'Products & Pricing', roles: ['ADMIN'] },
   { href: { ADMIN: '/admin/reports' }, label: 'Reports', roles: ['ADMIN'] },
   { href: { ADMIN: '/admin/staff' }, label: 'Staff Management', roles: ['ADMIN'] },
   { href: { ADMIN: '/admin/feedback' }, label: 'Feedback', roles: ['ADMIN'] },
   { href: { ADMIN: '/admin/profile', STAFF: '/staff/profile' }, label: 'My Account', roles: ['ADMIN', 'STAFF'] },
 ]
+
 
 const LogoutSVG = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -23,11 +28,13 @@ const LogoutSVG = () => (
   </svg>
 )
 
+
 export default function DashboardSidebar({ role }) {
   const pathname = usePathname()
   const router = useRouter()
 
   const visibleNav = NAV_ITEMS.filter(item => item.roles.includes(role))
+
 
   async function handleLogout() {
     const supabase = createClient()
@@ -35,10 +42,12 @@ export default function DashboardSidebar({ role }) {
     router.push('/login')
   }
 
+
   return (
     <aside style={{
       width: '240px',
       minWidth: '240px',
+      minHeight: '100vh',
       background: '#fff',
       display: 'flex',
       flexDirection: 'column',
@@ -56,13 +65,15 @@ export default function DashboardSidebar({ role }) {
         borderBottom: '0.5px solid #e4e4e4',
         marginBottom: '8px',
       }}>
-        {role === 'ADMIN' ? 'Admin Portal' : 'Staff Portal'}
+        {role === 'ADMIN' ? 'Admin Portal' : role === 'STAFF' ? 'Staff Portal' : 'My Account'}
       </div>
+
 
       <nav style={{ flex: 1 }}>
         {visibleNav.map(item => {
           const href = item.href[role]
           const isActive = pathname.startsWith(href)
+
           return (
             <Link
               key={href}
@@ -78,8 +89,12 @@ export default function DashboardSidebar({ role }) {
                 textDecoration: 'none',
                 transition: 'background .15s',
               }}
-              onMouseEnter={e => { if (!isActive) e.currentTarget.style.background = '#F5F5F5' }}
-              onMouseLeave={e => { if (!isActive) e.currentTarget.style.background = 'transparent' }}
+              onMouseEnter={e => {
+                if (!isActive) e.currentTarget.style.background = '#F5F5F5'
+              }}
+              onMouseLeave={e => {
+                if (!isActive) e.currentTarget.style.background = 'transparent'
+              }}
             >
               {item.label}
             </Link>

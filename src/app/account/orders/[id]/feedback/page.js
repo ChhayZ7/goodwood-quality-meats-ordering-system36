@@ -65,7 +65,7 @@ export default function FeedbackPage() {
 
   if (submitted) {
     return (
-      <div className="max-w-2xl mx-auto text-center py-24">
+      <div className="max-w-5xl mx-auto text-center py-24">
         <div className="text-6xl mb-6">🎉</div>
         <h2 className="text-3xl font-bold text-[#8B1A1A] mb-3">Thank you for your feedback!</h2>
         <p className="text-gray-500 mb-8">Your review helps us improve our products and service.</p>
@@ -80,19 +80,25 @@ export default function FeedbackPage() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto">
+    <div className="max-w-5xl mx-auto">
 
-      <div className="mb-8">
+      {/* ── Header (matches Inventory Management style) ── */}
+      <div style={{ marginBottom: '32px' }}>
         <Link
           href={`/account/orders/${id}`}
           className="text-sm text-[#8B1A1A] hover:underline flex items-center gap-1 mb-4"
         >
           ← Back to Order
         </Link>
-        <h1 className="text-3xl font-bold text-[#8B1A1A]">Leave a Review</h1>
-        <p className="text-gray-500 mt-1 text-sm">
-          Order #{typeof id === 'string' ? id.slice(0, 8).toUpperCase() : ''}
-        </p>
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px', marginBottom: '32px' }}>
+          <h1 style={{ fontFamily: '"Lato",serif', fontSize: '36px', fontWeight: 700, color: '#7B1A1A', margin: 0 }}>
+            Leave a Review
+          </h1>
+          <span style={{ fontFamily: '"Lato",sans-serif', fontSize: '14px', color: '#9CA3AF' }}>
+            Order #{typeof id === 'string' ? id.slice(0, 8).toUpperCase() : ''}
+          </span>
+        </div>
+        <div style={{ height: '2px', background: 'linear-gradient(90deg, #C9A84C, transparent)', borderRadius: '1px' }} />
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">

@@ -5,11 +5,11 @@ import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 
 const STATUS_CONFIG = {
-  CONFIRMED: { label: 'Confirmed',        bg: '#FEF3C7', color: '#92400E' },
+  CONFIRMED:   { label: 'Confirmed',        bg: '#FEF3C7', color: '#92400E' },
   IN_PROGRESS: { label: 'In Progress',      bg: '#3B82F6', color: '#fff' },
-  READY:     { label: 'Ready for Pickup', bg: '#DBEAFE', color: '#1E40AF' },
-  COMPLETED: { label: 'Completed',        bg: '#DCFCE7', color: '#166534' },
-  CANCELLED: { label: 'Cancelled',        bg: '#FEE2E2', color: '#991B1B' },
+  READY:       { label: 'Ready for Pickup', bg: '#DBEAFE', color: '#1E40AF' },
+  COMPLETED:   { label: 'Completed',        bg: '#DCFCE7', color: '#166534' },
+  CANCELLED:   { label: 'Cancelled',        bg: '#FEE2E2', color: '#991B1B' },
 }
 
 const ORDER_STATUSES = ['CONFIRMED', 'IN_PROGRESS', 'READY', 'COMPLETED']
@@ -31,6 +31,12 @@ const formatDate  = d => new Date(d).toLocaleDateString('en-AU', { day: '2-digit
 const formatSmall = d => new Date(d).toLocaleString('en-AU', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })
 const formatCents = c => c != null ? `$${(c / 100).toFixed(2)}` : '—'
 const shortNum    = id => id ? `GW${id.slice(0, 8).toUpperCase()}` : '—'
+
+function SkeletonBlock({ width, height, radius = '4px', style = {} }) {
+  return (
+    <div style={{ width, height, background: '#F0E8D0', borderRadius: radius, ...style }} />
+  )
+}
 
 export default function AdminOrderDetailPage() {
   const { id } = useParams()
@@ -92,10 +98,7 @@ export default function AdminOrderDetailPage() {
   }
 
   async function handleCancel() {
-    if (!cancelReason.trim()) {
-      setCancelReasonErr(true)
-      return
-    }
+    if (!cancelReason.trim()) { setCancelReasonErr(true); return }
     setCancelReasonErr(false)
     setCancelling(true)
     setCancelError(null)
@@ -117,27 +120,47 @@ export default function AdminOrderDetailPage() {
     }
   }
 
-  //Loading
+  // Loading skeleton
   if (loading) {
     return (
-      <div style={{ padding: '32px', maxWidth: '900px' }}>
-        <Link href="/admin/orders" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontFamily: '"Lato",sans-serif', fontSize: '14px', color: '#7B1A1A', textDecoration: 'none', marginBottom: '24px', fontWeight: 600 }}>
-          ← Back to Orders
-        </Link>
-        {[1,2,3].map(i => (
-          <div key={i} style={{ background: '#fff', borderRadius: '12px', border: '1px solid #E5E7EB', padding: '24px', marginBottom: '20px' }}>
-            <div style={{ height: '16px', width: '200px', background: '#F0E8D0', borderRadius: '4px', marginBottom: '12px' }} />
-            <div style={{ height: '13px', width: '70%', background: '#F3F4F6', borderRadius: '4px' }} />
+      <div style={{ padding: '32px', maxWidth: '1200px', width: '100%', margin: '0 auto', fontFamily: '"Lato", sans-serif' }}>
+
+        {/* Back link skeleton */}
+        <SkeletonBlock width="120px" height="14px" style={{ marginBottom: '28px' }} />
+
+        {/* Header skeleton */}
+        <div style={{ marginBottom: '32px' }}>
+          <SkeletonBlock width="320px" height="36px" style={{ marginBottom: '32px' }} />
+          <div style={{ height: '2px', background: 'linear-gradient(90deg, #C9A84C, transparent)', borderRadius: '1px' }} />
+        </div>
+
+        {/* Card skeletons */}
+        {[
+          { rows: 2 },
+          { rows: 4 },
+          { rows: 1 },
+          { rows: 1 },
+        ].map((card, ci) => (
+          <div key={ci} style={{ background: '#fff', borderRadius: '12px', border: '1px solid #E5E7EB', padding: '24px', marginBottom: '20px' }}>
+            {/* Card title */}
+            <SkeletonBlock width="180px" height="20px" style={{ marginBottom: '20px' }} />
+            {/* Card rows */}
+            {Array.from({ length: card.rows }).map((_, ri) => (
+              <div key={ri} style={{ display: 'flex', gap: '16px', marginBottom: ri < card.rows - 1 ? '14px' : 0, alignItems: 'center' }}>
+                <SkeletonBlock width="160px" height="13px" />
+                <SkeletonBlock width="220px" height="13px" style={{ background: '#F3F4F6' }} />
+              </div>
+            ))}
           </div>
         ))}
       </div>
     )
   }
 
-  //Error
+  // Error
   if (fetchError || !order) {
     return (
-      <div style={{ padding: '32px', maxWidth: '900px' }}>
+      <div style={{ padding: '32px', maxWidth: '1200px', width: '100%', margin: '0 auto' }}>
         <Link href="/admin/orders" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontFamily: '"Lato",sans-serif', fontSize: '14px', color: '#7B1A1A', textDecoration: 'none', marginBottom: '24px', fontWeight: 600 }}>
           ← Back to Orders
         </Link>
@@ -149,39 +172,42 @@ export default function AdminOrderDetailPage() {
   }
 
   const isCancelled = order.status === 'CANCELLED'
- const isLocked = ['READY', 'COMPLETED'].includes(order.status)
+  const isLocked    = ['READY', 'COMPLETED'].includes(order.status)
   const auditLog    = order.audit_log ?? []
 
   const lastStatusEntry = auditLog.find(e => e.field === 'status')
   const lastWeightEntry = auditLog.find(e => e.field === 'actual_weight')
 
   return (
-    <div style={{ padding: '32px', maxWidth: '900px', fontFamily: '"Lato", sans-serif' }}>
+    <div style={{ padding: '32px', maxWidth: '1200px', width: '100%', margin: '0 auto', fontFamily: '"Lato", sans-serif' }}>
 
       {/* Back */}
       <Link href="/admin/orders" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '14px', color: '#7B1A1A', textDecoration: 'none', marginBottom: '24px', fontWeight: 600 }}>
         ← Back to Orders
       </Link>
 
-      {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '28px' }}>
-        <div>
-          <h1 style={{ fontFamily: '"Playfair Display", serif', fontSize: '36px', fontWeight: 700, color: '#7B1A1A', margin: '0 0 8px' }}>
-            Order #{shortNum(order.id)}
-          </h1>
-          <div style={{ display: 'flex', gap: '24px', fontSize: '14px', color: '#6B7280' }}>
-            <span>Customer: <strong style={{ color: '#1A1A1A' }}>{order.customer?.first_name} {order.customer?.last_name}</strong></span>
-            {order.pickup_date && (
-              <span>Pickup: <strong style={{ color: '#1A1A1A' }}>{formatDate(order.pickup_date)}</strong></span>
-            )}
+      {/* Header + gold divider */}
+      <div style={{ marginBottom: '32px' }}>
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '32px' }}>
+          <div>
+            <h1 style={{ fontFamily: '"Lato", serif', fontSize: '36px', fontWeight: 700, color: '#7B1A1A', margin: '0 0 8px' }}>
+              Order #{shortNum(order.id)}
+            </h1>
+            <div style={{ display: 'flex', gap: '24px', fontSize: '14px', color: '#6B7280' }}>
+              <span>Customer: <strong style={{ color: '#1A1A1A' }}>{order.customer?.first_name} {order.customer?.last_name}</strong></span>
+              {order.pickup_date && (
+                <span>Pickup: <strong style={{ color: '#1A1A1A' }}>{formatDate(order.pickup_date)}</strong></span>
+              )}
+            </div>
           </div>
+          <StatusBadge status={order.status} />
         </div>
-        <StatusBadge status={order.status} />
+        <div style={{ height: '2px', background: 'linear-gradient(90deg, #C9A84C, transparent)', borderRadius: '1px' }} />
       </div>
 
       {/* Audit Trail */}
       <div style={{ background: '#fff', borderRadius: '12px', border: '1px solid #E5E7EB', padding: '24px', marginBottom: '20px' }}>
-        <h2 style={{ fontFamily: '"Playfair Display", serif', fontSize: '20px', fontWeight: 700, color: '#1A1A1A', margin: '0 0 16px' }}>
+        <h2 style={{ fontFamily: '"Lato", serif', fontSize: '20px', fontWeight: 700, color: '#1A1A1A', margin: '0 0 16px' }}>
           Audit Trail
         </h2>
         {auditLog.length === 0 ? (
@@ -220,7 +246,7 @@ export default function AdminOrderDetailPage() {
 
       {/* Order Items */}
       <div style={{ background: '#fff', borderRadius: '12px', border: '1px solid #E5E7EB', padding: '24px', marginBottom: '20px' }}>
-        <h2 style={{ fontFamily: '"Playfair Display", serif', fontSize: '20px', fontWeight: 700, color: '#1A1A1A', margin: '0 0 16px' }}>
+        <h2 style={{ fontFamily: '"Lato", serif', fontSize: '20px', fontWeight: 700, color: '#1A1A1A', margin: '0 0 16px' }}>
           Order Items
         </h2>
 
@@ -231,9 +257,9 @@ export default function AdminOrderDetailPage() {
           </div>
         )}
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 120px 140px 100px 160px', padding: '10px 0', borderBottom: '1px solid #E5E7EB', marginBottom: '4px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 140px 160px 100px 180px', padding: '10px 0', borderBottom: '1px solid #E5E7EB', marginBottom: '4px' }}>
           {['Product', 'Type', 'Weight Range', 'Quantity', 'Actual Weight (kg)'].map(h => (
-            <span key={h} style={{ fontSize: '13px', fontWeight: 700, color: '#6B7280' }}>{h}</span>
+            <span key={h} style={{ fontSize: '11px', fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '.06em' }}>{h}</span>
           ))}
         </div>
 
@@ -244,7 +270,7 @@ export default function AdminOrderDetailPage() {
             : item.weight_preference ?? '—'
           return (
             <div key={item.id ?? i} style={{
-              display: 'grid', gridTemplateColumns: '1fr 120px 140px 100px 160px',
+              display: 'grid', gridTemplateColumns: '1fr 140px 160px 100px 180px',
               padding: '14px 0',
               borderBottom: i < order.order_items.length - 1 ? '1px solid #F3F4F6' : 'none',
               alignItems: 'center',
@@ -290,7 +316,7 @@ export default function AdminOrderDetailPage() {
       {/* Update Status */}
       {!isCancelled && (
         <div style={{ background: '#fff', borderRadius: '12px', border: '1px solid #E5E7EB', padding: '24px', marginBottom: '20px' }}>
-          <h2 style={{ fontFamily: '"Playfair Display", serif', fontSize: '20px', fontWeight: 700, color: '#1A1A1A', margin: '0 0 16px' }}>
+          <h2 style={{ fontFamily: '"Lato", serif', fontSize: '20px', fontWeight: 700, color: '#1A1A1A', margin: '0 0 16px' }}>
             Update Status
           </h2>
           {saveError && <p style={{ fontSize: '13px', color: '#DC2626', marginBottom: '12px' }}>{saveError}</p>}
@@ -325,11 +351,10 @@ export default function AdminOrderDetailPage() {
 
       {/* Order Actions */}
       <div style={{ background: '#fff', borderRadius: '12px', border: '1px solid #E5E7EB', padding: '24px' }}>
-        <h2 style={{ fontFamily: '"Playfair Display", serif', fontSize: '20px', fontWeight: 700, color: '#1A1A1A', margin: '0 0 20px' }}>
+        <h2 style={{ fontFamily: '"Lato", serif', fontSize: '20px', fontWeight: 700, color: '#1A1A1A', margin: '0 0 20px' }}>
           Order Actions
         </h2>
 
-        {/* Inline cancel form */}
         {!isCancelled && showCancelForm && (
           <div style={{ marginBottom: '24px' }}>
             <label style={{ display: 'block', fontSize: '15px', fontWeight: 700, color: '#1A1A1A', marginBottom: '10px' }}>
@@ -341,16 +366,11 @@ export default function AdminOrderDetailPage() {
               placeholder="Please provide a reason for cancellation..."
               rows={4}
               style={{
-                width: '100%',
-                padding: '12px 16px',
-                fontSize: '14px',
+                width: '100%', padding: '12px 16px', fontSize: '14px',
                 fontFamily: '"Lato", sans-serif',
                 border: `1.5px solid ${cancelReasonErr ? '#EF4444' : '#E5E7EB'}`,
-                borderRadius: '10px',
-                resize: 'vertical',
-                outline: 'none',
-                boxSizing: 'border-box',
-                color: '#1A1A1A',
+                borderRadius: '10px', resize: 'vertical', outline: 'none',
+                boxSizing: 'border-box', color: '#1A1A1A',
               }}
             />
             {cancelReasonErr && (
@@ -366,12 +386,11 @@ export default function AdminOrderDetailPage() {
                 onClick={handleCancel}
                 disabled={cancelling}
                 style={{
-                  padding: '12px 28px', borderRadius: '10px',
-                  border: 'none', background: cancelling ? '#9CA3AF' : '#EF4444',
+                  padding: '12px 28px', borderRadius: '10px', border: 'none',
+                  background: cancelling ? '#9CA3AF' : '#EF4444',
                   color: '#fff', fontSize: '15px', fontWeight: 700,
                   cursor: cancelling ? 'not-allowed' : 'pointer',
-                  fontFamily: '"Lato", sans-serif',
-                  transition: 'opacity .15s',
+                  fontFamily: '"Lato", sans-serif', transition: 'opacity .15s',
                 }}
               >
                 {cancelling ? 'Cancelling…' : 'Confirm Cancellation'}
@@ -391,7 +410,6 @@ export default function AdminOrderDetailPage() {
           </div>
         )}
 
-        {/* Action buttons */}
         {(!showCancelForm || isCancelled) && (
           <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
             <button
@@ -401,8 +419,7 @@ export default function AdminOrderDetailPage() {
                 padding: '10px 20px', borderRadius: '8px',
                 border: '1.5px solid #7B1A1A', background: 'transparent',
                 color: '#7B1A1A', fontSize: '14px', fontWeight: 700,
-                cursor: 'pointer', fontFamily: '"Lato", sans-serif',
-                transition: 'all .15s',
+                cursor: 'pointer', fontFamily: '"Lato", sans-serif', transition: 'all .15s',
               }}
               onMouseEnter={e => { e.currentTarget.style.background = '#7B1A1A'; e.currentTarget.style.color = '#fff' }}
               onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#7B1A1A' }}
@@ -419,11 +436,9 @@ export default function AdminOrderDetailPage() {
               <button
                 onClick={() => setShowCancelForm(true)}
                 style={{
-                  padding: '10px 20px', borderRadius: '8px',
-                  border: 'none', background: '#EF4444',
-                  color: '#fff', fontSize: '14px', fontWeight: 700,
-                  cursor: 'pointer', fontFamily: '"Lato", sans-serif',
-                  transition: 'opacity .15s',
+                  padding: '10px 20px', borderRadius: '8px', border: 'none',
+                  background: '#EF4444', color: '#fff', fontSize: '14px', fontWeight: 700,
+                  cursor: 'pointer', fontFamily: '"Lato", sans-serif', transition: 'opacity .15s',
                 }}
                 onMouseEnter={e => e.currentTarget.style.opacity = '0.85'}
                 onMouseLeave={e => e.currentTarget.style.opacity = '1'}
