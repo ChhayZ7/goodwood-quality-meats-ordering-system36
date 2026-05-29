@@ -1,4 +1,4 @@
-import { Geist} from "next/font/google";
+import { Lato } from "next/font/google";
 import "./globals.css";
 import Footer from '@/components/Footer'
 import Navbar from "@/components/Navbar";
@@ -6,9 +6,10 @@ import GoldDivider from "@/components/GoldDivider";
 import { CartProvider } from "@/context/CartContext";
 
 // Root Layout Page - navbar, footer, font, cart provider
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const lato = Lato({
+  weight: ['400','700'],
   subsets: ["latin"],
+  variable: "--font-lato",
 });
 
 export const metadata = {
@@ -20,7 +21,7 @@ export default function RootLayout({ children }) {
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} h-full antialiased`}
+      className={`${lato.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       
