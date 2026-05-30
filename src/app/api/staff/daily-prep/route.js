@@ -46,6 +46,7 @@ export const GET = withHandler(async (request) => {
     `)
     .eq('pickup_date', date)
     .not('status', 'eq', 'CANCELLED')
+    .not('status', 'eq', 'PENDING')
     .order('created_at', { ascending: true })
 
   if (ordersError) throw ordersError
