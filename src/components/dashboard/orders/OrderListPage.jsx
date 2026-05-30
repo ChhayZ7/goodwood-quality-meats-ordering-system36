@@ -80,55 +80,19 @@ export default function OrdersListPage({ role }) {
 
     //page layout
     return (
-        <div style={{ padding: '32px', maxWidth: '1200px' }}>
+        <PageWrapper>
 
             {/* Heading + gold divider */}
-            <div style={{ marginBottom: '32px' }}>
-                <h1 style={{ fontFamily: '"Lato", serif', fontSize: '36px', fontWeight: 700, color: '#7B1A1A', margin: '0 0 32px 0' }}>
-                    Order Management
-                </h1>
-                <div style={{ height: '2px', background: 'linear-gradient(90deg, #C9A84C, transparent)', borderRadius: '1px' }} />
-            </div>
+            <PageHeader title="Order Management" />
+
 
             {/* Filter tabs */}
-            <div style={{ display: 'flex', gap: '8px', marginBottom: '16px', flexWrap: 'wrap' }}>
-                {ALL_TABS.map(tab => {
-                    const isActive = tab === activeTab
-                    return (
-                        <button
-                            key={tab}
-                            onClick={() => setActiveTab(tab)}
-                            style={{
-                                padding: '7px 16px', borderRadius: '20px',
-                                border: `1.5px solid ${isActive ? '#7B1A1A' : '#E5E7EB'}`,
-                                background: isActive ? '#7B1A1A' : '#fff',
-                                color: isActive ? '#fff' : '#555',
-                                fontSize: '13px', fontWeight: isActive ? 700 : 400,
-                                cursor: 'pointer', fontFamily: '"Lato",sans-serif',
-                                transition: 'all .15s',
-                            }}
-                        >
-                            {TAB_LABELS[tab]}
-                        </button>
-                    )
-                })}
-            </div>
+            <FilterTabs tabs={ALL_TABS} labels={TAB_LABELS} active={activeTab} onChange={setActiveTab} />
+
 
             {/* Search */}
             <div style={{ marginBottom: '20px' }}>
-                <div style={{ position: 'relative', display: 'inline-block', width: '340px' }}>
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#AAAAAA" strokeWidth="2" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}>
-                        <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
-                    </svg>
-                    <input
-                        className="gw-input"
-                        type="text"
-                        placeholder="Search order # or customer…"
-                        value={search}
-                        onChange={e => setSearch(e.target.value)}
-                        style={{ paddingLeft: '38px', width: '340px' }}
-                    />
-                </div>
+                <SearchInput value={search} onChange={e => setSearch(e.target.value)} placeholder="Search order number or customer…" />
             </div>
 
             {/* Fetch error */}
@@ -189,7 +153,7 @@ export default function OrdersListPage({ role }) {
                         <span style={{ fontFamily: '"Lato",sans-serif', fontSize: '12px', color: '#9CA3AF', paddingLeft: '8px' }}>
                             {lastUpdatedBy(order)}
                         </span>
-                        <Link href={`/admin/orders/${order.id}`} style={{ textDecoration: 'none' }}>
+                        <Link href={`${basePath}/${order.id}`} style={{ textDecoration: 'none' }}>
                             <div
                                 style={{
                                     padding: '6px 14px',
@@ -220,6 +184,6 @@ export default function OrdersListPage({ role }) {
                     </div>
                 )}
             </div>
-        </div>
-    )
+            </PageWrapper>
+            )
 }
