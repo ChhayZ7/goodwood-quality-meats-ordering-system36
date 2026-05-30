@@ -1,6 +1,6 @@
 //Since all of the order summary page and order details page show the status badges, show it is neccesary to make a share compoent for it
 
-const STATUS_CONFIG = {
+export const STATUS_CONFIG = {
   CONFIRMED:        { label: 'Confirmed',        bg: '#FEF3C7', color: '#92400E' },
   IN_PROGRESS:      { label: 'In Progress',      bg: '#3B82F6', color: '#fff' },
   READY:            { label: 'Ready for Pickup', bg: '#DBEAFE', color: '#1E40AF' },
