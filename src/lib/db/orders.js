@@ -140,7 +140,7 @@ export async function createOrder(orderData, items) {
 // Update allowed fields on an order.
 // Only updates fields that are explicitly passed in.
 export async function updateOrder(orderId, fields) {
-  const allowed = ['status', 'notes', 'pickup_date', 'deposit_paid_cents']
+  const allowed = ['status', 'notes', 'pickup_date', 'deposit_paid_cents', 'reminder_sent']
   const updates = Object.fromEntries(
     Object.entries(fields).filter(([k]) => allowed.includes(k))
   )
