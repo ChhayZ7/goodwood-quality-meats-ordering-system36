@@ -1,6 +1,6 @@
 'use client'
-import OrderListPage from '@/components/dashboard/orders/OrderListPage'
+import OrderDetailsPage from '@/components/dashboard/orders/OrderDetailsPage'
 
-export default function StaffOrdersPage() {
-  return <OrderListPage role="STAFF" />
+export default function StaffOrderDetailPage() {
+  return <OrderDetailsPage role="STAFF" />
 }
