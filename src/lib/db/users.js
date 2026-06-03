@@ -7,6 +7,7 @@ const USER_SELECT = `
     email,
     phone,
     role,
+    email_unsubscribed,
     created_at
 `
 
@@ -20,7 +21,7 @@ export async function getUserById(userId){
     .single()
 }
 
-const ALLOWED_UPDATE_FIELDS = ['first_name', 'last_name', 'phone']
+const ALLOWED_UPDATE_FIELDS = ['first_name', 'last_name', 'phone', 'email_unsubscribed']
 
 export async function updateUser(userId, fields){
      const supabase = await createClient()
