@@ -5,10 +5,11 @@ import { usePathname, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase-browser'
 
 const NAV_ITEMS = [
-  { href: { CUSTOMER: '/account/orders' }, label: 'My Orders', roles: ['CUSTOMER'] },
-  { href: { CUSTOMER: '/account/profile' }, label: 'My Profile', roles: ['CUSTOMER'] },
   { href: { ADMIN: '/admin/orders', STAFF: '/staff/orders' }, label: 'Orders', roles: ['ADMIN', 'STAFF'] },
   { href: { ADMIN: '/admin/inventory', STAFF: '/staff/inventory' }, label: 'Inventory', roles: ['ADMIN', 'STAFF'] },
+  { href: { ADMIN: '/admin/daily-prep', STAFF: '/staff/daily-prep' }, label: 'Daily Prep', roles: ['ADMIN', 'STAFF'] },
+  { href: { CUSTOMER: '/account/orders' }, label: 'My Orders', roles: ['CUSTOMER'] },
+  { href: { CUSTOMER: '/account/profile' }, label: 'My Profile', roles: ['CUSTOMER'] },
   { href: { ADMIN: '/admin/products' }, label: 'Products & Pricing', roles: ['ADMIN'] },
   { href: { ADMIN: '/admin/reports' }, label: 'Reports', roles: ['ADMIN'] },
   { href: { ADMIN: '/admin/staff' }, label: 'Staff Management', roles: ['ADMIN'] },
