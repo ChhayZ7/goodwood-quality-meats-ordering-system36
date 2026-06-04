@@ -10,7 +10,7 @@ export function orderConfirmationHtml({ customer, order, invoiceNumber, pickupDa
     const product    = item.product ?? {}
     const isWeight   = product.product_type === 'WEIGHT_RANGE'
     const weightText = item.weight_option
-      ? `${item.weight_option.min_weight_kg}–${item.weight_option.max_weight_kg} kg`
+      ? `${item.weight_option.label}`
       : item.weight_preference ?? ''
 
     return `<li>
