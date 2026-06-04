@@ -1,6 +1,7 @@
 // src/lib/email/christmasReminder.js
 
 export function christmasReminderHtml({ firstName, unsubscribeUrl }) {
+  const googleMapsUrl = 'https://maps.app.goo.gl/gymYkT4abq6wnSPc7'
     return `
       <!DOCTYPE html>
       <html>
@@ -94,7 +95,7 @@ export function christmasReminderHtml({ firstName, unsubscribeUrl }) {
                             Visit us in store
                           </p>
                           <p style="font-size: 13px; color: #555; line-height: 1.8; margin: 0;">
-                            📍 &nbsp;121 Goodwood Road, Goodwood SA 5034<br/>
+                            <a href="${googleMapsUrl}" target="_blank">📍 &nbsp;121 Goodwood Road, Goodwood SA 5034</a><br/>
                             📞 &nbsp;08 8271 4183<br/>
                             🕐 &nbsp;Mon–Fri: 7am–5:30pm &nbsp;|&nbsp; Sat: 7am–12pm
                           </p>
