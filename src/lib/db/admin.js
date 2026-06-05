@@ -1,13 +1,11 @@
+// src/lib/db/admin.js
 // Database operations for the admin orders API.
 // Includes audit trail logging
 
 import { supabaseAdmin } from '@/lib/supabase-admin'
 
-// Queries
+// ─── Queries ──────────────────────────────────────────────────────────────────
 
-// Fetch all orders for the admin dashboard.
-// Supports filtering by status, pickup date range, and customer name search.
- 
 export async function getAllOrders({
   status,
   dateFrom,
@@ -73,12 +71,10 @@ export async function getAllOrders({
   if (dateFrom) query = query.gte('pickup_date', dateFrom)
   if (dateTo)   query = query.lte('pickup_date', dateTo)
 
-  const { data, error, count } = await query
+  const { data, error } = await query
 
   if (error) throw error
 
-  // Filter by customer name
-  // filtering on joined table columns directly
   const filtered = search
     ? data.filter(order => {
         const name = `${order.customer?.first_name ?? ''} ${order.customer?.last_name ?? ''}`.toLowerCase()
@@ -89,10 +85,9 @@ export async function getAllOrders({
   return { data: filtered, error: null }
 }
 
-/**
- * Fetch a single order with its full audit log.
- * Used by the admin order detail view.
- */
+// Fetch a single order with its full audit log.
+// NOW includes actual_weight_kg on order_items so the weight inputs
+// are pre-populated when staff re-open an order they've already weighed.
 export async function getAdminOrderById(orderId) {
   const [orderResult, auditResult] = await Promise.all([
     supabaseAdmin
@@ -121,6 +116,7 @@ export async function getAdminOrderById(orderId) {
           weight_preference,
           unit_price_cents,
           subtotal_cents,
+          actual_weight_kg,
           notes,
           product:products (
             id,
@@ -181,12 +177,8 @@ export async function getAdminOrderById(orderId) {
   }
 }
 
-// Changes
+// ─── Changes ──────────────────────────────────────────────────────────────────
 
-/**
- * Update an order and write an audit log entry for every changed field.
- * Only updates fields that differ from the current values.
- */
 export async function adminUpdateOrder(orderId, fields, adminId, reason = null) {
   const allowed = ['status', 'notes', 'pickup_date', 'deposit_paid_cents']
   const updates = Object.fromEntries(
@@ -197,7 +189,6 @@ export async function adminUpdateOrder(orderId, fields, adminId, reason = null) 
     return { data: null, error: { message: 'No valid fields to update' } }
   }
 
-  // Fetch current order values so we can record old to new in the audit log
   const { data: current, error: fetchError } = await supabaseAdmin
     .from('orders')
     .select('status, notes, pickup_date, deposit_paid_cents')
@@ -206,7 +197,6 @@ export async function adminUpdateOrder(orderId, fields, adminId, reason = null) 
 
   if (fetchError) throw fetchError
 
-  // Apply the update
   const { data: updated, error: updateError } = await supabaseAdmin
     .from('orders')
     .update(updates)
@@ -216,7 +206,6 @@ export async function adminUpdateOrder(orderId, fields, adminId, reason = null) 
 
   if (updateError) throw updateError
 
-  // Write one audit log row per changed field
   const auditRows = Object.entries(updates)
     .filter(([field, newVal]) => String(current[field]) !== String(newVal))
     .map(([field, newVal]) => ({
@@ -234,7 +223,6 @@ export async function adminUpdateOrder(orderId, fields, adminId, reason = null) 
       .insert(auditRows)
 
     if (auditError) {
-      // Log but don't fail the request, the order update succeeded
       console.error('[adminUpdateOrder] audit log insert failed:', auditError)
     }
   }
