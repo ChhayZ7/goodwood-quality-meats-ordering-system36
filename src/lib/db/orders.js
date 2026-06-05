@@ -1,15 +1,17 @@
+// src/lib/db/orders.js
 // All database operations for orders (retrieval, order creation etc)
-// ROUTE FILES MUST IMPORT THIS to query database
 
 import { supabaseAdmin } from '@/lib/supabase-admin'
 
-
+// actual_weight_kg is included so the customer order detail page and the
+// invoice PDF both reflect the real weights once staff have entered them.
 const ORDER_ITEMS_SELECT = `
   id,
   quantity,
   weight_preference,
   unit_price_cents,
   subtotal_cents,
+  actual_weight_kg,
   notes,
   product:products (
     id,
@@ -29,12 +31,8 @@ const ORDER_ITEMS_SELECT = `
   )
 `
 
+// ─── Queries ──────────────────────────────────────────────────────────────────
 
-// DATABASE QUERIES
-
-
-// All orders for a customer, newest first.
-// Includes line items and product details.
 export async function getOrdersByCustomer(customerId) {
   return supabaseAdmin
     .from('orders')
@@ -53,9 +51,6 @@ export async function getOrdersByCustomer(customerId) {
     .order('created_at', { ascending: false })
 }
 
-
-// Single order by ID with full detail:
-// customer info, line items, products, weight options, payments.
 export async function getOrderById(orderId) {
   return supabaseAdmin
     .from('orders')
@@ -91,10 +86,6 @@ export async function getOrderById(orderId) {
     .single()
 }
 
-
-// orderData: { customer_id, pickup_date, notes, deposit_required_cents }
-// items: [{ product_id, quantity, weight_option_id, weight_preference, unit_price_cents, subtotal_cents, notes }]
-// returns { data: { order_id: string } | null, error }
 export async function createOrder(orderData, items) {
   const total_cents = items.reduce((sum, item) => sum + (item.subtotal_cents ?? 0), 0)
 
@@ -128,7 +119,6 @@ export async function createOrder(orderData, items) {
   const { error: itemsError } = await supabaseAdmin.from('order_items').insert(lineItems)
 
   if (itemsError) {
-    // Attempt to rollback if item insertion fails
     await supabaseAdmin.from('orders').delete().eq('id', order.id)
     return { data: null, error: itemsError }
   }
@@ -136,9 +126,6 @@ export async function createOrder(orderData, items) {
   return { data: { order_id: order.id }, error: null }
 }
 
-
-// Update allowed fields on an order.
-// Only updates fields that are explicitly passed in.
 export async function updateOrder(orderId, fields) {
   const allowed = ['status', 'notes', 'pickup_date', 'deposit_paid_cents', 'reminder_sent']
   const updates = Object.fromEntries(
@@ -153,9 +140,6 @@ export async function updateOrder(orderId, fields) {
     .single()
 }
 
-
-// Record a payment row against an order.
-// Called after Stripe confirms payment server-side.
 export async function recordPayment({
   order_id,
   stripe_payment_intent_id,
