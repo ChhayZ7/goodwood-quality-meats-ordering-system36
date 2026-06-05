@@ -279,7 +279,7 @@ function InvoiceDocument({ order, customer }) {
 
           const weightDisplay =
             weightOption
-              ? `${weightOption.min_weight_kg}–${weightOption.max_weight_kg} kg`
+              ? `${weightOption.label}`
               : item.weight_preference ?? '—'
 
           return (
