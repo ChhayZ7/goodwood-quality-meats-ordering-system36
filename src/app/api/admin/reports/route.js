@@ -58,9 +58,9 @@ export const GET = withHandler(async (request) => {
     low_stock_products,
     top_products,
   ] = await Promise.all([ // run at same time
-    getOrderCountsByStatus(),
-    getTotalRevenue(),
-    getTotalDepositsCollected(),
+    getOrderCountsByStatus(period),
+    getTotalRevenue(period),
+    getTotalDepositsCollected(period),
     getOrdersByPickupDate(),
     getLowStockProducts(),
     getTopProducts(period),

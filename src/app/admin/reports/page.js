@@ -208,9 +208,8 @@ function TopItemsChart({ items }) {
 }
 
 export default function AdminReportsPage() {
-  const [period,     setPeriod]     = useState('month')
-  const [filterDate, setFilterDate] = useState('')
-  const [report,     setReport]     = useState(null)
+  const [period,  setPeriod]  = useState('month')
+  const [report,  setReport]  = useState(null)
   const [loading,    setLoading]    = useState(true)
   const [error,      setError]      = useState(null)
 
@@ -219,9 +218,7 @@ export default function AdminReportsPage() {
       setLoading(true)
       setError(null)
       try {
-        const url = filterDate
-          ? `/api/admin/reports?period=${period}&date=${filterDate}`
-          : `/api/admin/reports?period=${period}`
+        const url = `/api/admin/reports?period=${period}`
         const res  = await fetch(url)
         const text = await res.text()
         let data
@@ -235,7 +232,7 @@ export default function AdminReportsPage() {
       }
     }
     fetchReport()
-  }, [period, filterDate])
+  }, [period])
 
   const statusCounts = report?.orders_by_status ?? {}
   const totalOrders  = Object.values(statusCounts).reduce((s, n) => s + n, 0)
@@ -266,20 +263,6 @@ export default function AdminReportsPage() {
               <option value="today">Today</option>
               <option value="month">This month</option>
             </select>
-            <input
-              type="date"
-              value={filterDate}
-              onChange={e => setFilterDate(e.target.value)}
-              style={{ padding: '10px 14px', border: `1.5px solid ${COLOR.border}`, borderRadius: '8px', fontSize: '14px', background: COLOR.white, color: filterDate ? COLOR.text : COLOR.muted, cursor: 'pointer', fontFamily: '"Lato", sans-serif' }}
-            />
-            {filterDate && (
-              <button
-                onClick={() => setFilterDate('')}
-                style={{ padding: '10px 14px', borderRadius: '8px', border: `1.5px solid ${COLOR.border}`, background: COLOR.white, fontSize: '13px', color: COLOR.muted, cursor: 'pointer', fontFamily: '"Lato", sans-serif' }}
-              >
-                Clear date
-              </button>
-            )}
           </div>
         }
       />
