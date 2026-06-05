@@ -3,6 +3,8 @@
 import { useState, useMemo, useEffect } from 'react'
 import { FaStar } from "react-icons/fa6"
 import { CiStar } from "react-icons/ci"
+import PageWrapper from '@/components/dashboard/PageWrapper'
+import PageHeader from '@/components/dashboard/PageHeader'
 
 const COLOR = {
     red: '#7B1A1A',
@@ -156,7 +158,7 @@ function Divider() {
     return <div style={{ height: '1px', background: COLOR.border, margin: '28px 0' }} />
 }
 
-// SkeletonBox component — reusable shimmer block
+// SkeletonBox component, reusable shimmer block
 function SkeletonBox({ w, h, style = {} }) {
     return (
         <div style={{
@@ -209,10 +211,10 @@ export default function AdminFeedbackPage() {
         return [...filtered].sort(sortOption.compareFn)
     }, [activeFilter, sortKey, feedback])
 
-    // ─── Skeleton loading state ───────────────────────────────────────────────
+    //Skeleton loading state 
     if (loading) {
-        return (
-            <div style={{ minHeight: '100vh', background: COLOR.cream, fontFamily: '"Lato", sans-serif' }}>
+               return (
+            <PageWrapper>
                 <style>{`
                     @keyframes shimmer {
                         0%   { background-position: -600px 0; }
@@ -220,199 +222,145 @@ export default function AdminFeedbackPage() {
                     }
                 `}</style>
 
-                <div style={{ maxWidth: '1180px', margin: '0 auto', padding: '48px 40px 80px' }}>
+                <PageHeader title="Feedback" />
 
-                    {/* Page title — kept real */}
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '18px', marginBottom: '28px' }}>
-                        <h1 style={{ fontFamily: '"Lato", serif', fontSize: '36px', fontWeight: 700, color: COLOR.red, margin: 0 }}>
-                            Feedback
-                        </h1>
+                <SectionLabel>Overall rating</SectionLabel>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '24px', marginBottom: '4px' }}>
+                    <div style={{ background: COLOR.white, border: `1px solid ${COLOR.border}`, borderRadius: '12px', padding: '24px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
+                        <SkeletonBox w="72px" h="56px" style={{ borderRadius: '8px' }} />
+                        <SkeletonBox w="110px" h="18px" />
+                        <SkeletonBox w="90px" h="13px" />
                     </div>
-
-                    {/* Gold divider */}
-                    <div style={{ height: '2px', background: `linear-gradient(90deg, ${COLOR.gold}, transparent)`, marginBottom: '32px', borderRadius: '1px' }} />
-
-                    {/* Overall rating label */}
-                    <SectionLabel>Overall rating</SectionLabel>
-
-                    {/* Summary grid */}
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '24px', marginBottom: '4px' }}>
-
-                        {/* Average score card */}
-                        <div style={{ background: COLOR.white, border: `1px solid ${COLOR.border}`, borderRadius: '12px', padding: '24px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
-                            <SkeletonBox w="72px" h="56px" style={{ borderRadius: '8px' }} />
-                            <SkeletonBox w="110px" h="18px" />
-                            <SkeletonBox w="90px" h="13px" />
-                        </div>
-
-                        {/* Star breakdown bars */}
-                        <div style={{ background: COLOR.white, border: `1px solid ${COLOR.border}`, borderRadius: '12px', padding: '24px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                            <SkeletonBox w="160px" h="13px" />
-                            {[80, 55, 30, 15, 5].map((pct, i) => (
-                                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                    <SkeletonBox w="20px" h="13px" style={{ flexShrink: 0 }} />
-                                    <SkeletonBox w="14px" h="13px" style={{ flexShrink: 0 }} />
-                                    <div style={{ flex: 1, height: '8px', background: COLOR.border, borderRadius: '4px', overflow: 'hidden' }}>
-                                        <SkeletonBox w={`${pct}%`} h="100%" style={{ borderRadius: '4px' }} />
-                                    </div>
-                                    <SkeletonBox w="20px" h="12px" style={{ flexShrink: 0 }} />
+                    <div style={{ background: COLOR.white, border: `1px solid ${COLOR.border}`, borderRadius: '12px', padding: '24px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                        <SkeletonBox w="160px" h="13px" />
+                        {[80, 55, 30, 15, 5].map((pct, i) => (
+                            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                <SkeletonBox w="20px" h="13px" style={{ flexShrink: 0 }} />
+                                <SkeletonBox w="14px" h="13px" style={{ flexShrink: 0 }} />
+                                <div style={{ flex: 1, height: '8px', background: COLOR.border, borderRadius: '4px', overflow: 'hidden' }}>
+                                    <SkeletonBox w={`${pct}%`} h="100%" style={{ borderRadius: '4px' }} />
                                 </div>
-                            ))}
-                        </div>
-                    </div>
-
-                    <Divider />
-
-                    {/* Controls row */}
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '12px' }}>
-                        <SkeletonBox w="130px" h="13px" />
-                        <SkeletonBox w="160px" h="34px" style={{ borderRadius: '8px' }} />
-                    </div>
-
-                    {/* Feedback card skeletons */}
-                    {[1, 2, 3].map(n => (
-                        <div key={n} style={{ background: COLOR.white, border: `1px solid ${COLOR.border}`, borderRadius: '12px', padding: '20px 24px', marginBottom: '12px' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                                    <SkeletonBox w="130px" h="15px" />
-                                    <SkeletonBox w="80px" h="12px" />
-                                </div>
-                                <SkeletonBox w="70px" h="12px" />
+                                <SkeletonBox w="20px" h="12px" style={{ flexShrink: 0 }} />
                             </div>
-                            <div style={{ display: 'flex', gap: '4px', marginBottom: '10px' }}>
-                                {[...Array(5)].map((_, i) => (
-                                    <SkeletonBox key={i} w="16px" h="16px" style={{ borderRadius: '3px' }} />
-                                ))}
-                            </div>
-                            <SkeletonBox w="100%" h="14px" style={{ marginBottom: '6px' }} />
-                            <SkeletonBox w="65%" h="14px" />
-                        </div>
-                    ))}
-
+                        ))}
+                    </div>
                 </div>
-            </div>
+
+                <Divider />
+
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '12px' }}>
+                    <SkeletonBox w="130px" h="13px" />
+                    <SkeletonBox w="160px" h="34px" style={{ borderRadius: '8px' }} />
+                </div>
+
+                {[1, 2, 3].map(n => (
+                    <div key={n} style={{ background: COLOR.white, border: `1px solid ${COLOR.border}`, borderRadius: '12px', padding: '20px 24px', marginBottom: '12px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                <SkeletonBox w="130px" h="15px" />
+                                <SkeletonBox w="80px"  h="12px" />
+                            </div>
+                            <SkeletonBox w="70px" h="12px" />
+                        </div>
+                        <div style={{ display: 'flex', gap: '4px', marginBottom: '10px' }}>
+                            {[...Array(5)].map((_, i) => <SkeletonBox key={i} w="16px" h="16px" style={{ borderRadius: '3px' }} />)}
+                        </div>
+                        <SkeletonBox w="100%" h="14px" style={{ marginBottom: '6px' }} />
+                        <SkeletonBox w="65%"  h="14px" />
+                    </div>
+                ))}
+            </PageWrapper>
         )
     }
-    // ─────────────────────────────────────────────────────────────────────────
 
     if (fetchError) {
         return (
-            <div style={{ padding: '48px', textAlign: 'center', color: COLOR.red, fontFamily: '"Lato", sans-serif' }}>
-                {fetchError}
-            </div>
+            <PageWrapper>
+                <PageHeader title="Feedback" />
+                <p style={{ color: COLOR.red, fontSize: '14px', fontFamily: '"Lato", sans-serif' }}>{fetchError}</p>
+            </PageWrapper>
         )
     }
 
     return (
-        <div style={{ minHeight: '100vh', background: COLOR.cream, fontFamily: '"Lato", sans-serif' }}>
-            <div style={{ maxWidth: '1180px', margin: '0 auto', padding: '48px 40px 80px' }}>
+        <PageWrapper>
+            <PageHeader title="Feedback" />
 
-                {/* Page title */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '18px', marginBottom: '28px' }}>
-                    <h1 style={{ fontFamily: '"Lato", serif', fontSize: '36px', fontWeight: 700, color: COLOR.red, margin: 0 }}>
-                        Feedback
-                    </h1>
+            {feedback.length === 0 && (
+                <p style={{ color: COLOR.muted, fontSize: '14px' }}>No feedback submitted yet.</p>
+            )}
+
+            {feedback.length > 0 && (<>
+
+                <SectionLabel>Overall rating</SectionLabel>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '24px', alignItems: 'center', marginBottom: '4px' }}>
+                    <div style={{ background: COLOR.white, border: `1px solid ${COLOR.border}`, borderRadius: '12px', padding: '24px', textAlign: 'center' }}>
+                        <p style={{ fontSize: '52px', fontWeight: 700, color: COLOR.text, margin: '0 0 4px', lineHeight: 1 }}>
+                            {avgRating.toFixed(1)}
+                        </p>
+                        <div style={{ display: 'flex', justifyContent: 'center', gap: '2px', margin: '0 0 8px' }}>
+                            {renderStars(Math.round(avgRating))}
+                        </div>
+                        <p style={{ fontSize: '13px', color: COLOR.muted, margin: 0 }}>
+                            Based on {feedback.length} review{feedback.length !== 1 ? 's' : ''}
+                        </p>
+                    </div>
+                    <div style={{ background: COLOR.white, border: `1px solid ${COLOR.border}`, borderRadius: '12px', padding: '24px' }}>
+                        <p style={{ fontSize: '13px', color: COLOR.muted, margin: '0 0 12px' }}>Click a row to filter by that rating</p>
+                        <StarBreakdown feedback={feedback} activeFilter={activeFilter} onFilter={setActiveFilter} />
+                    </div>
                 </div>
 
-                {/* Gold divider */}
-                <div style={{ height: '2px', background: `linear-gradient(90deg, ${COLOR.gold}, transparent)`, marginBottom: '32px', borderRadius: '1px' }} />
+                <Divider />
 
-                {/* Empty state */}
-                {feedback.length === 0 && (
-                    <p style={{ color: COLOR.muted, fontSize: '14px' }}>No feedback submitted yet.</p>
-                )}
-
-                {feedback.length > 0 && (<>
-
-                    {/* Section 1: Overall Rating */}
-                    <SectionLabel>Overall rating</SectionLabel>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '24px', alignItems: 'center', marginBottom: '4px' }}>
-
-                        {/* Average score card */}
-                        <div style={{ background: COLOR.white, border: `1px solid ${COLOR.border}`, borderRadius: '12px', padding: '24px', textAlign: 'center' }}>
-                            <p style={{ fontSize: '52px', fontWeight: 700, color: COLOR.text, margin: '0 0 4px', lineHeight: 1 }}>
-                                {avgRating.toFixed(1)}
-                            </p>
-                            <div style={{ display: 'flex', justifyContent: 'center', gap: '2px', margin: '0 0 8px' }}>
-                                {renderStars(Math.round(avgRating))}
-                            </div>
-                            <p style={{ fontSize: '13px', color: COLOR.muted, margin: 0 }}>
-                                Based on {feedback.length} review{feedback.length !== 1 ? 's' : ''}
-                            </p>
-                        </div>
-
-                        {/* Star breakdown bars */}
-                        <div style={{ background: COLOR.white, border: `1px solid ${COLOR.border}`, borderRadius: '12px', padding: '24px' }}>
-                            <p style={{ fontSize: '13px', color: COLOR.muted, margin: '0 0 12px' }}>
-                                Click a row to filter by that rating
-                            </p>
-                            <StarBreakdown
-                                feedback={feedback}
-                                activeFilter={activeFilter}
-                                onFilter={setActiveFilter}
-                            />
-                        </div>
-                    </div>
-
-                    <Divider />
-
-                    {/* Section 2: Controls row */}
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '12px' }}>
-
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-                            <SectionLabel>
-                                {activeFilter === 'all'
-                                    ? `All reviews (${feedback.length})`
-                                    : `${activeFilter}-star reviews (${processedFeedback.length})`
-                                }
-                            </SectionLabel>
-
-                            {activeFilter !== 'all' && (
-                                <button
-                                    onClick={() => setActiveFilter('all')}
-                                    style={{
-                                        background: COLOR.goldLight, border: `1px solid ${COLOR.gold}`,
-                                        borderRadius: '20px', padding: '3px 10px', fontSize: '12px',
-                                        color: COLOR.red, cursor: 'pointer', fontFamily: '"Lato", sans-serif',
-                                        fontWeight: 700, marginBottom: '12px', display: 'flex',
-                                        alignItems: 'center', gap: '4px',
-                                    }}
-                                >
-                                    {activeFilter} <FaStar style={{ color: COLOR.gold, fontSize: '11px' }} /> ×
-                                </button>
-                            )}
-                        </div>
-
-                        {/* Sort dropdown */}
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
-                            <label style={{ fontSize: '12px', color: COLOR.muted, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.06em', whiteSpace: 'nowrap' }}>
-                                Sort by
-                            </label>
-                            <select
-                                value={sortKey}
-                                onChange={e => setSortKey(e.target.value)}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '12px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                        <SectionLabel>
+                            {activeFilter === 'all'
+                                ? `All reviews (${feedback.length})`
+                                : `${activeFilter}-star reviews (${processedFeedback.length})`}
+                        </SectionLabel>
+                        {activeFilter !== 'all' && (
+                            <button
+                                onClick={() => setActiveFilter('all')}
                                 style={{
-                                    padding: '7px 12px', border: `1.5px solid ${COLOR.border}`,
-                                    borderRadius: '8px', fontSize: '13px', background: COLOR.white,
-                                    color: COLOR.text, cursor: 'pointer', fontFamily: '"Lato", sans-serif',
+                                    background: COLOR.goldLight, border: `1px solid ${COLOR.gold}`,
+                                    borderRadius: '20px', padding: '3px 10px', fontSize: '12px',
+                                    color: COLOR.red, cursor: 'pointer', fontFamily: '"Lato", sans-serif',
+                                    fontWeight: 700, marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '4px',
                                 }}
                             >
-                                {SORT_OPTIONS.map(o => (
-                                    <option key={o.value} value={o.value}>{o.label}</option>
-                                ))}
-                            </select>
-                        </div>
+                                {activeFilter} <FaStar style={{ color: COLOR.gold, fontSize: '11px' }} /> ×
+                            </button>
+                        )}
                     </div>
 
-                    {/* Section 3: Feedback cards */}
-                    {processedFeedback.length === 0
-                        ? <p style={{ color: COLOR.muted, fontSize: '14px' }}>No reviews for this rating.</p>
-                        : processedFeedback.map(item => <FeedbackCard key={item.id} item={item} />)
-                    }
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+                        <label style={{ fontSize: '12px', color: COLOR.muted, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.06em', whiteSpace: 'nowrap' }}>
+                            Sort by
+                        </label>
+                        <select
+                            value={sortKey}
+                            onChange={e => setSortKey(e.target.value)}
+                            style={{
+                                padding: '7px 12px', border: `1.5px solid ${COLOR.border}`,
+                                borderRadius: '8px', fontSize: '13px', background: COLOR.white,
+                                color: COLOR.text, cursor: 'pointer', fontFamily: '"Lato", sans-serif',
+                            }}
+                        >
+                            {SORT_OPTIONS.map(o => (
+                                <option key={o.value} value={o.value}>{o.label}</option>
+                            ))}
+                        </select>
+                    </div>
+                </div>
 
-                </>)}
+                {processedFeedback.length === 0
+                    ? <p style={{ color: COLOR.muted, fontSize: '14px' }}>No reviews for this rating.</p>
+                    : processedFeedback.map(item => <FeedbackCard key={item.id} item={item} />)
+                }
 
-            </div>
-        </div>
+            </>)}
+        </PageWrapper>
     )
 }
