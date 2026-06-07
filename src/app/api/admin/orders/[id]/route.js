@@ -19,6 +19,7 @@ import { supabaseAdmin }             from '@/lib/supabase-admin'
 import { getAdminOrderById, adminUpdateOrder } from '@/lib/db/admin'
 import { sendFeedbackRequestEmail }  from '@/lib/email/feedbackRequest'
 import { sendOrderStatusEmail }      from '@/lib/email/orderStatus'
+import { sendWeightsConfirmedEmail }  from '@/lib/email/weightsConfirmed'
 
 // ─── Auth helper ──────────────────────────────────────────────────────────────
 
@@ -206,6 +207,21 @@ export const PATCH = withHandler(
 // 4. Writes one audit log row per changed weight
 
 async function saveActualWeights({ orderId, actualWeights, changedBy }) {
+  // Hard lock - weights cannot be changed once an order is READY or COMPLETED.
+  // The fontend also enforces this but the API must be the source of truth.
+  const LOCKED_STATUSES = ['READY', 'COMPLETED']
+  const { data: orderStatus, error: statusError } = await supabaseAdmin
+    .from('orders')
+    .select('status')
+    .eq('id', orderId)
+    .single()
+
+  if (statusError) return { error: statusError.message }
+  if (LOCKED_STATUSES.includes(orderStatus.status)){
+    return {
+      error: `Weights cannot be edited - order is ${orderStatus.status}. Contact an administrator if a correction is needed.`
+    }
+  }
   // Fetch all order items for this order (we need product type + price)
   const { data: orderItems, error: fetchError } = await supabaseAdmin
     .from('order_items')
@@ -302,7 +318,45 @@ async function saveActualWeights({ orderId, actualWeights, changedBy }) {
       // Non-fatal — the data is saved, just log the failure
       console.error('[saveActualWeights] audit log insert failed:', auditErr)
     }
-  }
 
+        // ── Weights confirmed email ────────────────────────────────────────────────
+    // Only fires when at least one weight actually changed (auditRows.length > 0).
+    // Failures are logged but never block the response — the save is the
+    // critical operation, email is secondary.
+    try {
+      const { data: orderDetail } = await supabaseAdmin
+        .from('orders')
+        .select(`
+          total_cents,
+          deposit_paid_cents,
+          pickup_date,
+          customer:users ( email, first_name )
+        `)
+        .eq('id', orderId)
+        .single()
+
+      if (orderDetail?.customer?.email) {
+        const pickupDate = orderDetail.pickup_date
+          ? new Date(orderDetail.pickup_date).toLocaleDateString('en-AU', {
+              weekday: 'long',
+              day:     'numeric',
+              month:   'long',
+              year:    'numeric',
+            })
+          : 'To be confirmed'
+
+        await sendWeightsConfirmedEmail({
+          customerEmail:     orderDetail.customer.email,
+          customerFirstName: orderDetail.customer.first_name ?? 'there',
+          orderId,
+          pickupDate,
+          totalCents:        newTotal,
+          depositPaidCents:  orderDetail.deposit_paid_cents ?? 0,
+        })
+      }
+    } catch (emailErr) {
+      console.error('[weights-confirmed-email] Failed to send:', emailErr)
+    }
+  }
   return { error: null }
 }
