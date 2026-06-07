@@ -206,6 +206,21 @@ export const PATCH = withHandler(
 // 4. Writes one audit log row per changed weight
 
 async function saveActualWeights({ orderId, actualWeights, changedBy }) {
+  // Hard lock - weights cannot be changed once an order is READY or COMPLETED.
+  // The fontend also enforces this but the API must be the source of truth.
+  const LOCKED_STATUSES = ['READY', 'COMPLETED']
+  const { data: orderStatus, error: statusError } = await supabaseAdmin
+    .from('orders')
+    .select('status')
+    .eq('id', orderId)
+    .single()
+
+  if (statusError) return { error: statusError.message }
+  if (LOCKED_STATUSES.includes(orderStatus.status)){
+    return {
+      error: `Weights cannot be edited - order is ${orderStatus.status}. Contact an administrator if a correction is needed.`
+    }
+  }
   // Fetch all order items for this order (we need product type + price)
   const { data: orderItems, error: fetchError } = await supabaseAdmin
     .from('order_items')
