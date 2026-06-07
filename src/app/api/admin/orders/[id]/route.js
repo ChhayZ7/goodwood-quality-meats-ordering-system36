@@ -19,6 +19,7 @@ import { supabaseAdmin }             from '@/lib/supabase-admin'
 import { getAdminOrderById, adminUpdateOrder } from '@/lib/db/admin'
 import { sendFeedbackRequestEmail }  from '@/lib/email/feedbackRequest'
 import { sendOrderStatusEmail }      from '@/lib/email/orderStatus'
+import { sendWeightsConfirmedEmail }  from '@/lib/email/weightsConfirmed'
 
 // ─── Auth helper ──────────────────────────────────────────────────────────────
 
@@ -317,7 +318,45 @@ async function saveActualWeights({ orderId, actualWeights, changedBy }) {
       // Non-fatal — the data is saved, just log the failure
       console.error('[saveActualWeights] audit log insert failed:', auditErr)
     }
-  }
 
+        // ── Weights confirmed email ────────────────────────────────────────────────
+    // Only fires when at least one weight actually changed (auditRows.length > 0).
+    // Failures are logged but never block the response — the save is the
+    // critical operation, email is secondary.
+    try {
+      const { data: orderDetail } = await supabaseAdmin
+        .from('orders')
+        .select(`
+          total_cents,
+          deposit_paid_cents,
+          pickup_date,
+          customer:users ( email, first_name )
+        `)
+        .eq('id', orderId)
+        .single()
+
+      if (orderDetail?.customer?.email) {
+        const pickupDate = orderDetail.pickup_date
+          ? new Date(orderDetail.pickup_date).toLocaleDateString('en-AU', {
+              weekday: 'long',
+              day:     'numeric',
+              month:   'long',
+              year:    'numeric',
+            })
+          : 'To be confirmed'
+
+        await sendWeightsConfirmedEmail({
+          customerEmail:     orderDetail.customer.email,
+          customerFirstName: orderDetail.customer.first_name ?? 'there',
+          orderId,
+          pickupDate,
+          totalCents:        newTotal,
+          depositPaidCents:  orderDetail.deposit_paid_cents ?? 0,
+        })
+      }
+    } catch (emailErr) {
+      console.error('[weights-confirmed-email] Failed to send:', emailErr)
+    }
+  }
   return { error: null }
 }
