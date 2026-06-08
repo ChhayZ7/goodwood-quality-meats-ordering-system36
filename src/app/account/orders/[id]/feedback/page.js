@@ -31,11 +31,11 @@ export default function FeedbackPage() {
   const router = useRouter()
   const { id } = useParams()
 
-  const [score, setScore]               = useState(0)
+  const [score, setScore] = useState(0)
   const [feedbackText, setFeedbackText] = useState('')
-  const [submitting, setSubmitting]     = useState(false)
-  const [submitted, setSubmitted]       = useState(false)
-  const [error, setError]               = useState(null)
+  const [submitting, setSubmitting] = useState(false)
+  const [submitted, setSubmitted] = useState(false)
+  const [error, setError] = useState(null)
 
   async function handleSubmit(e) {
     e.preventDefault()
@@ -47,7 +47,7 @@ export default function FeedbackPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          order_id:      id,
+          order_id: id,
           score,
           feedback_text: feedbackText || undefined,
         }),

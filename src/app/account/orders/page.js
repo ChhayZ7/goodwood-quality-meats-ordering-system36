@@ -5,12 +5,12 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
 const statusColors = {
-  'PENDING':          'bg-gray-400',
-  'CONFIRMED':        'bg-yellow-500',
-  'IN_PROGRESS':      'bg-blue-500',
+  'PENDING': 'bg-gray-400',
+  'CONFIRMED': 'bg-yellow-500',
+  'IN_PROGRESS': 'bg-blue-500',
   'READY_FOR_PICKUP': 'bg-green-500',
-  'COMPLETED':        'bg-gray-500',
-  'CANCELLED':        'bg-red-500',
+  'COMPLETED': 'bg-gray-500',
+  'CANCELLED': 'bg-red-500',
 }
 
 function OrderCardSkeleton() {
@@ -37,9 +37,9 @@ function OrderCardSkeleton() {
 
 export default function OrdersPage() {
   const router = useRouter()
-  const [orders, setOrders]   = useState([])
+  const [orders, setOrders] = useState([])
   const [loading, setLoading] = useState(true)
-  const [error, setError]     = useState(null)
+  const [error, setError] = useState(null)
 
   useEffect(() => {
     async function load() {

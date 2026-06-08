@@ -6,18 +6,18 @@ import { createClient } from '@/lib/supabase-browser'
 export default function ProfilePage() {
   const router = useRouter()
 
-  const [user, setUser]       = useState(null)
-  const [form, setForm]       = useState({ first_name: '', last_name: '', phone: '' })
+  const [user, setUser] = useState(null)
+  const [form, setForm] = useState({ first_name: '', last_name: '', phone: '' })
   const [loading, setLoading] = useState(true)
-  const [saving, setSaving]   = useState(false)
-  const [error, setError]     = useState(null)
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState(null)
   const [success, setSuccess] = useState(false)
   const [showPasswordForm, setShowPasswordForm] = useState(false)
   const [passwordForm, setPasswordForm] = useState({
     current_password: '', new_password: '', confirm_password: ''
   })
-  const [passwordError, setPasswordError]       = useState(null)
-  const [passwordSuccess, setPasswordSuccess]   = useState(false)
+  const [passwordError, setPasswordError] = useState(null)
+  const [passwordSuccess, setPasswordSuccess] = useState(false)
   const [changingPassword, setChangingPassword] = useState(false)
   const [emailUnsubscribed, setEmailUnsubscribed] = useState(false)
 
@@ -46,12 +46,12 @@ export default function ProfilePage() {
     setUser(json.user); setSuccess(true); setSaving(false)
   }
 
-    const handleEmailPreference = async (unsubscribed) => {
+  const handleEmailPreference = async (unsubscribed) => {
     setEmailUnsubscribed(unsubscribed)
     const res = await fetch('/api/users/me', {
-      method:  'PATCH',
+      method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ email_unsubscribed: unsubscribed }),
+      body: JSON.stringify({ email_unsubscribed: unsubscribed }),
     })
     const json = await res.json()
     if (!res.ok) {
@@ -135,7 +135,7 @@ export default function ProfilePage() {
       <div className="bg-white rounded-xl border border-gray-200 p-8 mb-6">
         <h2 className="text-xl font-semibold text-gray-800 mb-6">Personal Details</h2>
 
-        {error   && <p className="text-red-600 text-sm mb-4">{error}</p>}
+        {error && <p className="text-red-600 text-sm mb-4">{error}</p>}
         {success && <p className="text-green-600 text-sm mb-4">Details updated successfully.</p>}
 
         <form onSubmit={handleSave} className="space-y-5">
@@ -205,7 +205,7 @@ export default function ProfilePage() {
           </button>
         ) : (
           <form onSubmit={handlePasswordChange} className="space-y-4 mt-4">
-            {passwordError   && <p className="text-red-600 text-sm">{passwordError}</p>}
+            {passwordError && <p className="text-red-600 text-sm">{passwordError}</p>}
             {passwordSuccess && <p className="text-green-600 text-sm">Password updated successfully.</p>}
 
             <div>
@@ -259,49 +259,49 @@ export default function ProfilePage() {
         )}
       </div>
       <div className="bg-white rounded-xl border border-gray-200 p-8 mb-6">
-          <h2 className="text-xl font-semibold text-gray-800 mb-2">Email Preferences</h2>
-          <p className="text-sm text-gray-500 mb-6">
-            Control which emails you receive from us. You will always receive
-            transactional emails about your orders regardless of this setting.
-          </p>
-          <div className="flex items-center justify-between p-4 rounded-lg"
-            style={{ background: '#FAF3E0', border: '1px solid #E8D48A' }}>
-            <div>
-              <p className="text-sm font-semibold text-gray-800">
-                Marketing emails
-              </p>
-              <p className="text-xs text-gray-500 mt-1">
-                Christmas order reminders and promotions from Goodwood Quality Meats
-              </p>
-            </div>
-            {/* Toggle switch */}
-            <button
-              type="button"
-              role="switch"
-              aria-checked={!emailUnsubscribed}
-              onClick={() => handleEmailPreference(!emailUnsubscribed)}
-              className="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer
+        <h2 className="text-xl font-semibold text-gray-800 mb-2">Email Preferences</h2>
+        <p className="text-sm text-gray-500 mb-6">
+          Control which emails you receive from us. You will always receive
+          transactional emails about your orders regardless of this setting.
+        </p>
+        <div className="flex items-center justify-between p-4 rounded-lg"
+          style={{ background: '#FAF3E0', border: '1px solid #E8D48A' }}>
+          <div>
+            <p className="text-sm font-semibold text-gray-800">
+              Marketing emails
+            </p>
+            <p className="text-xs text-gray-500 mt-1">
+              Christmas order reminders and promotions from Goodwood Quality Meats
+            </p>
+          </div>
+          {/* Toggle switch */}
+          <button
+            type="button"
+            role="switch"
+            aria-checked={!emailUnsubscribed}
+            onClick={() => handleEmailPreference(!emailUnsubscribed)}
+            className="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer
                 rounded-full border-2 border-transparent transition-colors duration-200
                 focus:outline-none focus:ring-2 focus:ring-[#8B1A1A] focus:ring-offset-2"
-              style={{
-                backgroundColor: emailUnsubscribed ? '#D1D5DB' : '#8B1A1A',
-              }}
-            >
-              <span
-                className="pointer-events-none inline-block h-5 w-5 transform rounded-full
+            style={{
+              backgroundColor: emailUnsubscribed ? '#D1D5DB' : '#8B1A1A',
+            }}
+          >
+            <span
+              className="pointer-events-none inline-block h-5 w-5 transform rounded-full
                   bg-white shadow ring-0 transition duration-200 ease-in-out"
-                style={{
-                  transform: emailUnsubscribed ? 'translateX(0)' : 'translateX(20px)',
-                }}
-              />
-            </button>
-          </div>
-          <p className="text-xs text-gray-400 mt-3">
-            {emailUnsubscribed
-              ? 'You are currently unsubscribed from marketing emails.'
-              : 'You are currently subscribed to marketing emails.'
-            }
-          </p>
+              style={{
+                transform: emailUnsubscribed ? 'translateX(0)' : 'translateX(20px)',
+              }}
+            />
+          </button>
+        </div>
+        <p className="text-xs text-gray-400 mt-3">
+          {emailUnsubscribed
+            ? 'You are currently unsubscribed from marketing emails.'
+            : 'You are currently subscribed to marketing emails.'
+          }
+        </p>
       </div>
     </div>
   )

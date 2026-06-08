@@ -37,9 +37,9 @@ export const POST = withHandler(
     if (paymentIntent.status !== 'succeeded') {
       return NextResponse.json(
         {
-          error:         'Payment has not been completed',
+          error: 'Payment has not been completed',
           stripe_status: paymentIntent.status,
-          status:        402,
+          status: 402,
         },
         { status: 402 }
       )
@@ -62,9 +62,9 @@ export const POST = withHandler(
     const { error: paymentError } = await recordPayment({
       order_id,
       stripe_payment_intent_id: payment_intent_id,
-      amount_cents:             paymentIntent.amount,
-      type:                     'DEPOSIT',
-      status:                   'PAID',
+      amount_cents: paymentIntent.amount,
+      type: 'DEPOSIT',
+      status: 'PAID',
     })
 
     if (paymentError) throw paymentError
@@ -82,7 +82,7 @@ export const POST = withHandler(
     // Moves order from PENDING → CONFIRMED and records how much the deposit was.
     // Confirmation email is handled by the Stripe webhook, not here.
     const { error: updateError } = await updateOrder(order_id, {
-      status:             'CONFIRMED',
+      status: 'CONFIRMED',
       deposit_paid_cents: paymentIntent.amount,
     })
 

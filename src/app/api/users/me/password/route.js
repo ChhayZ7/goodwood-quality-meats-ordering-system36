@@ -56,16 +56,17 @@ export const PATCH = withHandler(
                 new_password: 'string',
             },
             validators: {
+                // strong password check
                 new_password: (val) => {
                     if (val.length < 8){
                         return 'New password must be at least 8 characters'
                     }
-                    // if (val == val.toLowerCase()){
-                    //     return 'Password must contain at least one uppercase letter'
-                    // }
-                    // if (!/\d/.test(val)){
-                    //     return 'Password must contain at least one number'
-                    // }
+                    if (val == val.toLowerCase()){
+                        return 'Password must contain at least one uppercase letter'
+                    }
+                    if (!/\d/.test(val)){
+                        return 'Password must contain at least one number'
+                    }
                     return null
                 },
             },

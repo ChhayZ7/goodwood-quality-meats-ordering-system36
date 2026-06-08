@@ -9,12 +9,12 @@ import { useRouter, useParams } from 'next/navigation'
 import Link from 'next/link'
 
 const statusColors = {
-  'PENDING':          'bg-gray-400',
-  'CONFIRMED':        'bg-yellow-500',
-  'IN_PROGRESS':      'bg-blue-500',
+  'PENDING': 'bg-gray-400',
+  'CONFIRMED': 'bg-yellow-500',
+  'IN_PROGRESS': 'bg-blue-500',
   'READY_FOR_PICKUP': 'bg-green-500',
-  'COMPLETED':        'bg-gray-500',
-  'CANCELLED':        'bg-red-500',
+  'COMPLETED': 'bg-gray-500',
+  'CANCELLED': 'bg-red-500',
 }
 
 // Statuses where the invoice figures are confirmed (actual weights saved)
@@ -108,7 +108,7 @@ export default function OrderDetailPage() {
     </div>
   )
 
-  if (error)  return <p className="text-red-600 p-8">{error}</p>
+  if (error) return <p className="text-red-600 p-8">{error}</p>
   if (!order) return <p className="text-gray-500 p-8">Order not found.</p>
 
   const isFinal       = FINAL_STATUSES.includes(order.status)
@@ -252,9 +252,9 @@ export default function OrderDetailPage() {
           className="flex items-center gap-2 bg-[#8B1A1A] text-white px-6 py-3 rounded-lg text-sm font-semibold hover:opacity-90 transition"
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-            <polyline points="7 10 12 15 17 10"/>
-            <line x1="12" y1="15" x2="12" y2="3"/>
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <polyline points="7 10 12 15 17 10" />
+            <line x1="12" y1="15" x2="12" y2="3" />
           </svg>
           {invoiceLabel}
         </button>
@@ -264,7 +264,7 @@ export default function OrderDetailPage() {
           className="flex items-center gap-2 border border-[#8B1A1A] text-[#8B1A1A] px-6 py-3 rounded-lg text-sm font-semibold hover:bg-[#8B1A1A] hover:text-white transition"
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
           </svg>
           Leave a Review
         </Link>
