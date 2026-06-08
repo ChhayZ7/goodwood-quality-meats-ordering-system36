@@ -2,7 +2,7 @@
 
 import { createClient } from '@/lib/supabase-server'
 import { redirect } from 'next/navigation'
-import DashboardSidebar from '@/components/DashboardSideBar'
+import DashboardSidebar from '@/components/dashboard/DashboardSideBar'
 
 export default async function StaffLayout({ children }) {
   const supabase = await createClient()

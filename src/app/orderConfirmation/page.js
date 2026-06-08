@@ -1,6 +1,8 @@
 'use client'
+// src/app/orderConfirmation/page.js
 // Shown after a successful checkout. Reads ?order_id= from the URL,
-// fetches the real order from /api/orders/:id, and displays it.
+// fetches the real order, displays it, and provides an immediate
+// invoice download button so customers don't have to navigate to My Orders.
 
 import { useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
@@ -20,6 +22,7 @@ function formatCents(cents) {
 function shortOrderNumber(id) {
   return id ? `GW-${id.slice(0, 8).toUpperCase()}` : '—'
 }
+
 function getTargetKg(opt) {
   if (!opt.max_weight_kg || opt.max_weight_kg === opt.min_weight_kg) {
     return { type: 'single', kg: opt.min_weight_kg }
@@ -85,13 +88,56 @@ function getItemDetail(item) {
   return `× ${item.quantity}`
 }
 
+// ─── Download button ──────────────────────────────────────────────────────────
+// Inline component so it can manage its own "downloading" state without
+// affecting the rest of the page.
+function InvoiceDownloadButton({ orderId }) {
+  const [downloading, setDownloading] = useState(false)
+
+  async function handleDownload() {
+    if (downloading) return
+    setDownloading(true)
+    try {
+      // Open in new tab — browser handles the PDF download from the API
+      window.open(`/api/orders/${orderId}/invoice/confirmation`, '_blank')
+    } finally {
+      // Small delay so the button state feels intentional
+      setTimeout(() => setDownloading(false), 1500)
+    }
+  }
+
+  return (
+    <button
+      onClick={handleDownload}
+      disabled={downloading}
+      className="flex items-center gap-2 w-full justify-center py-4 rounded-lg font-semibold transition-opacity hover:opacity-90"
+      style={{
+        backgroundColor: downloading ? '#9ca3af' : '#8B1A1A',
+        color: '#fff',
+        border: 'none',
+        cursor: downloading ? 'not-allowed' : 'pointer',
+        fontSize: '14px',
+      }}
+    >
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+        <polyline points="7 10 12 15 17 10"/>
+        <line x1="12" y1="15" x2="12" y2="3"/>
+      </svg>
+      {downloading ? 'Opening…' : 'Download Confirmation Invoice'}
+    </button>
+  )
+}
+
+// ─── Main page ────────────────────────────────────────────────────────────────
+
 export default function OrderConfirmationPage() {
   const searchParams = useSearchParams()
   const orderId = searchParams.get('order_id')
 
-  const [order, setOrder]     = useState(null)
+  const [order,   setOrder]   = useState(null)
   const [loading, setLoading] = useState(true)
-  const [error, setError]     = useState(null)
+  const [error,   setError]   = useState(null)
 
   useEffect(() => {
     if (!orderId) {
@@ -117,7 +163,7 @@ export default function OrderConfirmationPage() {
     fetchOrder()
   }, [orderId])
 
-  // Loading
+  // ── Loading ────────────────────────────────────────────────────────────────
   if (loading) {
     return (
       <main className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#FDF8F0' }}>
@@ -126,7 +172,7 @@ export default function OrderConfirmationPage() {
     )
   }
 
-  // Error but order was placed
+  // ── Error (but order was placed — show fallback with download still available) ──
   if (error || !order) {
     return (
       <main className="min-h-screen py-12" style={{ backgroundColor: '#FDF8F0' }}>
@@ -141,26 +187,30 @@ export default function OrderConfirmationPage() {
           <p className="text-lg mb-6" style={{ color: '#717182' }}>
             {error ?? 'Your deposit has been secured.'}
           </p>
-          <Link
-            href="/dashboard"
-            className="inline-block px-6 py-3 rounded-lg text-white font-semibold"
-            style={{ backgroundColor: '#8B1A1A' }}
-          >
-            View My Orders
-          </Link>
+          <div className="flex flex-col gap-3 max-w-xs mx-auto">
+            {/* Still show the download button even if order details failed to load */}
+            {orderId && <InvoiceDownloadButton orderId={orderId} />}
+            <Link
+              href="/account/orders"
+              className="block w-full text-center py-4 rounded-lg font-semibold transition-opacity hover:opacity-90"
+              style={{ border: '1px solid #8B1A1A', color: '#8B1A1A', backgroundColor: 'transparent' }}
+            >
+              View My Orders
+            </Link>
+          </div>
         </div>
       </main>
     )
   }
 
-  // Success with real order data
-  const depositPaid = order.payments?.find(p => p.type === 'DEPOSIT' && p.status === 'PAID')
+  // ── Success ────────────────────────────────────────────────────────────────
+  const depositPaid  = order.payments?.find(p => p.type === 'DEPOSIT' && p.status === 'PAID')
   const depositAmount = depositPaid?.amount_cents ?? 2000
   const { minTotal, maxTotal } = getPriceRange(order.order_items ?? [])
   const minBalance = Math.max(0, minTotal - depositAmount)
   const maxBalance = Math.max(0, maxTotal - depositAmount)
-  const hasRange = minBalance !== maxBalance
-  const hasPrice = minTotal > 0
+  const hasRange   = minBalance !== maxBalance
+  const hasPrice   = minTotal > 0
 
   return (
     <main className="min-h-screen py-12" style={{ backgroundColor: '#FDF8F0' }}>
@@ -184,7 +234,6 @@ export default function OrderConfirmationPage() {
         <div className="bg-white rounded-lg p-6 mb-6" style={{ border: '1px solid #e5e5e5' }}>
           <h2 className="text-lg font-semibold mb-4" style={{ color: '#2C2C2A' }}>Order Summary</h2>
 
-          {/* Order number */}
           <div className="flex justify-between items-center py-3" style={{ borderBottom: '1px solid #e5e5e5' }}>
             <span className="text-sm" style={{ color: '#717182' }}>Order Number</span>
             <span className="text-sm font-semibold" style={{ color: '#2C2C2A' }}>
@@ -192,7 +241,6 @@ export default function OrderConfirmationPage() {
             </span>
           </div>
 
-          {/* Pickup date */}
           <div className="flex justify-between items-center py-3" style={{ borderBottom: '1px solid #e5e5e5' }}>
             <span className="text-sm" style={{ color: '#717182' }}>Pickup Date</span>
             <span className="text-sm font-semibold" style={{ color: '#2C2C2A' }}>
@@ -200,7 +248,6 @@ export default function OrderConfirmationPage() {
             </span>
           </div>
 
-          {/* Items */}
           <div className="py-3" style={{ borderBottom: '1px solid #e5e5e5' }}>
             <span className="text-sm mb-3 block" style={{ color: '#717182' }}>Items Ordered</span>
             <div className="flex flex-col gap-2">
@@ -222,7 +269,6 @@ export default function OrderConfirmationPage() {
             </div>
           </div>
 
-          {/* Deposit paid */}
           <div className="flex justify-between items-center py-3" style={{ borderBottom: '1px solid #e5e5e5' }}>
             <span className="text-sm" style={{ color: '#717182' }}>Deposit Paid</span>
             <span className="text-sm font-semibold" style={{ color: '#2D6A2D' }}>
@@ -230,7 +276,6 @@ export default function OrderConfirmationPage() {
             </span>
           </div>
 
-          {/* Estimated balance due */}
           <div className="flex justify-between items-center pt-3">
             <span className="text-sm font-semibold" style={{ color: '#2C2C2A' }}>
               Estimated Balance Due at Pickup
@@ -244,7 +289,7 @@ export default function OrderConfirmationPage() {
               }
             </span>
           </div>
-        </div>{/* end order details card */}
+        </div>
 
         {/* Info box */}
         <div
@@ -261,17 +306,22 @@ export default function OrderConfirmationPage() {
 
         {/* Buttons */}
         <div className="flex flex-col gap-3">
+
+          {/* Invoice download — prominent, at the top of the action list */}
+          <InvoiceDownloadButton orderId={order.id} />
+
           <Link
             href="/account/orders"
-            className="block w-full text-center py-4 rounded-lg text-white font-semibold transition-opacity hover:opacity-90"
-            style={{ backgroundColor: '#8B1A1A' }}
+            className="block w-full text-center py-4 rounded-lg font-semibold transition-opacity hover:opacity-90"
+            style={{ border: '1px solid #8B1A1A', color: '#8B1A1A', backgroundColor: 'transparent' }}
           >
             View My Orders
           </Link>
+
           <Link
             href="/products"
             className="block w-full text-center py-4 rounded-lg font-semibold transition-opacity hover:opacity-70"
-            style={{ border: '1px solid #8B1A1A', color: '#8B1A1A', backgroundColor: 'transparent' }}
+            style={{ border: '1px solid #d1d5db', color: '#6b7280', backgroundColor: 'transparent' }}
           >
             Continue Shopping
           </Link>
