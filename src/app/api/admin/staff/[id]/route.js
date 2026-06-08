@@ -1,9 +1,22 @@
-// PATCH /api/admin/staff/[id] — activate or deactivate a staff account
+// src/app/api/admin/staff/[id]/route.js
+//
+// PATCH  /api/admin/staff/:id  — activate or deactivate a staff account
+// DELETE /api/admin/staff/:id  — permanently delete a staff account
+//
+// Both endpoints are admin-only. An admin cannot target their own account.
+//
+// Deactivation strategy:
+//   Supabase Auth is updated FIRST (ban_duration) before the public.users row
+//   is updated. This order matters — if the DB update fails we can retry,
+//   but if Auth were updated last and the DB update failed the user would
+//   still be able to log in despite appearing inactive in the dashboard.
 
 import { NextResponse } from 'next/server'
 import { withHandler } from '@/lib/middleware/withHandler'
 import { createClient } from '@/lib/supabase-server'
 import { supabaseAdmin } from '@/lib/supabase-admin'
+
+// ─── Shared auth helper ───────────────────────────────────────────────────────
 
 async function requireAdmin() {
   const supabase = await createClient()
@@ -13,6 +26,7 @@ async function requireAdmin() {
   return { user, error: null }
 }
 
+// ─── PATCH ────────────────────────────────────────────────────────────────────
 export const PATCH = withHandler(async (request, { params }) => {
   const { id } = await params
 
@@ -24,7 +38,7 @@ export const PATCH = withHandler(async (request, { params }) => {
     return NextResponse.json({ error: 'Access denied — admin only' }, { status: 403 })
   }
 
-  // Prevent admin from deactivating themselves
+  // Prevent an admin from locking themselves out
   if (id === adminUser.id) {
     return NextResponse.json(
       { error: 'You cannot deactivate your own account' },
@@ -42,7 +56,7 @@ export const PATCH = withHandler(async (request, { params }) => {
     )
   }
 
-  // Make sure target is a STAFF account
+  // Confirm the target is a STAFF account — admins cannot toggle other admins
   const { data: target } = await supabaseAdmin
     .from('users')
     .select('id, role')
@@ -60,9 +74,11 @@ export const PATCH = withHandler(async (request, { params }) => {
     )
   }
 
-  // Step 1: Update Supabase Auth FIRST
-  // Must update auth before DB — if this fails we don't want DB out of sync
-  // ban_duration 'none' = unban (reactivate), '876600h' ≈ 100 years = ban
+  // Step 1: Update Supabase Auth FIRST.
+  // ban_duration 'none' = unban (reactivate).
+  // ban_duration '876600h' ≈ 100 years — effectively a permanent ban.
+  // Updating Auth before the DB ensures the login block is enforced even if
+  // the subsequent DB write fails.
   const { error: authUpdateError } = await supabaseAdmin.auth.admin.updateUserById(id, {
     ban_duration: is_active ? 'none' : '876600h',
   })
@@ -71,7 +87,7 @@ export const PATCH = withHandler(async (request, { params }) => {
     return NextResponse.json({ error: authUpdateError.message }, { status: 500 })
   }
 
-  // Step 2: Sync public.users AFTER auth succeeds
+  // Step 2: Sync the is_active flag in the public.users table
   const { error: updateError } = await supabaseAdmin
     .from('users')
     .update({ is_active })
@@ -81,7 +97,8 @@ export const PATCH = withHandler(async (request, { params }) => {
     return NextResponse.json({ error: updateError.message }, { status: 500 })
   }
 
-  // Return updated staff member
+  // Return the full updated staff member so the UI can refresh without a
+  // second round-trip
   const { data: updated } = await supabaseAdmin
     .from('users')
     .select('id, first_name, last_name, email, phone, role, is_active, created_at')
@@ -91,6 +108,7 @@ export const PATCH = withHandler(async (request, { params }) => {
   return NextResponse.json({ staff: updated })
 })
 
+// ─── DELETE ───────────────────────────────────────────────────────────────────
 export async function DELETE(request, { params }) {
   const { id } = await params
 
@@ -101,7 +119,7 @@ export async function DELETE(request, { params }) {
   if (authErr === 'forbidden') {
     return NextResponse.json({ error: 'Access denied — admin only' }, { status: 403 })
   }
-
+  // Prevent self-deletion
   if (id === adminUser.id) {
     return NextResponse.json({ error: 'You cannot delete your own account' }, { status: 400 })
   }
@@ -116,11 +134,16 @@ export async function DELETE(request, { params }) {
     return NextResponse.json({ error: 'Staff member not found' }, { status: 404 })
   }
 
+  // Delete from Supabase Auth first — this cascades the session invalidation
+  // and removes the user from the auth.users table
   const { error: authDeleteError } = await supabaseAdmin.auth.admin.deleteUser(id)
   if (authDeleteError) {
     return NextResponse.json({ error: authDeleteError.message }, { status: 500 })
   }
 
+  // Then remove the corresponding row from public.users
+  // (the on_auth_user_created trigger created this row, but deletion is not
+  // cascaded automatically — it must be done explicitly)
   const { error: dbError } = await supabaseAdmin
     .from('users')
     .delete()

@@ -1,15 +1,16 @@
-// PATCH /api/admin/inventory
-// Updates stock quantities for one or more products.
-// Admin and Staff can update inventory.
-//
-// Body: [{ inventory_id: string, stock_quantity: number }]
+// src/app/api/admin/inventory/route.js
+// GET /api/admin/inventory - fetch all inventory rows with product details
+// PATCH /api/admin/inventory - bulk update stock quantities (admin + staff)
+
+// Both roles acan read inventory, Both roles can update stock.
+// Body for PATCH: [{ inventory_id: string, stock_quantity: number }]
 
 import { NextResponse } from 'next/server'
 import { withHandler } from '@/lib/middleware/withHandler'
 import { createClient } from '@/lib/supabase-server'
 import { supabaseAdmin } from '@/lib/supabase-admin'
 
-// GET /api/admin/inventory — fetch all inventory with product details
+// ─── GET ──────────────────────────────────────────────────────────────────────
 export const GET = withHandler(async (request) => {
   const supabase = await createClient()
   const { data: { user }, error: authError } = await supabase.auth.getUser()
@@ -48,7 +49,7 @@ export const GET = withHandler(async (request) => {
   return NextResponse.json({ inventory: data })
 })
 
-// PATCH /api/admin/inventory — bulk update stock quantities
+// ─── PATCH ────────────────────────────────────────────────────────────────────
 export const PATCH = withHandler(async (request) => {
   const supabase = await createClient()
   const { data: { user }, error: authError } = await supabase.auth.getUser()
@@ -68,7 +69,7 @@ export const PATCH = withHandler(async (request) => {
 
   const body = await request.json()
 
-  // Expect array of { inventory_id, stock_quantity }
+  // Expect a non-empty array of { inventory_id, stock_quantity } objects
   if (!Array.isArray(body) || body.length === 0) {
     return NextResponse.json(
       { error: 'Body must be a non-empty array of { inventory_id, stock_quantity }' },
@@ -76,6 +77,7 @@ export const PATCH = withHandler(async (request) => {
     )
   }
 
+  // Hard cap to prevent accidentally sending an enormous request
   const MAX_UPDATES = 50
   if (body.length > MAX_UPDATES) {
     return NextResponse.json(
@@ -84,7 +86,7 @@ export const PATCH = withHandler(async (request) => {
     )
 }
 
-  // Validate each entry
+  // Validate each entry before touching the database
   for (const entry of body) {
     if (!entry.inventory_id) {
       return NextResponse.json({ error: 'Each entry must have inventory_id' }, { status: 400 })
@@ -98,7 +100,7 @@ export const PATCH = withHandler(async (request) => {
   }
 
   // Update each inventory row individually
-  // Supabase doesn't support bulk upsert with different values per row without RPC
+  // Supabase doesn't support bulk upsert with different values per row without RPC(Remote Procedure Call)
   const errors = []
   const updated = []
 
@@ -117,10 +119,11 @@ export const PATCH = withHandler(async (request) => {
     }
   }
 
+  // 207 Multi-Status - some rows saved, some failed
   if (errors.length > 0) {
     return NextResponse.json(
       { error: 'Some updates failed', failures: errors, updated },
-      { status: 207 } // 207 Multi-Status — partial success
+      { status: 207 }
     )
   }
 

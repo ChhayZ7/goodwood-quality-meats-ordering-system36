@@ -11,7 +11,7 @@ import { stripe } from '@/lib/stripe'
 import { recordPayment, updateOrder, getOrderById } from '@/lib/db/orders'
 import { resend } from '@/lib/resend'
 import { generateInvoicePDF } from '@/lib/pdf/invoice'
-import { orderConfirmationHtml } from '@/lib/email/orderConfirmation'
+import { sendOrderConfirmationEmail } from '@/lib/email/orderConfirmation'
 import { supabaseAdmin } from '@/lib/supabase-admin'
 
 export async function POST(req) {
@@ -145,6 +145,16 @@ export async function POST(req) {
       const result = await resend.emails.send(emailPayload)
       //console.log('[webhook] Resend result:', JSON.stringify(result))
 
+    // 5. Send confirmation email (with optional PDF attachment)
+    try {
+      const result = await sendOrderConfirmationEmail({
+        customer,
+        order,
+        invoiceNumber,
+        pickupDate,
+        pdfBuffer, // undefined if PDF failed — sendOrderConfirmationEmail handles this
+      })
+      console.log('[webhook] Email sent:', JSON.stringify(result))
     } catch (emailErr) {
       //console.error('[webhook] Email send failed:', emailErr.message)
       //console.error('[webhook] Email error details:', JSON.stringify(emailErr))

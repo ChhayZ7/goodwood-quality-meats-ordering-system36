@@ -1,16 +1,22 @@
 // src/app/api/admin/orders/[id]/route.js
 //
-// GET   /api/admin/orders/:id
-// Returns full order detail including the complete audit log for staff and admin only.
+// GET   /api/admin/orders/:id  — full order detail including complete audit log
+// PATCH /api/admin/orders/:id  — two distinct update modes:
 //
-// PATCH /api/admin/orders/:id
-// Two responsibilities handled in one route:
-//   1. Standard field updates (status, notes, pickup_date, deposit_paid_cents)
-//      — writes one audit log row per changed field.
-//   2. Actual weight submission (actual_weights array)
-//      — updates actual_weight_kg + subtotal_cents on each order_item,
-//        recalculates orders.total_cents, and writes audit log rows.
-// When status is changed to COMPLETED, sends a feedback request email to the customer.
+//   Mode A — standard field updates (status, notes, pickup_date, deposit_paid_cents)
+//     Writes one audit log row per changed field.
+//     Sends a status change email (IN_PROGRESS, READY, CANCELLED).
+//     Sends a feedback request email when status moves to COMPLETED.
+//
+//   Mode B — actual weight submission ({ actual_weights: [...] })
+//     Updates actual_weight_kg + recalculates subtotal_cents per weight-based item.
+//     Recalculates orders.total_cents from the sum of all item subtotals.
+//     Writes audit log rows only for values that actually changed.
+//     Sends a "weights confirmed" email to the customer (non-fatal if it fails).
+//     Rejects if the order is already READY or COMPLETED — weights are locked.
+//
+// The two modes are mutually exclusive within a single request: if actual_weights
+// is present in the body, Mode B runs; otherwise Mode A runs.
 
 import { NextResponse }              from 'next/server'
 import { withHandler }               from '@/lib/middleware/withHandler'
@@ -22,6 +28,8 @@ import { sendOrderStatusEmail }      from '@/lib/email/orderStatus'
 import { sendWeightsConfirmedEmail }  from '@/lib/email/weightsConfirmed'
 
 // ─── Auth helper ──────────────────────────────────────────────────────────────
+// Reads the session cookie and confirms the user is ADMIN or STAFF.
+// Returns { user, error } - error is 'unauthenticated' or 'forbidden'.
 
 async function getAdminUser() {
   const supabase = await createClient()
@@ -65,6 +73,8 @@ export const GET = withHandler(async (request, { params }) => {
 
 // ─── PATCH ────────────────────────────────────────────────────────────────────
 
+// Validation schema for Mode A (standard field updates).
+// actual_weights uses a separate validator because it's an array of objects.
 const adminUpdateSchema = {
   types: {
     status:             'string',
@@ -103,9 +113,11 @@ export const PATCH = withHandler(
       return NextResponse.json({ error: 'Access denied — staff and admin only' }, { status: 403 })
     }
 
+    // reason and actual_weights are pulled out before passing fields to
+    // adminUpdateOrder, which only accepts standard DB columns
     const { reason, actual_weights, ...fields } = request._body
 
-    // ── Branch A: actual weight submission ────────────────────────────────────
+    // ── Mode B: actual weight submission ──────────────────────────────────────
     if (actual_weights && actual_weights.length > 0) {
       const result = await saveActualWeights({
         orderId: id,
@@ -117,12 +129,13 @@ export const PATCH = withHandler(
         return NextResponse.json({ error: result.error }, { status: 400 })
       }
 
-      // Re-fetch the full order so the frontend gets fresh data
+      // Re-fetch the full order so the frontend gets fresh data totals and 
+      // pre-populated weights input
       const { data: refreshed } = await getAdminOrderById(id)
       return NextResponse.json({ order: refreshed })
     }
 
-    // ── Branch B: standard field updates (status, notes, etc.) ────────────────
+    // ── Mode A: standard field updates ────────────────────────────────────────
     if (!Object.keys(fields).length) {
       return NextResponse.json(
         { error: 'No valid fields provided to update' },
@@ -134,6 +147,8 @@ export const PATCH = withHandler(
     if (error) throw error
 
     // ── Status change emails ───────────────────────────────────────────────────
+    // Only send emails for statuses that have customer-facing meaning.
+    // The sendOrderStatusEmail function handles its own internal filtering.
     if (fields.status) {
       try {
         const { data: orderDetail } = await supabaseAdmin
