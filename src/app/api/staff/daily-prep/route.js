@@ -7,6 +7,7 @@ export const GET = withHandler(async (request) => {
   const supabase = await createClient()
   const { data: { user }, error: authError } = await supabase.auth.getUser()
 
+  // check user is logged in via supabase auth
   if (authError || !user) {
     return NextResponse.json({ error: 'Unauthorised — please log in' }, { status: 401 })
   }
@@ -17,6 +18,7 @@ export const GET = withHandler(async (request) => {
     .eq('id', user.id)
     .single()
 
+  // check user role is staff or admin only
   if (!['STAFF', 'ADMIN'].includes(profile?.role)) {
     return NextResponse.json({ error: 'Access denied — staff or admin only' }, { status: 403 })
   }
@@ -26,11 +28,12 @@ export const GET = withHandler(async (request) => {
   const date = searchParams.get('date')
   const category = searchParams.get('category')
 
+  // if date not provided in param
   if (!date) {
     return NextResponse.json({ error: 'date query param is required (YYYY-MM-DD)' }, { status: 400 })
   }
 
-  // Fetch all non-cancelled orders for this pickup date
+  // Fetch all non-cancelled and non-pending orders for this pickup date
   const { data: orders, error: ordersError } = await supabaseAdmin
     .from('orders')
     .select(`
