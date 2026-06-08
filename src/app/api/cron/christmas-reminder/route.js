@@ -1,29 +1,48 @@
 // src/app/api/cron/christmas-reminder/route.js
-// Fires once a year on November 1st (scheduled via pg_cron).
-// Emails all customers who had a COMPLETED order in December of the
-// previous year, and have not unsubscribed from marketing emails.
+// POST /api/cron/christmas-reminder — annual marketing email to returning customers.
+//
+// Scheduled via pg_cron to fire once on November 1st each year.
+// Targets customers who had a COMPLETED order in December of the previous year
+// and have not unsubscribed from marketing emails.
+//
+// Flow:
+//   1. Verify CRON_SECRET — reject anything that isn't our pg_cron job
+//   2. Build last December's date range (e.g. 2025-12-01 → 2025-12-31)
+//   3. Fetch all COMPLETED orders in that window with customer details
+//   4. Deduplicate — one email per customer regardless of order count
+//   5. Filter out unsubscribed customers
+//   6. Send email to each eligible customer; count sent vs skipped
+//
+// Returns: { sent: number, skipped: number }
 
 import { NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-admin'
 import { sendChristmasReminderEmail }  from '@/lib/email/christmasReminder'
 
 export async function POST(request) {
-  // Verify the request came from our Supabase cron job
+  // ── 1. Authenticate the cron caller ──────────────────────────────────────
+  // CRON_SECRET is a shared secret set in both Vercel env and the pg_cron job.
+  // Any other caller — including a logged-in admin — gets a 401.
   const authHeader = request.headers.get('authorization')
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
     return NextResponse.json({ error: 'Unauthorised' }, { status: 401 })
   }
 
-  // Build the December date range for last year
-  // e.g. if today is Nov 1 2026, we want Dec 1 2025 – Dec 31 2025
+  // ── 2. Build last December's date range ───────────────────────────────────
+  // This job runs on Nov 1st, so "last year" is always the correct Christmas season.
+  // e.g. running on 2026-11-01 → queries 2025-12-01 to 2025-12-31
   const thisYear = new Date().getFullYear()
   const lastYear = thisYear - 1
   const dateFrom = `${lastYear}-12-01`
   const dateTo   = `${lastYear}-12-31`
   const appUrl   = process.env.NEXT_PUBLIC_URL ?? 'https://goodwoodqualitymeats.com.au'
 
-  console.log(`[christmas-reminder] Querying COMPLETED orders from ${dateFrom} to ${dateTo}`)
+  // console.log(`[christmas-reminder] Querying COMPLETED orders from ${dateFrom} to ${dateTo}`)
 
+  // ── 3. Fetch eligible orders ──────────────────────────────────────────────
+  // We only select customer fields — order line items aren't needed for this email.
+  // unsubscribe_token is fetched here so the one-click unsubscribe URL can be
+  // built per-customer without a second query.
   const { data: orders, error: fetchError } = await supabaseAdmin
     .from('orders')
     .select(`
@@ -45,30 +64,36 @@ export async function POST(request) {
   }
 
   if (!orders || orders.length === 0) {
-    console.log('[christmas-reminder] No eligible customers found.')
+    // console.log('[christmas-reminder] No eligible customers found.')
     return NextResponse.json({ sent: 0, skipped: 0 })
   }
 
-  // Deduplicate by customer ID — one email per customer regardless of how many
-  // orders they placed last December
+  // ── 4 & 5. Deduplicate and filter unsubscribed customers ──────────────────
+  // A customer who placed 3 orders last December should still only get 1 email.
+  // Unsubscribed customers are skipped here rather than in the query so we keep
+  // the fetch simple and honour preference changes made after the query runs.
   const seenIds  = new Set()
   const customers = []
 
   for (const order of orders) {
     const customer = order.customer
-    if (!customer?.email || !customer?.id) continue
-    if (customer.email_unsubscribed) continue
-    if (seenIds.has(customer.id)) continue
+    if (!customer?.email || !customer?.id) continue // skip malformed rows
+    if (customer.email_unsubscribed) continue // respect opt-out
+    if (seenIds.has(customer.id)) continue // already in the send list
     seenIds.add(customer.id)
     customers.push(customer)
   }
 
-  console.log(`[christmas-reminder] Sending to ${customers.length} unique customer(s)`)
+  // console.log(`[christmas-reminder] Sending to ${customers.length} unique customer(s)`)
 
+  // ── 6. Send emails ────────────────────────────────────────────────────────
+  // Each failure is caught individually so one bad address doesn't abort
+  // the rest of the batch. skipped count is returned to the cron job log.
   let sent    = 0
   let skipped = 0
 
   for (const customer of customers) {
+    // Build a unique unsubscribe URL using the customer's token — no login required
     const unsubscribeUrl = `${appUrl}/api/emailUnsubscribe?token=${customer.unsubscribe_token}`
     try {
       await sendChristmasReminderEmail({
@@ -76,14 +101,15 @@ export async function POST(request) {
         firstName:      customer.first_name ?? 'there',
         unsubscribeUrl,
       })
-      console.log(`[christmas-reminder] Sent to ${customer.email}`)
+      // Non-fatal — log and move on to the next customer
+      // console.log(`[christmas-reminder] Sent to ${customer.email}`)
       sent++
     } catch (emailErr) {
-      console.error(`[christmas-reminder] Failed for ${customer.email}:`, emailErr)
+      // console.error(`[christmas-reminder] Failed for ${customer.email}:`, emailErr)
       skipped++
     }
   }
 
-  console.log(`[christmas-reminder] Done. Sent: ${sent}, Skipped: ${skipped}`)
+  // console.log(`[christmas-reminder] Done. Sent: ${sent}, Skipped: ${skipped}`)
   return NextResponse.json({ sent, skipped })
 }

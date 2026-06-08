@@ -1,23 +1,36 @@
 // src/app/api/cron/pickup-reminder/route.js
-// Called daily by the Supabase pg_cron job.
+// POST /api/cron/pickup-reminder — daily pickup reminder to customers.
+//
+// Scheduled via pg_cron to fire once per day.
 // Finds all CONFIRMED and READY orders with a pickup_date of tomorrow
-// (Adelaide time), and sends each customer a reminder email.
+// (in Adelaide local time) and sends each customer a reminder email.
+//
+// Flow:
+//   1. Verify CRON_SECRET — reject anything that isn't our pg_cron job
+//   2. Resolve tomorrow's date in Adelaide time (handles daylight saving)
+//   3. Fetch all eligible orders — CONFIRMED or READY, pickup tomorrow, not yet reminded
+//   4. For each order: send reminder email, then mark reminder_sent = true
+//   5. On email failure: log and skip — reminder_sent stays false so it retries tomorrow
+//
+// Returns: { sent: number, skipped: number }
 
 import { NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-admin'
 import { sendPickupReminderEmail } from '@/lib/email/pickupReminder'
 
-// Adelaide is UTC+9:30 standard / UTC+10:30 daylight saving (October–April).
-// We derive "tomorrow in Adelaide" from the current UTC time so it stays
-// correct across daylight saving changes rather than hardcoding an offset.
+// ─── Adelaide timezone helper ─────────────────────────────────────────────────
+// Adelaide runs at UTC+9:30 (standard) and UTC+10:30 (daylight saving, Oct–Apr).
+// Hardcoding either offset would break twice a year, so we derive the date using
+// the IANA timezone name instead — the JS runtime handles DST automatically.
 function getTomorrowAdelaide() {
   const now = new Date()
 
-  // en-CA gives YYYY-MM-DD format consistently
+  // en-CA locale gives consistent YYYY-MM-DD format — other locales vary
   const adelaideDateStr = now.toLocaleDateString('en-CA', {
     timeZone: 'Australia/Adelaide',
   })
 
+  // Parse as midnight local time, then add one day
   const adelaideDate = new Date(adelaideDateStr + 'T00:00:00')
   adelaideDate.setDate(adelaideDate.getDate() + 1)
 
@@ -26,17 +39,23 @@ function getTomorrowAdelaide() {
 }
 
 export async function POST(request) {
-  // Verify the request is from our Supabase cron job using the shared secret
+  // ── 1. Authenticate the cron caller ──────────────────────────────────────
+  // CRON_SECRET is set in both Vercel env and the pg_cron job HTTP header.
+  // Any other caller gets a 401 — this endpoint must never be publicly triggerable.
   const authHeader = request.headers.get('authorization')
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
     return NextResponse.json({ error: 'Unauthorised' }, { status: 401 })
   }
 
+  // ── 2. Resolve tomorrow in Adelaide time ──────────────────────────────────
   const tomorrow = getTomorrowAdelaide()
   console.log(`[pickup-reminder] Running for pickup date: ${tomorrow}`)
 
-  // Fetch all eligible orders — CONFIRMED or READY, picking up tomorrow,
-  // not yet sent a reminder
+  // ── 3. Fetch eligible orders ──────────────────────────────────────────────
+  // Three filters narrow this to exactly the orders that need a reminder today:
+  //   status IN (CONFIRMED, READY) — excludes PENDING, COMPLETED, CANCELLED
+  //   pickup_date = tomorrow       — only orders being collected tomorrow
+  //   reminder_sent = false        — prevents sending the same reminder twice
   const { data: orders, error: fetchError } = await supabaseAdmin
     .from('orders')
     .select(`
@@ -56,7 +75,7 @@ export async function POST(request) {
     `)
     .in('status', ['CONFIRMED', 'READY'])
     .eq('pickup_date', tomorrow)
-    .eq('reminder_sent', false)
+    .eq('reminder_sent', false) // idempotency guard — never remind twice
 
   if (fetchError) {
     console.error('[pickup-reminder] Failed to fetch orders:', fetchError)
@@ -64,22 +83,25 @@ export async function POST(request) {
   }
 
   if (!orders || orders.length === 0) {
-    console.log('[pickup-reminder] No orders to remind today.')
+    // console.log('[pickup-reminder] No orders to remind today.')
     return NextResponse.json({ sent: 0, skipped: 0 })
   }
 
-  console.log(`[pickup-reminder] Found ${orders.length} order(s) to remind.`)
+  // console.log(`[pickup-reminder] Found ${orders.length} order(s) to remind.`)
 
+  // Format the date once outside the loop — same string for every email
   const pickupDate = new Date(tomorrow + 'T00:00:00').toLocaleDateString('en-AU', {
     weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
   })
 
+  // ── 4 & 5. Send reminders ─────────────────────────────────────────────────
   let sent    = 0
   let skipped = 0
 
   for (const order of orders) {
     const customer = order.customer
 
+    // Guard — should never happen, but log clearly if it does
     if (!customer?.email) {
       console.warn(`[pickup-reminder] Order ${order.id} has no customer email — skipping.`)
       skipped++
@@ -91,21 +113,24 @@ export async function POST(request) {
     try {
       await sendPickupReminderEmail({ customer, order, invoiceNumber, pickupDate })
 
-      // Mark reminder as sent so we never send it twice
+      // Mark as sent AFTER the email succeeds — never before.
+      // If this update fails, the email still went out; the worst case is a
+      // duplicate reminder tomorrow, which is acceptable.
       await supabaseAdmin
         .from('orders')
         .update({ reminder_sent: true })
         .eq('id', order.id)
 
-      console.log(`[pickup-reminder] Sent reminder for ${invoiceNumber} to ${customer.email}`)
+      // console.log(`[pickup-reminder] Sent reminder for ${invoiceNumber} to ${customer.email}`)
       sent++
     } catch (emailErr) {
-      // Log but don't mark reminder_sent — will retry on the next cron run
+      // Do NOT mark reminder_sent — leaving it false means the job will
+      // retry on the next daily run, giving the customer another chance to receive it.
       console.error(`[pickup-reminder] Failed for ${invoiceNumber}:`, emailErr)
       skipped++
     }
   }
 
-  console.log(`[pickup-reminder] Done. Sent: ${sent}, Skipped: ${skipped}`)
+  // console.log(`[pickup-reminder] Done. Sent: ${sent}, Skipped: ${skipped}`)
   return NextResponse.json({ sent, skipped })
 }

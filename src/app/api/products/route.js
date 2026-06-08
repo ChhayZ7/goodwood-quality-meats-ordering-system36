@@ -1,5 +1,18 @@
-// GET /api/products
-// Returns all available products with weight options
+// src/app/api/products/route.js
+// GET /api/products — public product listing for the storefront.
+//
+// No authentication required — this endpoint is called by the products page
+// before the customer logs in. Auth is only required at checkout.
+//
+// Query params (all optional):
+//   ?type=FIXED|WEIGHT_RANGE — filter to one product type only
+//   ?available=false         — include unavailable products (omit for available-only)
+//
+// Default behaviour with no params: returns all available products, both types,
+// ordered alphabetically by name.
+//
+// Contrast with GET /api/admin/products — that endpoint returns ALL products
+// including unavailable ones, and requires ADMIN or STAFF role.
 
 import { NextResponse } from 'next/server'
 import { withHandler } from '@/lib/middleware/withHandler'
