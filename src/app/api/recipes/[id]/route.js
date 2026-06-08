@@ -8,6 +8,7 @@ import { getRecipeById } from '@/lib/db/recipes'
 export const GET = withHandler(async (request, { params }) => {
   const { id } = await params
 
+  // retrieve single recipe to be displayed in recipe detail
   const { data, error } = await getRecipeById(id)
 
   if (error) throw error

@@ -17,17 +17,17 @@ async function getAuthUser() {
 
 // GET /api/users/me
 export const GET = withHandler(async (request) => {
+    // check user is logged in
     const authUser = await getAuthUser()
-    console.log('[/api/users/me] authUser:', authUser)
 
     if (!authUser){
-        console.log('[/api/users/me] No auth user — returning 401')
         return NextResponse.json(
             { error: 'Unauthorised - please log in', status: 401},
             { status: 401 }
         )
     }
 
+    // get logged in user's data
     const { data, error } = await getUserById(authUser.id)
 
     if (error) throw error
@@ -43,10 +43,11 @@ export const GET = withHandler(async (request) => {
 })
 
 // PATCH /api/users/me
+// update user data
 export const PATCH = withHandler(
     async (request) => {
         const authUser = await getAuthUser()
-
+        //ensure user is currently logged in
         if (!authUser){
             return NextResponse.json(
                 { error: "Unauthorised = please log in", status: 401 },
@@ -54,6 +55,7 @@ export const PATCH = withHandler(
             )
         }
 
+        // update given data fields (first name, last name, phone only)
         const { data, error } = await updateUser(authUser.id, request._body)
 
         if (error) {

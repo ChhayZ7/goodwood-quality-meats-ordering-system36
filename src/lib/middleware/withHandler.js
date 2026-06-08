@@ -1,15 +1,22 @@
-// Wraps every API route handler with consistent error catching
-// and input validation. All errors are returned in consistent format
-
-// Input validation done with AI for convenience and comprehensiveness
-
+// Wraps every API route handler with two things:
+//   1. Input validation — checks the request body against a schema before the handler runs
+//   2. Error catching — catches any unhandled errors and returns a consistent JSON error shape
+//
+// Every API route exports its handler wrapped in withHandler() so error handling
+// never has to be repeated across individual route files.
+//
+// developed with AI assistance.
 
 import { NextResponse } from 'next/server'
 
-// Input validation
+// Validation
+
+// Validates a parsed request body against a schema object.
+// Returns an object of field errors if any fail, or null if everything passes.
 function validate(body, schema) {
   const errors = {}
 
+  // Check required fields are present and not empty
   for (const field of schema.required ?? []) {
     const val = body[field]
     if (val === undefined || val === null || val === '') {
@@ -17,6 +24,8 @@ function validate(body, schema) {
     }
   }
 
+  // Check each field matches its expected type
+  // Arrays need special handling because typeof [] === 'object' in JS
   for (const [field, expectedType] of Object.entries(schema.types ?? {})) {
     const val = body[field]
     if (val === undefined || val === null) continue
@@ -26,6 +35,7 @@ function validate(body, schema) {
     }
   }
 
+  // Run any custom validators (e.g. date format checks, enum membership)
   for (const [field, validator] of Object.entries(schema.validators ?? {})) {
     const val = body[field]
     if (val === undefined || val === null) continue
@@ -36,8 +46,11 @@ function validate(body, schema) {
   return Object.keys(errors).length ? errors : null
 }
 
+// Wrapper
 
-// Wrapper function
+// Wraps a route handler function with validation and error handling.
+// If a schema is provided, the request body is parsed, validated, and attached
+// to request._body so the handler can read it without calling request.json() again.
 export function withHandler(handler, options = {}) {
   return async function (request, context) {
     try {
@@ -60,15 +73,16 @@ export function withHandler(handler, options = {}) {
           )
         }
 
-        // Attach to request so handler can read it without parsing again
+        // Attach the parsed body so handlers don't need to call request.json() themselves
         request._body = body
       }
 
       return await handler(request, context)
+
     } catch (err) {
       console.error(`[API Error] ${request.method} ${request.url}`, err)
 
-      // Error if row cannot be found in supabase
+      // PGRST116 is Supabase's error code for "no rows returned" on a .single() query
       if (err?.code === 'PGRST116') {
         return NextResponse.json(
           { error: 'Resource not found', status: 404 },
@@ -84,16 +98,19 @@ export function withHandler(handler, options = {}) {
   }
 }
 
+// Schemas
 
-
-// Reusable schemas to check attributes
+// Reusable validation schemas passed into withHandler as options.schema.
+// Each schema is specific to one type of request body.
 export const schemas = {
+
+  // Used by POST /api/checkout
   createOrder: {
     required: ['customer_id', 'pickup_date', 'items'],
     types: {
       customer_id: 'string',
       pickup_date: 'string',
-      items:       'array',
+      items: 'array',
     },
     validators: {
       pickup_date: (val) => {
@@ -105,21 +122,22 @@ export const schemas = {
       items: (val) => {
         if (!val.length) return 'Order must contain at least one item'
         for (const item of val) {
-          if (!item.product_id)                    return 'Each item must have a product_id'
+          if (!item.product_id) return 'Each item must have a product_id'
           if (!item.quantity || item.quantity < 1) return 'Each item must have quantity >= 1'
           if (item.unit_price_cents === undefined) return 'Each item must have unit_price_cents'
-          if (item.subtotal_cents === undefined)   return 'Each item must have subtotal_cents'
+          if (item.subtotal_cents === undefined) return 'Each item must have subtotal_cents'
         }
         return null
       },
     },
   },
 
+  // Used by PATCH /api/orders/:id and PATCH /api/admin/orders/:id
   updateOrder: {
     types: {
-      status:             'string',
-      notes:              'string',
-      pickup_date:        'string',
+      status: 'string',
+      notes: 'string',
+      pickup_date: 'string',
       deposit_paid_cents: 'number',
     },
     validators: {
@@ -130,15 +148,17 @@ export const schemas = {
     },
   },
 
+  // Used by POST /api/checkout/confirm
   confirmPayment: {
     required: ['order_id', 'payment_intent_id', 'items'],
     types: {
-      order_id:          'string',
+      order_id: 'string',
       payment_intent_id: 'string',
-      items:             'array',
+      items: 'array',
     },
   },
 
+  // Used by PATCH /api/users/me
   updateUser: {
     types: {
       first_name: 'string',
