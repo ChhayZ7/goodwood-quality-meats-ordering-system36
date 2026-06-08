@@ -3,17 +3,19 @@
 // invoice. Falls back gracefully if PDF generation fails; the order is already
 // confirmed so we never block Stripe with a non-200 on email/PDF failures.
 
-import { stripe }                        from '@/lib/stripe'
-import { recordPayment, updateOrder,
-         getOrderById }                  from '@/lib/db/orders'
-import { decrementStock }                from '@/lib/db/inventory'
-import { generateInvoicePDF }            from '@/lib/pdf/invoice'
-import { sendOrderConfirmationEmail }    from '@/lib/email/orderConfirmation'
-import { supabaseAdmin }                 from '@/lib/supabase-admin'
+import { stripe } from '@/lib/stripe'
+import {
+  recordPayment, updateOrder,
+  getOrderById
+} from '@/lib/db/orders'
+import { decrementStock } from '@/lib/db/inventory'
+import { generateInvoicePDF } from '@/lib/pdf/invoice'
+import { sendOrderConfirmationEmail } from '@/lib/email/orderConfirmation'
+import { supabaseAdmin } from '@/lib/supabase-admin'
 
 export async function POST(req) {
   const body = await req.text()
-  const sig  = req.headers.get('stripe-signature')
+  const sig = req.headers.get('stripe-signature')
 
   let event
   try {
@@ -28,7 +30,7 @@ export async function POST(req) {
   }
 
   if (event.type === 'payment_intent.succeeded') {
-    const intent  = event.data.object
+    const intent = event.data.object
     const orderId = intent.metadata?.order_id
 
     if (!orderId) {
@@ -38,11 +40,11 @@ export async function POST(req) {
 
     // 1. Record payment (idempotent — safe if /confirm already ran)
     const { error: paymentError } = await recordPayment({
-      order_id:                 orderId,
+      order_id: orderId,
       stripe_payment_intent_id: intent.id,
-      amount_cents:             intent.amount,
-      type:                     'DEPOSIT',
-      status:                   'PAID',
+      amount_cents: intent.amount,
+      type: 'DEPOSIT',
+      status: 'PAID',
     })
 
     if (paymentError && paymentError.code !== '23505') {
@@ -51,7 +53,7 @@ export async function POST(req) {
 
     // 2. Update order status to CONFIRMED
     const { error: updateError } = await updateOrder(orderId, {
-      status:             'CONFIRMED',
+      status: 'CONFIRMED',
       deposit_paid_cents: intent.amount,
     })
 
@@ -80,10 +82,10 @@ export async function POST(req) {
 
     // 4. Generate PDF invoice (non-fatal if it fails)
     const invoiceNumber = `GW-${orderId.slice(0, 8).toUpperCase()}`
-    const pickupDate    = order.pickup_date
+    const pickupDate = order.pickup_date
       ? new Date(order.pickup_date).toLocaleDateString('en-AU', {
-          day: '2-digit', month: 'long', year: 'numeric',
-        })
+        day: '2-digit', month: 'long', year: 'numeric',
+      })
       : 'To be confirmed'
 
     let pdfBuffer

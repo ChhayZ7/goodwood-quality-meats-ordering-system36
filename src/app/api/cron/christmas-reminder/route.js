@@ -3,8 +3,8 @@
 // Emails all customers who had a COMPLETED order in December of the
 // previous year, and have not unsubscribed from marketing emails.
 
-import { NextResponse }                from 'next/server'
-import { supabaseAdmin }               from '@/lib/supabase-admin'
+import { NextResponse } from 'next/server'
+import { supabaseAdmin } from '@/lib/supabase-admin'
 import { sendChristmasReminderEmail }  from '@/lib/email/christmasReminder'
 
 export async function POST(request) {

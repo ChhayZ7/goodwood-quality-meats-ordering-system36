@@ -3,8 +3,8 @@
 // Finds all CONFIRMED and READY orders with a pickup_date of tomorrow
 // (Adelaide time), and sends each customer a reminder email.
 
-import { NextResponse }            from 'next/server'
-import { supabaseAdmin }           from '@/lib/supabase-admin'
+import { NextResponse } from 'next/server'
+import { supabaseAdmin } from '@/lib/supabase-admin'
 import { sendPickupReminderEmail } from '@/lib/email/pickupReminder'
 
 // Adelaide is UTC+9:30 standard / UTC+10:30 daylight saving (October–April).
