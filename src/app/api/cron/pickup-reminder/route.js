@@ -1,28 +1,23 @@
 // src/app/api/cron/pickup-reminder/route.js
 // Called daily by the Supabase pg_cron job.
-// Finds all CONFIRMED and READY_FOR_PICKUP orders with a pickup_date
-// of tomorrow (Adelaide time), and sends each customer a reminder email.
+// Finds all CONFIRMED and READY orders with a pickup_date of tomorrow
+// (Adelaide time), and sends each customer a reminder email.
 
-import { NextResponse } from 'next/server'
-import { supabaseAdmin }  from '@/lib/supabase-admin'
-import { resend }         from '@/lib/resend'
-import { pickupReminderHtml } from '@/lib/email/pickupReminder'
+import { NextResponse }            from 'next/server'
+import { supabaseAdmin }           from '@/lib/supabase-admin'
+import { sendPickupReminderEmail } from '@/lib/email/pickupReminder'
 
-// Adelaide is UTC+9:30, UTC+10:30 during daylight saving (October–April).
-// We derive "tomorrow in Adelaide" from the current UTC time rather than
-// hardcoding the offset, so it stays correct across daylight saving changes.
+// Adelaide is UTC+9:30 standard / UTC+10:30 daylight saving (October–April).
+// We derive "tomorrow in Adelaide" from the current UTC time so it stays
+// correct across daylight saving changes rather than hardcoding an offset.
 function getTomorrowAdelaide() {
-  // AEST offset: +9:30 standard, +10:30 daylight saving
-  // A reliable way is to use Intl to get the current Adelaide date,
-  // then add one day.
   const now = new Date()
 
-  // Get today's date string in Adelaide time (e.g. "2025-12-24")
+  // en-CA gives YYYY-MM-DD format consistently
   const adelaideDateStr = now.toLocaleDateString('en-CA', {
     timeZone: 'Australia/Adelaide',
-  }) // en-CA gives YYYY-MM-DD format
+  })
 
-  // Add one day
   const adelaideDate = new Date(adelaideDateStr + 'T00:00:00')
   adelaideDate.setDate(adelaideDate.getDate() + 1)
 
@@ -40,8 +35,8 @@ export async function POST(request) {
   const tomorrow = getTomorrowAdelaide()
   console.log(`[pickup-reminder] Running for pickup date: ${tomorrow}`)
 
-  // Fetch all eligible orders — CONFIRMED or READY_FOR_PICKUP,
-  // picking up tomorrow, and not already sent a reminder
+  // Fetch all eligible orders — CONFIRMED or READY, picking up tomorrow,
+  // not yet sent a reminder
   const { data: orders, error: fetchError } = await supabaseAdmin
     .from('orders')
     .select(`
@@ -76,10 +71,7 @@ export async function POST(request) {
   console.log(`[pickup-reminder] Found ${orders.length} order(s) to remind.`)
 
   const pickupDate = new Date(tomorrow + 'T00:00:00').toLocaleDateString('en-AU', {
-    weekday: 'long',
-    day:     'numeric',
-    month:   'long',
-    year:    'numeric',
+    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
   })
 
   let sent    = 0
@@ -97,12 +89,7 @@ export async function POST(request) {
     const invoiceNumber = `GW-${order.id.slice(0, 8).toUpperCase()}`
 
     try {
-      await resend.emails.send({
-        from:    'Goodwood Quality Meats <orders@mail.goodwoodqualitymeats.com.au>',
-        to:      customer.email,
-        subject: `Reminder: your order ${invoiceNumber} is ready for pickup tomorrow`,
-        html:    pickupReminderHtml({ customer, order, invoiceNumber, pickupDate }),
-      })
+      await sendPickupReminderEmail({ customer, order, invoiceNumber, pickupDate })
 
       // Mark reminder as sent so we never send it twice
       await supabaseAdmin
@@ -110,13 +97,11 @@ export async function POST(request) {
         .update({ reminder_sent: true })
         .eq('id', order.id)
 
-      console.log(`[pickup-reminder] Sent reminder for order ${invoiceNumber} to ${customer.email}`)
+      console.log(`[pickup-reminder] Sent reminder for ${invoiceNumber} to ${customer.email}`)
       sent++
-
     } catch (emailErr) {
-      // Log the failure but continue processing other orders —
-      // we don't mark reminder_sent so it will retry on the next cron run
-      console.error(`[pickup-reminder] Failed to send for order ${invoiceNumber}:`, emailErr)
+      // Log but don't mark reminder_sent — will retry on the next cron run
+      console.error(`[pickup-reminder] Failed for ${invoiceNumber}:`, emailErr)
       skipped++
     }
   }

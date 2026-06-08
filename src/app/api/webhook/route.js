@@ -1,13 +1,15 @@
-import { stripe } from '@/lib/stripe'
-import { recordPayment, updateOrder, getOrderById } from '@/lib/db/orders'
-import { decrementStock } from '@/lib/db/inventory'
-import { resend } from '@/lib/resend'
-import { generateInvoicePDF } from '@/lib/pdf/invoice'
-import { orderConfirmationHtml } from '@/lib/email/orderConfirmation'
-import { supabaseAdmin } from '@/lib/supabase-admin'
+// src/app/api/webhook/route.js
+// Stripe webhook — confirms payment and emails the customer a confirmation
+// invoice. Falls back gracefully if PDF generation fails; the order is already
+// confirmed so we never block Stripe with a non-200 on email/PDF failures.
 
-// POST /api/webhook
-// Stripe webhook — confirms payment, generates PDF invoice, emails customer
+import { stripe }                        from '@/lib/stripe'
+import { recordPayment, updateOrder,
+         getOrderById }                  from '@/lib/db/orders'
+import { decrementStock }                from '@/lib/db/inventory'
+import { generateInvoicePDF }            from '@/lib/pdf/invoice'
+import { sendOrderConfirmationEmail }    from '@/lib/email/orderConfirmation'
+import { supabaseAdmin }                 from '@/lib/supabase-admin'
 
 export async function POST(req) {
   const body = await req.text()
@@ -57,7 +59,7 @@ export async function POST(req) {
       console.error('[webhook] updateOrder error:', updateError)
     }
 
-    // 3. Fetch full order with items and products for the invoice
+    // 3. Fetch full order and customer for the email + invoice
     const { data: order, error: orderFetchError } = await getOrderById(orderId)
 
     if (orderFetchError || !order) {
@@ -65,7 +67,6 @@ export async function POST(req) {
       return new Response('ok') // Already confirmed — don't block Stripe
     }
 
-    // 4. Fetch customer profile
     const { data: customer } = await supabaseAdmin
       .from('users')
       .select('id, first_name, last_name, email, phone')
@@ -77,58 +78,34 @@ export async function POST(req) {
       return new Response('ok')
     }
 
-    // 5. Generate PDF invoice
-const invoiceNumber = `GW-${orderId.slice(0, 8).toUpperCase()}`
-const pickupDate = order.pickup_date
-  ? new Date(order.pickup_date).toLocaleDateString('en-AU', {
-      day: '2-digit',
-      month: 'long',
-      year: 'numeric',
-    })
-  : 'To be confirmed'
+    // 4. Generate PDF invoice (non-fatal if it fails)
+    const invoiceNumber = `GW-${orderId.slice(0, 8).toUpperCase()}`
+    const pickupDate    = order.pickup_date
+      ? new Date(order.pickup_date).toLocaleDateString('en-AU', {
+          day: '2-digit', month: 'long', year: 'numeric',
+        })
+      : 'To be confirmed'
 
-console.log('[webhook] Generating PDF...')
-let pdfBuffer
-try {
-  pdfBuffer = await generateInvoicePDF(order, customer)
-  console.log('[webhook] PDF generated, buffer size:', pdfBuffer?.length)
-} catch (pdfErr) {
-  console.error('[webhook] PDF generation failed:', pdfErr.message)
-  console.error('[webhook] PDF error stack:', pdfErr.stack)
-}
+    let pdfBuffer
+    try {
+      pdfBuffer = await generateInvoicePDF(order, customer)
+      console.log('[webhook] PDF generated, size:', pdfBuffer?.length)
+    } catch (pdfErr) {
+      console.error('[webhook] PDF generation failed:', pdfErr.message)
+    }
 
-// 6. Send confirmation email
-console.log('[webhook] Attempting to send email to:', customer.email)
-console.log('[webhook] PDF attached:', !!pdfBuffer)
-try {
-  const emailPayload = {
-    from:    'Goodwood Quality Meats <orders@mail.goodwoodqualitymeats.com.au>',
-    to:      customer.email,
-    subject: `Order confirmed — ${invoiceNumber} — pickup ${pickupDate}`,
-    html:    orderConfirmationHtml({
-      customer,
-      order,
-      invoiceNumber,
-      pickupDate,
-    }),
-  }
-
-  if (pdfBuffer) {
-    emailPayload.attachments = [
-      {
-        filename:    `${invoiceNumber}.pdf`,
-        content:     pdfBuffer.toString('base64'),
-        contentType: 'application/pdf',
-      },
-    ]
-  }
-
-  const result = await resend.emails.send(emailPayload)
-  console.log('[webhook] Resend result:', JSON.stringify(result))
-
+    // 5. Send confirmation email (with optional PDF attachment)
+    try {
+      const result = await sendOrderConfirmationEmail({
+        customer,
+        order,
+        invoiceNumber,
+        pickupDate,
+        pdfBuffer, // undefined if PDF failed — sendOrderConfirmationEmail handles this
+      })
+      console.log('[webhook] Email sent:', JSON.stringify(result))
     } catch (emailErr) {
       console.error('[webhook] Email send failed:', emailErr.message)
-      console.error('[webhook] Email error details:', JSON.stringify(emailErr))
     }
   }
 
