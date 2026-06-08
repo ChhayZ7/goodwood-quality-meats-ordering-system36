@@ -1,10 +1,9 @@
-// src/lib/db/admin.js
 // Database operations for the admin orders API.
 // Includes audit trail logging
 
 import { supabaseAdmin } from '@/lib/supabase-admin'
 
-// ─── Queries ──────────────────────────────────────────────────────────────────
+// Queries
 
 export async function getAllOrders({
   status,
@@ -67,9 +66,9 @@ export async function getAllOrders({
     .order('created_at', { ascending: false })
     .range(offset, offset + limit - 1)
 
-  if (status)   query = query.eq('status', status)
+  if (status) query = query.eq('status', status)
   if (dateFrom) query = query.gte('pickup_date', dateFrom)
-  if (dateTo)   query = query.lte('pickup_date', dateTo)
+  if (dateTo) query = query.lte('pickup_date', dateTo)
 
   const { data, error } = await query
 
@@ -77,9 +76,9 @@ export async function getAllOrders({
 
   const filtered = search
     ? data.filter(order => {
-        const name = `${order.customer?.first_name ?? ''} ${order.customer?.last_name ?? ''}`.toLowerCase()
-        return name.includes(search.toLowerCase())
-      })
+      const name = `${order.customer?.first_name ?? ''} ${order.customer?.last_name ?? ''}`.toLowerCase()
+      return name.includes(search.toLowerCase())
+    })
     : data
 
   return { data: filtered, error: null }
@@ -209,11 +208,11 @@ export async function adminUpdateOrder(orderId, fields, adminId, reason = null) 
   const auditRows = Object.entries(updates)
     .filter(([field, newVal]) => String(current[field]) !== String(newVal))
     .map(([field, newVal]) => ({
-      order_id:   orderId,
+      order_id: orderId,
       changed_by: adminId,
       field,
-      old_value:  current[field] != null ? String(current[field]) : null,
-      new_value:  String(newVal),
+      old_value: current[field] != null ? String(current[field]) : null,
+      new_value: String(newVal),
       reason,
     }))
 

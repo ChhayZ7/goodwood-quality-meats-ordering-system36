@@ -56,6 +56,7 @@ export const PATCH = withHandler(
                 new_password: 'string',
             },
             validators: {
+                // strong password check
                 new_password: (val) => {
                     if (val.length < 8){
                         return 'New password must be at least 8 characters'
