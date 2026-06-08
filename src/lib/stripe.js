@@ -52,19 +52,19 @@ export async function getOrCreateStripeCustomer({ userId, email, name }) {
  */
 export async function createDepositPaymentIntent({ orderId, customerEmail, stripeCustomerId }) {
   const intent = await stripe.paymentIntents.create({
-    amount:        DEPOSIT_CENTS,
-    currency:      'aud',
-    description:   `$20 deposit — order ${orderId}`,
-    customer:      stripeCustomerId ?? undefined,
+    amount: DEPOSIT_CENTS,
+    currency: 'aud',
+    description: `$20 deposit — order ${orderId}`,
+    customer: stripeCustomerId ?? undefined,
     receipt_email: customerEmail ?? undefined,
     metadata: {
       order_id: orderId,
-      type:     'DEPOSIT',
+      type: 'DEPOSIT',
     },
   })
 
   return {
-    clientSecret:    intent.client_secret,
+    clientSecret: intent.client_secret,
     paymentIntentId: intent.id,
   }
 }
