@@ -77,6 +77,14 @@ export default function DailyPrepPage() {
 
   return (
     <PageWrapper>
+      <style>{`
+        .prep-row     { display: grid; grid-template-columns: 1fr 120px 80px; }
+        .prep-sum-row { display: grid; grid-template-columns: 1fr 120px 100px; }
+        @media (max-width: 480px) {
+          .prep-row     { grid-template-columns: 1fr 80px 52px; }
+          .prep-sum-row { grid-template-columns: 1fr 80px 64px; }
+        }
+      `}</style>
       <PageHeader title="Daily Prep" />
 
       {/* Date picker */}
@@ -188,7 +196,7 @@ export default function DailyPrepPage() {
               </div>
 
               {/* Column headers */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 120px 80px', padding: '8px 20px', borderBottom: '1px solid #F3F4F6' }}>
+              <div className="prep-row" style={{ padding: '8px 20px', borderBottom: '1px solid #F3F4F6' }}>
                 {['Product', 'Category', 'Qty'].map(h => (
                   <span key={h} style={{
                     fontFamily: '"Lato", sans-serif', fontSize: '11px', fontWeight: 700,
@@ -201,8 +209,7 @@ export default function DailyPrepPage() {
 
               {/* Item rows */}
               {order.order_items.map((item, i) => (
-                <div key={item.id} style={{
-                  display: 'grid', gridTemplateColumns: '1fr 120px 80px',
+                <div key={item.id} className="prep-row" style={{
                   padding: '10px 20px',
                   borderBottom: i < order.order_items.length - 1 ? '1px solid #F9F6EF' : 'none',
                   alignItems: 'center',
@@ -238,8 +245,7 @@ export default function DailyPrepPage() {
           </div>
 
           {summary.length > 0 && (
-            <div style={{
-              display: 'grid', gridTemplateColumns: '1fr 120px 100px',
+            <div className="prep-sum-row" style={{
               padding: '10px 20px', background: '#F9FAFB', borderBottom: '1px solid #E5E7EB',
             }}>
               {['Product', 'Category', 'Total Qty'].map(h => (
@@ -259,8 +265,7 @@ export default function DailyPrepPage() {
             </div>
           ) : (
             summary.map((item, i) => (
-              <div key={item.product_name} style={{
-                display: 'grid', gridTemplateColumns: '1fr 120px 100px',
+              <div key={item.product_name} className="prep-sum-row" style={{
                 padding: '12px 20px',
                 borderBottom: i < summary.length - 1 ? '1px solid #F9F6EF' : 'none',
                 alignItems: 'center',

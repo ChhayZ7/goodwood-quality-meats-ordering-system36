@@ -68,7 +68,7 @@ export default function HomePage() {
         <p className="text-3xl font-semibold tracking-widest mb-3" style={{ color: '#D4AF37' }}>
           PREMIUM MEATS
         </p>
-        <h1 className="text-5xl font-bold mb-6" style={{ color: '#8B1A1A' }}>
+        <h1 className="text-3xl sm:text-5xl font-bold mb-6" style={{ color: '#8B1A1A' }}>
           Order Your Christmas Meats
         </h1>
         <p className="text-lg/8 mb-8" style={{ color: '#717182' }}>
@@ -93,7 +93,7 @@ export default function HomePage() {
           <h2 className="text-4xl text-center mb-16" style={{ color: '#8B1A1A' }}>
             How It Works
           </h2>
-          <div className="grid grid-cols-3 gap-12">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 sm:gap-12">
             {[
               {
                 number: '1',
@@ -170,7 +170,7 @@ export default function HomePage() {
           <p className="text-lg mb-12" style={{ color: '#353535' }}>
             Meet our experienced team of master butchers dedicated to providing you with the finest quality meats
           </p>
-          <div className="grid grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {teamMembers.map((member) => (
               <div
                 key={member.name}

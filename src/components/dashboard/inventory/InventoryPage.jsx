@@ -140,8 +140,8 @@ export default function InventoryPage({ role }) {
             <PageHeader title="Inventory Management" />
 
             {/* Search bar is shown to both admin and staff */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '20px' }}>
-                <SearchInput value={searchQuery} onChange={e => setSearchQuery(e.target.value)} placeholder="Search products..." width="400px" />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '20px', flexWrap: 'wrap' }}>
+                <SearchInput value={searchQuery} onChange={e => setSearchQuery(e.target.value)} placeholder="Search products..." width="min(400px, 100%)" />
                 {searchQuery && (
                     <button onClick={() => setSearchQuery('')} style={{ padding: '9px 18px', background: 'transparent', color: '#6B7280', border: '1.5px solid #CCCCCC', borderRadius: '8px', fontSize: '13px', fontWeight: 700, cursor: 'pointer', fontFamily: '"Lato",sans-serif', whiteSpace: 'nowrap' }}>
                         Clear Search
@@ -181,7 +181,8 @@ export default function InventoryPage({ role }) {
             )}
 
             {/* Table */}
-            <div style={{ background: '#fff', borderRadius: '12px', border: '1px solid #E5E7EB', overflow: 'hidden' }}>
+            <div style={{ overflowX: 'auto', borderRadius: '12px', border: '1px solid #E5E7EB' }}>
+            <div style={{ background: '#fff', borderRadius: '12px', overflow: 'hidden', minWidth: '480px' }}>
 
                 {/* Header row */}
                 <div style={{ display: 'grid', gridTemplateColumns: COLS, padding: '12px 20px', background: '#F9FAFB', borderBottom: '1px solid #E5E7EB' }}>
@@ -249,6 +250,7 @@ export default function InventoryPage({ role }) {
                         </div>
                     )
                 })}
+            </div>
             </div>
 
             {/* Floating save bar for admin only */}

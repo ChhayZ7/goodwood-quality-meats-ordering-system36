@@ -133,12 +133,12 @@ export default function SignUp() {
     return (
       <div className="min-h-screen flex bg-[#f4f1ec]">
 
-        <div className="w-[55%] relative h-full">
+        <div className="hidden md:block md:w-[55%] relative">
           <img src="/signupImage.png" alt="meat" className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#f4f1ec]/40 to-[#f4f1ec]"></div>
         </div>
 
-        <div className="w-[45%] flex items-center justify-center px-20 py-10">
+        <div className="w-full md:w-[45%] flex items-center justify-center px-6 md:px-20 py-10">
           <div className="w-full max-w-md text-center">
 
             <div className="flex items-center gap-4 justify-center mb-8">
@@ -181,12 +181,12 @@ export default function SignUp() {
   return (
     <div className="min-h-screen flex bg-[#f4f1ec]">
 
-      <div className="w-[55%] relative h-full">
+      <div className="hidden md:block md:w-[55%] relative">
         <img src="/signupImage.png" alt="meat" className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#f4f1ec]/40 to-[#f4f1ec]"></div>
       </div>
 
-      <div className="w-[45%] flex items-center px-20 py-10 overflow-y-auto">
+      <div className="w-full md:w-[45%] flex items-center px-6 md:px-20 py-10 overflow-y-auto">
         <div className="w-full max-w-lg">
 
           <div className="flex items-center gap-4 justify-left mb-6">
@@ -199,7 +199,7 @@ export default function SignUp() {
 
           <div style={{ height: '2px', background: 'linear-gradient(90deg, #D4AF37, transparent)', borderRadius: '1px', marginBottom: '40px' }} />
 
-          <h2 className="text-5xl font-bold mb-2 text-black">Create an Account</h2>
+          <h2 className="text-3xl md:text-5xl font-bold mb-2 text-black">Create an Account</h2>
 
           <p className="mb-8 text-gray-600 text-lg italic">
             Already have an account?{" "}

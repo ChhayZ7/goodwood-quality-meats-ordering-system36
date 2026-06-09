@@ -85,10 +85,10 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="h-screen flex bg-[#f4f1ec] overflow-hidden">
+    <div className="min-h-screen flex bg-[#f4f1ec]">
 
       {/* LEFT FORM */}
-      <div className="w-[45%] flex items-center justify-center px-20">
+      <div className="w-full md:w-[45%] flex items-center justify-center px-6 md:px-20 py-10">
         <div className="w-full max-w-lg">
 
           {/* LOGO */}
@@ -105,7 +105,7 @@ export default function LoginPage() {
           </div>
 
           <div style={{ height: '2px', background: 'linear-gradient(90deg, #D4AF37, transparent)', borderRadius: '1px', marginBottom: '40px' }} />
-          <h2 className="text-5xl font-bold mb-2 text-black">Welcome Back</h2>
+          <h2 className="text-3xl md:text-5xl font-bold mb-2 text-black">Welcome Back</h2>
 
           <p className="mb-8 text-gray-600 text-lg italic">
             Don't have an account?{" "}
@@ -163,8 +163,8 @@ export default function LoginPage() {
         </div>
       </div>
 
-      {/* RIGHT IMAGE */}
-      <div className="w-[55%] relative h-full">
+      {/* RIGHT IMAGE — hidden on mobile */}
+      <div className="hidden md:block md:w-[55%] relative">
         <img src="/loginImage.jpg" alt="meat" className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-l from-transparent via-[#f4f1ec]/40 to-[#f4f1ec]"></div>
       </div>

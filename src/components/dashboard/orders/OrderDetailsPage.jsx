@@ -152,7 +152,7 @@ export default function OrderDetailPage({ role }) {
 
             {/* Header */}
             <div style={{ marginBottom: '32px' }}>
-                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '32px' }}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '32px', flexWrap: 'wrap', gap: '12px' }}>
                     <div>
                         <h1 style={{ fontSize: '36px', fontWeight: 700, color: '#7B1A1A', margin: '0 0 8px' }}>
                             Order #{shortNum(order.id)}
@@ -206,6 +206,8 @@ export default function OrderDetailPage({ role }) {
                     </div>
                 )}
 
+                <div style={{ overflowX: 'auto' }}>
+                <div style={{ minWidth: '660px' }}>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 140px 160px 100px 180px', padding: '10px 0', borderBottom: '1px solid #E5E7EB', marginBottom: '4px' }}>
                     {['Product', 'Type', 'Weight Range', 'Quantity', 'Actual Weight (kg)'].map(h => (
                         <span key={h} style={{ fontSize: '11px', fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '.06em' }}>{h}</span>
@@ -239,6 +241,8 @@ export default function OrderDetailPage({ role }) {
                         </div>
                     )
                 })}
+                </div>
+                </div>
 
                 <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '16px', paddingTop: '16px', borderTop: '1px solid #E5E7EB' }}>
                     <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', gap: '6px' }}>

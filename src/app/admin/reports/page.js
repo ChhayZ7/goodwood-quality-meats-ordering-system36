@@ -108,7 +108,7 @@ function ReportsSkeleton() {
         <div>
           <SkeletonBox width="150px" height={16} />
           <div style={{ height: 14 }} />
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '14px' }}>
+          <div className="report-income-grid">
             {[1, 2, 3, 4].map(i => (
               <div key={i} style={{ background: COLOR.sidebar, borderRadius: '10px', padding: '16px 20px', border: `1px solid ${COLOR.border}` }}>
                 <SkeletonBox width="80%" height={14} />
@@ -128,7 +128,7 @@ function ReportsSkeleton() {
         <div>
           <SkeletonBox width="180px" height={16} />
           <div style={{ height: 14 }} />
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '14px' }}>
+          <div className="report-order-grid">
             {[1, 2, 3, 4, 5, 6].map(i => (
               <div key={i} style={{ background: COLOR.sidebar, borderRadius: '10px', padding: '16px 20px', border: `1px solid ${COLOR.border}` }}>
                 <SkeletonBox width="80%" height={14} />
@@ -452,11 +452,23 @@ export default function AdminReportsPage() {
   // RENDER
   return (
     <PageWrapper>
+      <style>{`
+        .report-filter { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .report-income-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 4px; }
+        .report-order-grid  { display: grid; grid-template-columns: repeat(6, 1fr); gap: 14px; margin-bottom: 4px; }
+        @media (max-width: 900px) {
+          .report-income-grid { grid-template-columns: repeat(2, 1fr); }
+          .report-order-grid  { grid-template-columns: repeat(3, 1fr); }
+        }
+        @media (max-width: 480px) {
+          .report-order-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+      `}</style>
       <PageHeader
         title="Reports"
         action={
           // Month and year dropdowns displayed in the top-right of the page header
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <div className="report-filter">
 
             {/* Month dropdown label */}
             <label style={{ fontSize: '12px', color: COLOR.muted, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.06em' }}>
@@ -512,7 +524,7 @@ export default function AdminReportsPage() {
               4 cards showing financial figures for the selected pickup month
            */}
           <SectionLabel>Income summary — {periodLabel}</SectionLabel>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '14px', marginBottom: '4px' }}>
+          <div className="report-income-grid">
 
             {/* Card 1: Number of active (non-cancelled) orders for this pickup month */}
             <MetricCard
@@ -555,7 +567,7 @@ export default function AdminReportsPage() {
               Helps the admin see at a glance what stage each order is at
            */}
           <SectionLabel>Order summary — {periodLabel}</SectionLabel>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '14px', marginBottom: '4px' }}>
+          <div className="report-order-grid">
 
             {/* Total orders including every status (incl. cancelled and pending) */}
             <MetricCard
