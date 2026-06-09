@@ -1,7 +1,6 @@
 // GET /api/admin/reports
 
-// Admin-only route, returns a summary of total orders by status, revenue,
-// deposits collected, orders by pickup date, low stock products
+// Query params: ?month=12&year=2026
 
 
 import { NextResponse } from 'next/server'
@@ -10,10 +9,7 @@ import { createClient } from '@/lib/supabase-server'
 import { supabaseAdmin } from '@/lib/supabase-admin'
 import {
   getOrderCountsByStatus,
-  getTotalRevenue,
-  getTotalDepositsCollected,
-  getOrdersByPickupDate,
-  getLowStockProducts,
+  getOrderSummary,
   getTopProducts,
 } from '@/lib/db/reports'
 
@@ -35,7 +31,8 @@ export const GET = withHandler(async (request) => {
     .select('role')
     .eq('id', user.id)
     .single()
-
+  
+  // if the user's role is not ADMIN, return 403 Access Denied
   if (profile?.role !== 'ADMIN') {
     return NextResponse.json(
       { error: 'Access denied — admin only', status: 403 },
@@ -43,36 +40,50 @@ export const GET = withHandler(async (request) => {
     )
   }
 
-  // parse period params
-  const { searchParams } = new URL(request.url)
-  const period = ['today', 'month'].includes(searchParams.get('period'))
-    ? searchParams.get('period')
-    : 'month'
+  // parse period params, month year
+  // Valid months: 11 (November), 12 (December), 1 (January)
+  // Valid years: 2025, 2026, 2027
+  // like /api/admin/reports?month=12&year=2026
+  // If invalid values are passed, default to December of the current year
 
-  // Run all report queries
+  const { searchParams } = new URL(request.url)
+
+  const VALID_MONTHS = [11, 12, 1]            // November, December, January, valid for now
+  const VALID_YEARS = [2025, 2026, 2027]     // supported season years, valid for now, can be expanded
+
+  //get the month parameter from the URL and convert it from a string to a number
+  // e.g. "12" → 12
+  const parsedMonth = parseInt(searchParams.get('month'))
+  // Same as rhe above
+  const parsedYear = parseInt(searchParams.get('year'))
+
+  // if the parsed month is in the valid list, use it, otherwise default to December
+  const month = VALID_MONTHS.includes(parsedMonth) ? parsedMonth : 12
+  // if the parsed year is in the valid list, use it, otherwise default to current year
+  const year = VALID_YEARS.includes(parsedYear) ? parsedYear : new Date().getFullYear()
+
+  // Run all report queries in parallel using Promise.all
+  // Promise.all runs all queries in parallel instead of one after another (AI suggested to use Promise.all to run 3 queries)
+  //so the total wait time is the slowest query, not the sum of all queries
+
   const [
-    orders_by_status,
-    revenue,
-    deposits,
-    orders_by_pickup_date,
-    low_stock_products,
-    top_products,
-  ] = await Promise.all([ // run at same time
-    getOrderCountsByStatus(period),
-    getTotalRevenue(period),
-    getTotalDepositsCollected(period),
-    getOrdersByPickupDate(),
-    getLowStockProducts(),
-    getTopProducts(period),
+    orders_by_status, // count of orders per status (CONFIRMED, IN_PROGRESS, etc.)
+    order_summary,// income figures: totals, deposits, avg order value
+    top_products, // top 3 products by units ordered
+  ] = await Promise.all([
+    getOrderCountsByStatus(month, year),
+    getOrderSummary(month, year),
+    getTopProducts(month, year),
   ])
 
+  // Return the full report as a JSON response
   return NextResponse.json({
-    generated_at:         new Date().toISOString(),
+    generated_at: new Date().toISOString(), // timestamp so admin knows when data was fetched
+    month, // echo back which month was queried
+    year, // echo back which year was queried
     orders_by_status,
-    revenue,
-    deposits,
-    orders_by_pickup_date,
-    low_stock_products,
+    order_summary,
     top_products,
   })
+
 })

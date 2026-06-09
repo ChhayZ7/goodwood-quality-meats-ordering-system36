@@ -164,7 +164,7 @@ export async function getOrderSummary(month, year) {
 //Excludes cancelled orders so admin only sees what they actually needs to prepare
 
 export async function getTopProducts(month, year) {
-  const { from, to } = getPickupDateRange(month, year)
+  const { from, to } = getDateRange(month, year)
  
   //Get IDs of all non-cancelled orders picking up this month
   const { data: orders, error: ordersError } = await supabaseAdmin
