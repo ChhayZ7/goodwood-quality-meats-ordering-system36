@@ -6,13 +6,13 @@
 //   Mode A — standard field updates (status, notes, pickup_date, deposit_paid_cents)
 //     Writes one audit log row per changed field.
 //     Sends a status change email (IN_PROGRESS, READY, CANCELLED).
-//     Sends a feedback request email when status moves to COMPLETED.
+//     Sends a feedback request email + Final Invoice PDF when status moves to COMPLETED.
 //
 //   Mode B — actual weight submission ({ actual_weights: [...] })
 //     Updates actual_weight_kg + recalculates subtotal_cents per weight-based item.
 //     Recalculates orders.total_cents from the sum of all item subtotals.
 //     Writes audit log rows only for values that actually changed.
-//     Sends a "weights confirmed" email to the customer (non-fatal if it fails).
+//     Generates the Final Invoice PDF and emails it to the customer as an attachment.
 //     Rejects if the order is already READY or COMPLETED — weights are locked.
 //
 // The two modes are mutually exclusive within a single request: if actual_weights
@@ -22,14 +22,16 @@ import { NextResponse }              from 'next/server'
 import { withHandler }               from '@/lib/middleware/withHandler'
 import { createClient }              from '@/lib/supabase-server'
 import { supabaseAdmin }             from '@/lib/supabase-admin'
-import { getAdminOrderById, adminUpdateOrder } from '@/lib/db/admin'
+import { getAdminOrderById,
+         adminUpdateOrder }          from '@/lib/db/admin'
 import { sendFeedbackRequestEmail }  from '@/lib/email/feedbackRequest'
 import { sendOrderStatusEmail }      from '@/lib/email/orderStatus'
-import { sendWeightsConfirmedEmail }  from '@/lib/email/weightsConfirmed'
+import { sendWeightsConfirmedEmail } from '@/lib/email/weightsConfirmed'
+import { generateInvoicePDF }        from '@/lib/pdf/invoice'
 
 // ─── Auth helper ──────────────────────────────────────────────────────────────
 // Reads the session cookie and confirms the user is ADMIN or STAFF.
-// Returns { user, error } - error is 'unauthenticated' or 'forbidden'.
+// Returns { user, error } — error is 'unauthenticated' or 'forbidden'.
 
 async function getAdminUser() {
   const supabase = await createClient()
@@ -82,7 +84,7 @@ const adminUpdateSchema = {
     pickup_date:        'string',
     deposit_paid_cents: 'number',
     reason:             'string',
-    actual_weights:     'array',   // [{ order_item_id, actual_weight_kg }]
+    actual_weights:     'array',
   },
   validators: {
     status: (val) => {
@@ -114,23 +116,23 @@ export const PATCH = withHandler(
     }
 
     // reason and actual_weights are pulled out before passing fields to
-    // adminUpdateOrder, which only accepts standard DB columns
+    // adminUpdateOrder, which only accepts standard DB columns.
     const { reason, actual_weights, ...fields } = request._body
 
     // ── Mode B: actual weight submission ──────────────────────────────────────
     if (actual_weights && actual_weights.length > 0) {
       const result = await saveActualWeights({
-        orderId: id,
+        orderId:       id,
         actualWeights: actual_weights,
-        changedBy: user.id,
+        changedBy:     user.id,
       })
 
       if (result.error) {
         return NextResponse.json({ error: result.error }, { status: 400 })
       }
 
-      // Re-fetch the full order so the frontend gets fresh data totals and 
-      // pre-populated weights input
+      // Re-fetch the full order so the frontend gets fresh totals and
+      // pre-populated weight inputs
       const { data: refreshed } = await getAdminOrderById(id)
       return NextResponse.json({ order: refreshed })
     }
@@ -165,42 +167,87 @@ export const PATCH = withHandler(
         if (orderDetail?.customer?.email) {
           const pickupDate = orderDetail.pickup_date
             ? new Date(orderDetail.pickup_date).toLocaleDateString('en-AU', {
-                weekday: 'long',
-                day:     'numeric',
-                month:   'long',
-                year:    'numeric',
+                weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
               })
             : 'To be confirmed'
 
           await sendOrderStatusEmail({
-            newStatus:          fields.status,
-            customerEmail:      orderDetail.customer.email,
-            customerFirstName:  orderDetail.customer.first_name,
-            orderId:            id,
+            newStatus:         fields.status,
+            customerEmail:     orderDetail.customer.email,
+            customerFirstName: orderDetail.customer.first_name,
+            orderId:           id,
             pickupDate,
-            totalCents:         orderDetail.total_cents        ?? 0,
-            depositPaidCents:   orderDetail.deposit_paid_cents ?? 0,
-            reason:             reason ?? null,
+            totalCents:        orderDetail.total_cents        ?? 0,
+            depositPaidCents:  orderDetail.deposit_paid_cents ?? 0,
+            reason:            reason ?? null,
           })
         }
       } catch (emailErr) {
+        // Non-fatal — the order is already updated; log and continue
         console.error('[order-status-email] Failed to send:', emailErr)
       }
 
-      // Feedback request email on COMPLETED
+      // Send feedback request + Final Invoice PDF when order is marked COMPLETED.
+      // COMPLETED means the customer has collected and fully paid — this is the
+      // correct moment to send the paid receipt.
       if (fields.status === 'COMPLETED') {
         try {
+          // Fetch full order shape — needed by generateInvoicePDF to render
+          // the Final Invoice with confirmed weights and zero balance due
           const { data: orderDetail } = await supabaseAdmin
             .from('orders')
-            .select('customer:users ( email, first_name )')
+            .select(`
+              id,
+              status,
+              pickup_date,
+              total_cents,
+              deposit_paid_cents,
+              deposit_required_cents,
+              customer:users ( id, first_name, last_name, email, phone ),
+              order_items (
+                id,
+                quantity,
+                weight_preference,
+                unit_price_cents,
+                subtotal_cents,
+                actual_weight_kg,
+                notes,
+                product:products (
+                  id,
+                  name,
+                  product_type,
+                  price_cents,
+                  price_per_kg_cents
+                ),
+                weight_option:product_weight_options (
+                  id,
+                  label,
+                  min_weight_kg,
+                  max_weight_kg
+                )
+              ),
+              payments ( id, amount_cents, type, status )
+            `)
             .eq('id', id)
             .single()
 
           if (orderDetail?.customer?.email) {
+            // forceFinal = true — order is COMPLETED so all weights are confirmed.
+            // The status check inside isFinalInvoice() would pass on its own here,
+            // but forceFinal makes the intent explicit and guards against edge cases
+            // where weights were not entered before COMPLETED was set.
+            let pdfBuffer
+            try {
+              pdfBuffer = await generateInvoicePDF(orderDetail, orderDetail.customer, true)
+            } catch (pdfErr) {
+              console.error('[feedback-email] PDF generation failed:', pdfErr.message)
+            }
+
             await sendFeedbackRequestEmail({
               customerEmail:     orderDetail.customer.email,
               customerFirstName: orderDetail.customer.first_name ?? 'there',
               orderId:           id,
+              pdfBuffer, // undefined if generation failed — email sends without attachment
             })
           }
         } catch (emailErr) {
@@ -214,17 +261,27 @@ export const PATCH = withHandler(
   { schema: adminUpdateSchema }
 )
 
-// ─── saveActualWeights helper ─────────────────────────────────────────────────
+// ─── saveActualWeights ────────────────────────────────────────────────────────
+// Called only from Mode B above. Isolated as a helper to keep the PATCH
+// handler readable.
 //
-// 1. Validates every order_item_id belongs to this order
-// 2. Updates actual_weight_kg + recalculates subtotal_cents per item
-// 3. Sums all item subtotals → updates orders.total_cents
-// 4. Writes one audit log row per changed weight
+// Steps:
+//   1. Reject if the order is READY or COMPLETED (weights are locked)
+//   2. Fetch all order_items for this order
+//   3. Validate that every submitted order_item_id belongs to this order
+//   4. For each weight-based item in the payload: update actual_weight_kg and
+//      recalculate subtotal_cents = actual_kg × price_per_kg × quantity
+//   5. Recalculate orders.total_cents as the sum of all item subtotals
+//   6. Write audit log rows for values that actually changed
+//   7. Generate the Final Invoice PDF and email it to the customer as an
+//      attachment (non-fatal — email sends without PDF if generation fails)
 
 async function saveActualWeights({ orderId, actualWeights, changedBy }) {
-  // Hard lock - weights cannot be changed once an order is READY or COMPLETED.
-  // The fontend also enforces this but the API must be the source of truth.
+  // Weights are locked once an order reaches READY or COMPLETED because the
+  // customer has already been notified of the balance due — changing weights
+  // at that point would cause a discrepancy.
   const LOCKED_STATUSES = ['READY', 'COMPLETED']
+
   const { data: orderStatus, error: statusError } = await supabaseAdmin
     .from('orders')
     .select('status')
@@ -232,12 +289,16 @@ async function saveActualWeights({ orderId, actualWeights, changedBy }) {
     .single()
 
   if (statusError) return { error: statusError.message }
-  if (LOCKED_STATUSES.includes(orderStatus.status)){
+
+  if (LOCKED_STATUSES.includes(orderStatus.status)) {
     return {
-      error: `Weights cannot be edited - order is ${orderStatus.status}. Contact an administrator if a correction is needed.`
+      error: `Weights cannot be edited — order is ${orderStatus.status}. Contact an administrator if a correction is needed.`,
     }
   }
-  // Fetch all order items for this order (we need product type + price)
+
+  // Fetch all items for this order so we can validate ownership and
+  // recalculate the order total correctly across ALL items, not just
+  // the ones included in this particular submission.
   const { data: orderItems, error: fetchError } = await supabaseAdmin
     .from('order_items')
     .select(`
@@ -253,24 +314,22 @@ async function saveActualWeights({ orderId, actualWeights, changedBy }) {
   if (fetchError) return { error: fetchError.message }
   if (!orderItems?.length) return { error: 'No order items found for this order' }
 
-  // Index by id for quick lookup
+  // Index by id for O(1) lookup during validation
   const itemMap = Object.fromEntries(orderItems.map(i => [i.id, i]))
 
-  // Validate: every submitted id must belong to this order
+  // Reject the entire request if any submitted id doesn't belong to this order
   for (const entry of actualWeights) {
     if (!itemMap[entry.order_item_id]) {
       return { error: `Order item ${entry.order_item_id} does not belong to this order` }
     }
   }
 
-  // Build updates and audit rows
-  const auditRows = []
+  // Build a quick lookup: order_item_id → actual_weight_kg from the payload
   const weightMap = Object.fromEntries(
     actualWeights.map(e => [e.order_item_id, e.actual_weight_kg])
   )
 
-  // Process every item in the order (not just the ones submitted)
-  // so we can correctly sum all subtotals
+  const auditRows    = []
   const updatedItems = []
 
   for (const item of orderItems) {
@@ -278,22 +337,19 @@ async function saveActualWeights({ orderId, actualWeights, changedBy }) {
     const newWeightKg   = weightMap[item.id]
 
     if (isWeightBased && newWeightKg !== undefined) {
-      // Recalculate subtotal: actual_kg × price_per_kg × quantity
+      // subtotal = actual_kg × price_per_kg × quantity
       const pricePerKg  = item.product.price_per_kg_cents ?? 0
       const newSubtotal = Math.round(newWeightKg * pricePerKg * item.quantity)
 
-      // Write to DB
       const { error: updateErr } = await supabaseAdmin
         .from('order_items')
-        .update({
-          actual_weight_kg: newWeightKg,
-          subtotal_cents:   newSubtotal,
-        })
+        .update({ actual_weight_kg: newWeightKg, subtotal_cents: newSubtotal })
         .eq('id', item.id)
 
       if (updateErr) return { error: updateErr.message }
 
-      // Audit row — only if the value actually changed
+      // Only write an audit row if the value genuinely changed — avoids
+      // noise when staff re-save without modifying a weight
       const oldWeight = item.actual_weight_kg
       if (String(oldWeight) !== String(newWeightKg)) {
         auditRows.push({
@@ -308,12 +364,13 @@ async function saveActualWeights({ orderId, actualWeights, changedBy }) {
 
       updatedItems.push({ ...item, subtotal_cents: newSubtotal })
     } else {
-      // Item not in the submitted weights — keep its existing subtotal
+      // Item not in this submission — carry its existing subtotal forward
+      // so the order total is still correct
       updatedItems.push(item)
     }
   }
 
-  // Recalculate order total from all item subtotals
+  // Recalculate the order total from all item subtotals (not just the changed ones)
   const newTotal = updatedItems.reduce((sum, i) => sum + (i.subtotal_cents ?? 0), 0)
 
   const { error: orderUpdateErr } = await supabaseAdmin
@@ -323,29 +380,55 @@ async function saveActualWeights({ orderId, actualWeights, changedBy }) {
 
   if (orderUpdateErr) return { error: orderUpdateErr.message }
 
-  // Write audit rows (if any weights actually changed)
+  // Write audit rows (only if weights actually changed)
   if (auditRows.length > 0) {
     const { error: auditErr } = await supabaseAdmin
       .from('order_audit_logs')
       .insert(auditRows)
 
+    // Non-fatal — the data is saved; log the failure but don't block the response
     if (auditErr) {
-      // Non-fatal — the data is saved, just log the failure
       console.error('[saveActualWeights] audit log insert failed:', auditErr)
     }
 
-        // ── Weights confirmed email ────────────────────────────────────────────────
-    // Only fires when at least one weight actually changed (auditRows.length > 0).
-    // Failures are logged but never block the response — the save is the
-    // critical operation, email is secondary.
+    // Send "weights confirmed" email with Final Invoice PDF attached.
+    // Only fires when at least one weight changed (auditRows.length > 0)
+    // so re-saving without changes doesn't spam the customer.
     try {
+      // Fetch full order and customer — needed for both the PDF and the email
       const { data: orderDetail } = await supabaseAdmin
         .from('orders')
         .select(`
+          id,
+          status,
+          pickup_date,
           total_cents,
           deposit_paid_cents,
-          pickup_date,
-          customer:users ( email, first_name )
+          deposit_required_cents,
+          customer:users ( id, first_name, last_name, email, phone ),
+          order_items (
+            id,
+            quantity,
+            weight_preference,
+            unit_price_cents,
+            subtotal_cents,
+            actual_weight_kg,
+            notes,
+            product:products (
+              id,
+              name,
+              product_type,
+              price_cents,
+              price_per_kg_cents
+            ),
+            weight_option:product_weight_options (
+              id,
+              label,
+              min_weight_kg,
+              max_weight_kg
+            )
+          ),
+          payments ( id, amount_cents, type, status )
         `)
         .eq('id', orderId)
         .single()
@@ -353,12 +436,22 @@ async function saveActualWeights({ orderId, actualWeights, changedBy }) {
       if (orderDetail?.customer?.email) {
         const pickupDate = orderDetail.pickup_date
           ? new Date(orderDetail.pickup_date).toLocaleDateString('en-AU', {
-              weekday: 'long',
-              day:     'numeric',
-              month:   'long',
-              year:    'numeric',
+              weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
             })
           : 'To be confirmed'
+
+        // Generate the Final Invoice PDF.
+        // forceFinal = true bypasses the status check inside isFinalInvoice() —
+        // the order is still IN_PROGRESS here but all weights are now saved,
+        // so the PDF content should be final, not estimated.
+        // Non-fatal: if generation fails, the email still sends without the
+        // attachment and the customer can download it from the portal.
+        let pdfBuffer
+        try {
+          pdfBuffer = await generateInvoicePDF(orderDetail, orderDetail.customer, true)
+        } catch (pdfErr) {
+          console.error('[weights-confirmed-email] PDF generation failed:', pdfErr.message)
+        }
 
         await sendWeightsConfirmedEmail({
           customerEmail:     orderDetail.customer.email,
@@ -367,11 +460,13 @@ async function saveActualWeights({ orderId, actualWeights, changedBy }) {
           pickupDate,
           totalCents:        newTotal,
           depositPaidCents:  orderDetail.deposit_paid_cents ?? 0,
+          pdfBuffer, // undefined if generation failed — email sends without attachment
         })
       }
     } catch (emailErr) {
       console.error('[weights-confirmed-email] Failed to send:', emailErr)
     }
   }
+
   return { error: null }
 }
