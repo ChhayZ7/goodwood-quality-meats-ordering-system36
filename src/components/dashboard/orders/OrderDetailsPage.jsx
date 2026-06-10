@@ -374,21 +374,21 @@ export default function OrderDetailPage({ role }) {
           </div>
         )}
 
-                <div style={{ overflowX: 'auto' }}>
-                <div style={{ minWidth: '660px' }}>
-        {/* Editable weight notice for IN_PROGRESS */}
-        {order.status === 'IN_PROGRESS' && hasWeightBasedItems && !weightsLocked && (
-          <div style={{ background: '#F0FDF4', border: '1px solid #86EFAC', borderRadius: '8px', padding: '12px 16px', marginBottom: '16px', fontSize: '14px', color: '#166534' }}>
-            Enter the actual weight for each item below, then click <strong>Save Weights</strong>. The order total will update automatically.
-          </div>
-        )}
+        <div style={{ overflowX: 'auto' }}>
+          <div style={{ minWidth: '660px' }}>
+            {/* Editable weight notice for IN_PROGRESS */}
+            {order.status === 'IN_PROGRESS' && hasWeightBasedItems && !weightsLocked && (
+              <div style={{ background: '#F0FDF4', border: '1px solid #86EFAC', borderRadius: '8px', padding: '12px 16px', marginBottom: '16px', fontSize: '14px', color: '#166534' }}>
+                Enter the actual weight for each item below, then click <strong>Save Weights</strong>. The order total will update automatically.
+              </div>
+            )}
 
-        {/* Table header — 7 columns */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 110px 130px 50px 110px 100px 110px', padding: '10px 0', borderBottom: '1px solid #E5E7EB', marginBottom: '4px' }}>
-          {['Product', 'Type', 'Weight Range', 'Qty', 'Price/kg', 'Actual Weight', 'Subtotal'].map(h => (
-            <span key={h} style={{ fontSize: '11px', fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '.06em' }}>{h}</span>
-          ))}
-        </div>
+            {/* Table header — 7 columns */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 110px 130px 50px 110px 100px 110px', padding: '10px 0', borderBottom: '1px solid #E5E7EB', marginBottom: '4px' }}>
+              {['Product', 'Type', 'Weight Range', 'Qty', 'Price/kg', 'Actual Weight', 'Subtotal'].map(h => (
+                <span key={h} style={{ fontSize: '11px', fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '.06em' }}>{h}</span>
+              ))}
+            </div>
 
         {/* Item rows */}
         {(order.order_items ?? []).map((item, i) => {
@@ -399,106 +399,110 @@ export default function OrderDetailPage({ role }) {
           const pricePerKg = item.product?.price_per_kg_cents ?? 0
           const fixedPrice = item.unit_price_cents ?? 0
 
-          // Live subtotal recalculates from the typed actual weight.
-          // This lets staff/admin check the subtotal before saving.
-          // If no weight is typed yet, it falls back to the saved subtotal.
-          // AI was used to help with this calculation and fallback logic
-          const typedWeight = parseFloat(weights[item.id])
-          const liveSubtotal = isWeightBased
-            ? (!isNaN(typedWeight) && typedWeight > 0
-              ? Math.round(typedWeight * pricePerKg * item.quantity)
-              : item.subtotal_cents)
-            : fixedPrice * item.quantity
+              // Live subtotal recalculates from the typed actual weight.
+              // This lets staff/admin check the subtotal before saving.
+              // If no weight is typed yet, it falls back to the saved subtotal.
+              // AI was used to help with this calculation and fallback logic
+              const typedWeight = parseFloat(weights[item.id])
+              const liveSubtotal = isWeightBased
+                ? (!isNaN(typedWeight) && typedWeight > 0
+                  ? Math.round(typedWeight * pricePerKg * item.quantity)
+                  : item.subtotal_cents)
+                : fixedPrice * item.quantity
 
-          // Flag whether the live subtotal differs from the saved one, so we can hint to the user that unsaved changes are pending
-          const subtotalChanged = isWeightBased
-            && !isNaN(typedWeight)
-            && typedWeight > 0
-            && liveSubtotal !== item.subtotal_cents
+              // Flag whether the live subtotal differs from the saved one, so we can hint to the user that unsaved changes are pending
+              const subtotalChanged = isWeightBased
+                && !isNaN(typedWeight)
+                && typedWeight > 0
+                && liveSubtotal !== item.subtotal_cents
 
-          return (
-            <div
-              key={item.id ?? i}
-              style={{
-                display: 'grid',
-                gridTemplateColumns: '1.4fr 110px 130px 50px 110px 100px 110px',
-                padding: '14px 0',
-                borderBottom: i < order.order_items.length - 1 ? '1px solid #F3F4F6' : 'none',
-                alignItems: 'center',
-              }}
-            >
-              {/* Product name */}
-              <span style={{ fontSize: '14px', color: '#1A1A1A', fontWeight: 500 }}>{item.product?.name ?? '—'}</span>
+              return (
+                <div
+                  key={item.id ?? i}
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: '1.4fr 110px 130px 50px 110px 100px 110px',
+                    padding: '14px 0',
+                    borderBottom: i < order.order_items.length - 1 ? '1px solid #F3F4F6' : 'none',
+                    alignItems: 'center',
+                  }}
+                >
+                  {/* Product name */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                    <span style={{ fontSize: '14px', color: '#1A1A1A', fontWeight: 500 }}>{item.product?.name ?? '—'}</span>
+                    {item.notes && (
+                      <span style={{ fontSize: '12px', color: '#6B7280', fontStyle: 'italic' }}>{item.notes}</span>
+                    )}
+                  </div>
+                  {/* Type */}
+                  <span style={{ fontSize: '13px', color: '#6B7280' }}>{isWeightBased ? 'Weight-based' : 'Fixed price'}</span>
 
-              {/* Type */}
-              <span style={{ fontSize: '13px', color: '#6B7280' }}>{isWeightBased ? 'Weight-based' : 'Fixed price'}</span>
+                  {/* Weight range */}
+                  <span style={{ fontSize: '13px', color: '#6B7280' }}>{isWeightBased ? weightRange : '—'}</span>
 
-              {/* Weight range */}
-              <span style={{ fontSize: '13px', color: '#6B7280' }}>{isWeightBased ? weightRange : '—'}</span>
+                  {/* Qty */}
+                  <span style={{ fontSize: '13px', color: '#1A1A1A' }}>{item.quantity}</span>
 
-              {/* Qty */}
-              <span style={{ fontSize: '13px', color: '#1A1A1A' }}>{item.quantity}</span>
-
-              {/* Price per kg (or per box for fixed) */}
-              <span style={{ fontSize: '13px', color: '#1A1A1A' }}>
-                {isWeightBased
-                  ? `${formatCents(pricePerKg)}/kg`
-                  : formatCents(fixedPrice)
-                }
-              </span>
-
-              {/* Actual weight input only appears for weight-based products*/}
-              {isWeightBased ? (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                  <input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    value={weights[item.id] ?? ''}
-                    onChange={e => {
-                      setWeights(prev => ({ ...prev, [item.id]: e.target.value }))
-                      setWeightError(null)
-                      setWeightSaved(false)
-                    }}
-                    disabled={weightsLocked}
-                    placeholder={weightsLocked ? '—' : '0.00'}
-                    className="gw-input"
-                    style={{
-                      width: '72px',
-                      padding: '7px 8px',
-                      fontSize: '13px',
-                      background: weightsLocked ? '#F9FAFB' : '#fff',
-                      cursor: weightsLocked ? 'not-allowed' : 'text',
-                      color: weightsLocked ? '#9CA3AF' : '#1A1A1A',
-                    }}
-                  />
-                  <span style={{ fontSize: '11px', color: '#9CA3AF' }}>kg</span>
-                </div>
-              ) : (
-                <span style={{ fontSize: '13px', color: '#9CA3AF', fontStyle: 'italic' }}>—</span>
-              )}
-
-              {/* Live subtotal */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                <span style={{
-                  fontSize: '13px',
-                  fontWeight: subtotalChanged ? 700 : 400,
-                  color: subtotalChanged ? '#7B1A1A' : '#1A1A1A',
-                }}>
-                  {liveSubtotal != null ? formatCents(liveSubtotal) : '—'}
-                </span>
-                {/* Unsaved indicator — shows when the typed weight would change the subtotal */}
-                {subtotalChanged && (
-                  <span style={{ fontSize: '10px', color: '#C9A84C', fontWeight: 700, letterSpacing: '.03em' }}>
-                    UNSAVED
+                  {/* Price per kg (or per box for fixed) */}
+                  <span style={{ fontSize: '13px', color: '#1A1A1A' }}>
+                    {isWeightBased
+                      ? `${formatCents(pricePerKg)}/kg`
+                      : formatCents(fixedPrice)
+                    }
                   </span>
-                )}
-              </div>
-            </div>
-          )
-        })}
+
+                  {/* Actual weight input only appears for weight-based products*/}
+                  {isWeightBased ? (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        value={weights[item.id] ?? ''}
+                        onChange={e => {
+                          setWeights(prev => ({ ...prev, [item.id]: e.target.value }))
+                          setWeightError(null)
+                          setWeightSaved(false)
+                        }}
+                        disabled={weightsLocked}
+                        placeholder={weightsLocked ? '—' : '0.00'}
+                        className="gw-input"
+                        style={{
+                          width: '72px',
+                          padding: '7px 8px',
+                          fontSize: '13px',
+                          background: weightsLocked ? '#F9FAFB' : '#fff',
+                          cursor: weightsLocked ? 'not-allowed' : 'text',
+                          color: weightsLocked ? '#9CA3AF' : '#1A1A1A',
+                        }}
+                      />
+                      <span style={{ fontSize: '11px', color: '#9CA3AF' }}>kg</span>
+                    </div>
+                  ) : (
+                    <span style={{ fontSize: '13px', color: '#9CA3AF', fontStyle: 'italic' }}>—</span>
+                  )}
+
+                  {/* Live subtotal */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                    <span style={{
+                      fontSize: '13px',
+                      fontWeight: subtotalChanged ? 700 : 400,
+                      color: subtotalChanged ? '#7B1A1A' : '#1A1A1A',
+                    }}>
+                      {liveSubtotal != null ? formatCents(liveSubtotal) : '—'}
+                    </span>
+                    {/* Unsaved indicator — shows when the typed weight would change the subtotal */}
+                    {subtotalChanged && (
+                      <span style={{ fontSize: '10px', color: '#C9A84C', fontWeight: 700, letterSpacing: '.03em' }}>
+                        UNSAVED
+                      </span>
+                    )}
+                  </div>
                 </div>
-                </div>
+              )
+            })}
+          </div>
+        </div>
 
         {/*Save Weights section*/}
         {hasWeightBasedItems && !weightsLocked && (

@@ -200,7 +200,7 @@ export default function NewProductPage() {
         const path = `products/${Date.now()}.${ext}`
 
         const { error: uploadError } = await supabase.storage
-          .from('product-images')
+          .from('store_asset')
           .upload(path, imageFile, { upsert: true })
 
         if (uploadError) {
@@ -208,7 +208,7 @@ export default function NewProductPage() {
         }
 
         const { data: urlData } = supabase.storage
-          .from('product-images')
+          .from('store_asset')
           .getPublicUrl(path)
 
         image_url = urlData.publicUrl
