@@ -76,7 +76,6 @@ export async function getOrderCountsByStatus(month, year) {
 
 }
 
-//AI supported
 
 //This second query is used to get the order summary including the order count, estimated total which is includifg the deposits and the estimated final payment (minimum estimated)
 // count minimum estimated final payment, and average order value (how much does 1 order cost in average)
@@ -88,6 +87,10 @@ export async function getOrderSummary(month, year) {
   const { from, to } = getDateRange(month, year)
 
   //fetch all the order picking up this month 
+  //SELECT id, total_cents, status
+  // FROM orders
+  // WHERE pickup_date >= '2025-12-01'
+  //   AND pickup_date <= '2025-12-31'
 
   const { data: allOrders, error: allOrdersError } = await supabaseAdmin
     .from('orders')
@@ -110,6 +113,17 @@ export async function getOrderSummary(month, year) {
 
   //This query is used to fetch PAID deposits for all orders in this pickup month
   //if orderIdList has more than 0 id , run supabase query, otherwise, skip, return empty data and null error
+
+  //SELECT amount_cents
+  // FROM payments
+  // WHERE type = 'DEPOSIT'
+  //   AND status = 'PAID'
+  //   AND order_id IN (
+  //     SELECT id
+  //     FROM orders
+  //     WHERE pickup_date >= '2025-12-01'
+  //       AND pickup_date <= '2025-12-31'
+  //   )
   const { data: deposits, error: depositsError } = orderIdList.length > 0
     ? await supabaseAdmin
       .from('payments')
@@ -163,9 +177,38 @@ export async function getOrderSummary(month, year) {
 //Query 3, find the top 3 product of the selected time frame so admin can predict the products for upcoming season
 //Excludes cancelled orders so admin only sees what they actually needs to prepare
 
+//SQL Query
+
+//fetch order items for those orders, joining to products for the name
+// SELECT oi.quantity, p.name FROM order_items oi
+// JOIN products p ON p.id = oi.product_id
+// WHERE oi.order_id IN (
+//   -- get non cancelled order id for the selected month
+//   SELECT id
+//   FROM orders
+//   WHERE pickup_date >= '2025-12-01'
+//     AND pickup_date <= '2025-12-31'
+//     AND status != 'CANCELLED'
+// )
+
+//then
+// SELECT p.name, SUM(oi.quantity) AS units
+// FROM order_items oi
+// JOIN products p ON p.id = oi.product_id
+// WHERE oi.order_id IN (
+//   SELECT id
+//   FROM orders
+//   WHERE pickup_date >= '2025-12-01'
+//     AND pickup_date <= '2025-12-31'
+//     AND status != 'CANCELLED'
+// )
+// GROUP BY p.name
+// ORDER BY units DESC
+// LIMIT 3
+
 export async function getTopProducts(month, year) {
   const { from, to } = getDateRange(month, year)
- 
+
   //Get IDs of all non-cancelled orders picking up this month
   const { data: orders, error: ordersError } = await supabaseAdmin
     .from('orders')
@@ -173,35 +216,37 @@ export async function getTopProducts(month, year) {
     .gte('pickup_date', from)
     .lte('pickup_date', to)
     .not('status', 'eq', 'CANCELLED')   // exclude cancelled, don't prep these
- 
+
   if (ordersError) throw ordersError
 
   // If no orders exist for this period, return empty array early
   const orderIds = orders.map(o => o.id)
   if (orderIds.length === 0) return []
- 
+
   //Fetch order_items for those orders, joining to products for the name
   // The join syntax "product:products!order_items_product_id_fkey" explicitly names
   // the foreign key so Supabase knows which relationship to use
+  //AI Support to write this query
   const { data: items, error: itemsError } = await supabaseAdmin
     .from('order_items')
     .select(`
       quantity,
-      product:products!order_items_product_id_fkey ( name )
-    `)
+      product:products!order_items_product_id_fkey ( name ) 
+    `) //second line means JOIN products p ON p.id = oi.product_id
     .in('order_id', orderIds)   // only items belonging to our filtered orders
- 
+
   if (itemsError) throw itemsError
 
   //Aggregate quantity by product name
   // We use a map (object) keyed by product name to accumulate totals
+  //AI support to aggregate
   const map = {}
   for (const item of items) {
     const name = item.product?.name ?? 'Unknown'  // fallback if join returns null
     if (!map[name]) map[name] = { name, units: 0 }  // initialise if first time seeing this product
     map[name].units += item.quantity ?? 0            // add this line item's quantity
   }
- 
+
   //Sort by units descending and return only the top 3
   return Object.values(map)
     .sort((a, b) => b.units - a.units)  // highest quantity first

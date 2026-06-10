@@ -100,7 +100,7 @@ function SkeletonBox({ height = 20, width = '100%', radius = 8 }) {
 function ReportsSkeleton() {
   return (
     <>
-      {/* pulse keyframe -- slides the gradient from right to left repeatedly */}
+      {/* pulse keyframe -- slides the gradient from right to left repeatedly I asked AI for this effect */}
       <style>{`
         @keyframes pulse {
           0%   { background-position:  200% 0; }
@@ -484,7 +484,7 @@ export default function AdminReportsPage() {
       {/* Inline CSS for responsive grid layouts
           report-income-grid is 4 columns on desktop, 2 columns on tablet (max 900px)
           report-order-grid is 6 columns on desktop, 3 columns on tablet, 2 columns on small mobile (max 480px)
-          report-filter is the dropdown row in the page header */}
+          report-filter is the dropdown row in the page header AI support*/}
       <style>{`
         .report-filter { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
         .report-income-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 4px; }
