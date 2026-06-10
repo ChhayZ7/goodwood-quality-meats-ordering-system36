@@ -1,10 +1,36 @@
 'use client'
-import { useState, useEffect } from 'react'
-import Link from 'next/link'
-import styles from '@/app/styles/card.module.css'
 
+// This page needs to be a Client Component because it uses React state,
+// fetching, search input changes, and category button clicks.
+// Referece - https://nextjs.org/docs/app/api-reference/directives/use-client
+
+import { useState, useEffect } from 'react'
+// useState stores values that change on the page, like products, loading, and search text.
+// useEffect runs the product fetch when the page first loads.
+// AI-assisted reference used for hooks:
+// https://react.dev/reference/react/useState
+// https://react.dev/reference/react/useEffect
+
+import Link from 'next/link'
+// Link is used instead of a normal <a> tag so navigation works properly in Next.js.
+// Reference used:
+// https://nextjs.org/docs/app/api-reference/components/link
+
+import styles from '@/app/styles/card.module.css'
+// CSS module is used so the card styles stay scoped to this component.
+// Reference used:
+// https://nextjs.org/docs/app/getting-started/css#css-modules
+
+
+// Product categories used for the filter buttons.
+// "All" is included so the customer can reset the filter and see every product.
 const CATEGORIES = ['All', 'Pork', 'Beef', 'Lamb', 'Poultry', 'Seafood', 'Other']
 
+// This component displays grey loading cards while the products are being fetched.
+// I used this so the page does not look empty while waiting for the API.
+// AI was used to help organise the loading UI pattern.
+// Reference used for conditional rendering idea:
+// https://react.dev/learn/conditional-rendering
 function ProductCardSkeleton() {
   return (
     <div className={styles.cardSkeleton}>
@@ -19,9 +45,13 @@ function ProductCardSkeleton() {
   )
 }
 
+// This component displays one product card. It keeps the product card code separate 
+// from the main ProductsPage, which makes the page easier to read and maintain.
 function ProductCard({ product }) {
+  // A product is sold out if it is marked unavailable or its stock is 0
   const soldOut = !product.is_available || product.stock === 0
 
+  // This decides how the price should display. Fixed products show price per box, and weight products show price per kg
   const priceDisplay =
     product.product_type === 'FIXED'
       ? `$${(product.price_cents / 100).toFixed(2)}/box`
@@ -30,6 +60,8 @@ function ProductCard({ product }) {
   return (
     <div className={styles.card}>
       <div className={styles.imageWrapper} style={{ position: 'relative' }}>
+        {/* If the product has an image, show it. Otherwise, show a placeholder icon. */}
+        {/* https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/img */}
         {product.image_url ? (
           <img src={product.image_url} alt={product.name} className={styles.image} />
         ) : (
@@ -41,6 +73,7 @@ function ProductCard({ product }) {
             </svg>
           </div>
         )}
+        {/* This badge is only shown when the product is sold out. */}
         {soldOut && (
           <span style={{
             position: 'absolute', top: '10px', right: '10px',
@@ -75,29 +108,46 @@ function ProductCard({ product }) {
 }
 
 export default function ProductsPage() {
+  // activeCategory controls which category button is selected.
   const [activeCategory, setActiveCategory] = useState('All')
+  // searchQuery stores what the user types into the search bar.
   const [searchQuery, setSearchQuery] = useState('')
+  // products stores the product list returned from the API.
   const [products, setProducts] = useState([])
+  // loading is true while the products are still being fetched.
   const [loading, setLoading] = useState(true)
+  // error stores a friendly message if the API request fails.
   const [error, setError] = useState(null)
 
+  // This useEffect runs once when the page loads.
+  // It calls the products API and then saves the result into products state.
+  // Reference - https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch
   useEffect(() => {
     async function fetchProducts() {
       try {
         const res = await fetch('/api/products')
+
+        // If the API returns an error response, show the user an error message.
         if (!res.ok) throw new Error('Failed to fetch products')
         const json = await res.json()
+
+        // If products is missing for any reason, use an empty array to avoid crashing.
         setProducts(json.products ?? [])
       } catch (err) {
         console.error(err)
         setError('Could not load products. Please try again.')
       } finally {
+        // This runs whether the fetch succeeds or fails.
         setLoading(false)
       }
     }
     fetchProducts()
   }, [])
 
+  // This filters products using both the selected category and search text.
+  // AI was used to help simplify this filtering logic.
+  // Reference used for Array.filter:
+  // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/filter
   const filteredProducts = products.filter(product => {
     const matchesCategory = activeCategory === 'All' || product.category === activeCategory
     const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -109,7 +159,7 @@ export default function ProductsPage() {
       <main style={{ flex: 1 }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '48px 24px' }}>
 
-          {/* Header */}
+          {/* Header section for the customer product page. */}
           <section style={{ textAlign: 'center', marginBottom: '40px' }}>
             <h1 style={{
               margin: '0 0 16px', color: '#7b1a1a', fontSize: '36px',
@@ -123,7 +173,7 @@ export default function ProductsPage() {
             </p>
           </section>
 
-          {/* Search Bar */}
+          {/* Search bar section. This lets customers search by product name. */}
           <section style={{ marginBottom: '24px' }}>
             <div style={{ position: 'relative', maxWidth: '620px', margin: '0 auto' }}>
               <svg
@@ -148,6 +198,10 @@ export default function ProductsPage() {
                 onFocus={e => e.target.style.borderColor = '#7b1a1a'}
                 onBlur={e => e.target.style.borderColor = '#e0d5b7'}
               />
+
+              {/* This clear button only appears when the user has typed something. */}
+              {/* aria-label is added so screen readers know what this icon button does. */}
+              {/* Reference - https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Reference/Attributes/aria-label */}
               {searchQuery && (
                 <button
                   type="button"
@@ -168,9 +222,14 @@ export default function ProductsPage() {
             </div>
           </section>
 
-          {/* Category Filter */}
+          {/* Category filter buttons. */}
+          {/* The active button is styled differently using the CSS module class. */}
           <section style={{ marginBottom: '32px' }}>
             <div className={styles.filterContainer}>
+
+              {/* map is used to render one button for each category. */}
+              {/* Reference used for rendering lists in React: */}
+              {/* https://react.dev/learn/rendering-lists */}
               {CATEGORIES.map(category => (
                 <button
                   key={category}
@@ -184,16 +243,22 @@ export default function ProductsPage() {
             </div>
           </section>
 
-          {/* Product Grid */}
+          {/* Product grid section */}
           <section>
+            {/* Shows an error message if loading products failed*/}
             {error && (
               <p style={{ textAlign: 'center', color: '#7B1A1A', fontSize: '14px' }}>{error}</p>
             )}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px' }}>
               {loading
+              // While loading, show 6 skeleton cards instead of an empty screen.
                 ? Array.from({ length: 6 }).map((_, i) => <ProductCardSkeleton key={i} />)
+
+                // If products exist after filtering, show the product cards
                 : filteredProducts.length > 0
                   ? filteredProducts.map(product => <ProductCard key={product.id} product={product} />)
+
+                  // If nothing matches the search or category, show a friendly empty state.
                   : (
                     <div style={{
                       gridColumn: '1 / -1',
@@ -204,7 +269,7 @@ export default function ProductsPage() {
                       padding: '10px 24px',
                       gap: '12px',
                     }}>
-                      {/* Red circle icon */}
+                      {/* This red circle icon gives the empty state a more finished look*/}
                       <div style={{
                         width: '80px',
                         height: '80px',
@@ -223,7 +288,7 @@ export default function ProductsPage() {
                         </svg>
                       </div>
 
-                      {/* Bold heading */}
+                      {/* Empty state heading. */}
                       <p style={{
                         margin: 0,
                         fontSize: '22px',
@@ -234,7 +299,7 @@ export default function ProductsPage() {
                         No products found
                       </p>
 
-                      {/* Helper text */}
+                      {/* Helper text changes depending on whether the user searched or filtered*/}
                       <p style={{
                         margin: 0,
                         fontSize: '14px',
