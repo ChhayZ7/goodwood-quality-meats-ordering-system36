@@ -1,7 +1,10 @@
 // All database reads related to recipes
-
+// Uses supabaseAdmin (service role) to bypass row-level security for server-side reads
 import { supabaseAdmin } from '@/lib/supabase-admin'
 
+// Summary fields only 
+// used for the recipe listing page
+// Excludes heavy fields like ingredients and method to keep the response light
 const RECIPE_SELECT_SUMMARY = `
   id,
   name,
@@ -10,6 +13,7 @@ const RECIPE_SELECT_SUMMARY = `
   description
 `
 
+// Full fields used for the recipe detail page where everything needs to be displayed
 const RECIPE_SELECT_FULL = `
   id,
   name,
@@ -29,6 +33,7 @@ const RECIPE_SELECT_FULL = `
 `
 
 // Fetch all recipes (summary fields only for listing page)
+// Orders by created_at descending so the newest recipes appear first
 export async function getRecipes() {
   return supabaseAdmin
     .from('recipes')
@@ -37,6 +42,7 @@ export async function getRecipes() {
 }
 
 // Fetch a single recipe by ID with all fields
+// .eq filters by matching id, .single() returns one object instead of an array
 export async function getRecipeById(recipeId) {
   return supabaseAdmin
     .from('recipes')
