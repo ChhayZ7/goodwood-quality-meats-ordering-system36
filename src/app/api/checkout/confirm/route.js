@@ -67,7 +67,11 @@ export const POST = withHandler(
       status: 'PAID',
     })
 
-    if (paymentError) throw paymentError
+    // Ignore duplicate key error (23505) — means the webhook already recorded
+    // this payment. Everything is fine, continue confirming the order.
+    if (paymentError && paymentError.code !== '23505') {
+      throw paymentError
+    }
 
     // ── 4. Decrement stock ────────────────────────────────────────────────────
     // Non-fatal — payment is already confirmed so we never block the response
