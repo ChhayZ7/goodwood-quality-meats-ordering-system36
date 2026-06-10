@@ -3,9 +3,9 @@
 // Handles payment_intent.succeeded, confirming the order,
 // recording the payment, and sending the customer a confirmation email with invoice.
 //
-// safety net, so if the customer closes their browser after paying but
+// Safety net: if the customer closes their browser after paying but
 // before /api/checkout/confirm runs, this webhook still confirms the order automatically.
-// file assisted with AI, console logging commented out
+// File assisted with AI, console logging commented out.
 
 import { stripe } from '@/lib/stripe'
 import { recordPayment, updateOrder, getOrderById } from '@/lib/db/orders'
@@ -17,9 +17,9 @@ import { supabaseAdmin } from '@/lib/supabase-admin'
 export async function POST(req) {
 
   // Stripe sends the raw request body and a signature header.
-  // signature verified using webhook secret to confirm request is genuine from Stripe
+  // Signature is verified using the webhook secret to confirm the request is genuine from Stripe.
   const body = await req.text()
-  const sig = req.headers.get('stripe-signature')
+  const sig  = req.headers.get('stripe-signature')
 
   let event
   try {
@@ -32,50 +32,41 @@ export async function POST(req) {
     return new Response('Webhook signature invalid', { status: 400 })
   }
 
-  // ignore all other Stripe event types except for successful payments
+  // Ignore all other Stripe event types except successful payments
   if (event.type === 'payment_intent.succeeded') {
-    const intent = event.data.object
+    const intent  = event.data.object
     const orderId = intent.metadata?.order_id
 
     // Every PaymentIntent includes order_id in its metadata.
-    // If it's missing something went wrong during checkout setup.
+    // If it's missing, something went wrong during checkout setup.
     if (!orderId) {
       return new Response('ok')
     }
 
     // 1. Record the payment row in our database.
-    // if /api/checkout/confirm already ran and recorded the payment,
-    // the duplicate insert will fail and be ignored
+    // If /api/checkout/confirm already ran and recorded the payment,
+    // the duplicate insert will be rejected by the unique constraint and ignored.
     const { error: paymentError } = await recordPayment({
-      order_id: orderId,
+      order_id:                 orderId,
       stripe_payment_intent_id: intent.id,
-      amount_cents: intent.amount,
-      type: 'DEPOSIT',
-      status: 'PAID',
+      amount_cents:             intent.amount,
+      type:                     'DEPOSIT',
+      status:                   'PAID',
     })
 
-    // if (paymentError && paymentError.code !== '23505') {
-    //   console.error('[webhook] recordPayment error:', paymentError)
-    // }
-
     // 2. Mark the order as CONFIRMED and record how much deposit was paid.
-    // doesn't matter if /confirm already did this
+    // Safe to run even if /confirm already did this — updating to the same status is harmless.
     const { error: updateError } = await updateOrder(orderId, {
-      status: 'CONFIRMED',
+      status:             'CONFIRMED',
       deposit_paid_cents: intent.amount,
     })
 
-    // if (updateError) {
-    //   console.error('[webhook] updateOrder error:', updateError)
-    // }
-
     // 3. Fetch the full order including items and product details.
-    // needed to generate the invoice PDF and populate the email.
+    // Needed to generate the invoice PDF and populate the email.
     const { data: order, error: orderFetchError } = await getOrderById(orderId)
 
     if (orderFetchError || !order) {
-      //console.error('[webhook] Could not fetch order for invoice:', orderFetchError)
-      // Order is already confirmed above, so return ok so Stripe doesn't retry
+      // Order is already confirmed above — return ok so Stripe doesn't retry
       return new Response('ok')
     }
 
@@ -87,7 +78,6 @@ export async function POST(req) {
       .single()
 
     if (!customer?.email) {
-      //console.error('[webhook] No customer email found for order:', orderId)
       return new Response('ok')
     }
 
@@ -96,56 +86,22 @@ export async function POST(req) {
     const invoiceNumber = `GW-${orderId.slice(0, 8).toUpperCase()}`
     const pickupDate = order.pickup_date
       ? new Date(order.pickup_date).toLocaleDateString('en-AU', {
-        day: '2-digit',
-        month: 'long',
-        year: 'numeric',
-      })
+          day:   '2-digit',
+          month: 'long',
+          year:  'numeric',
+        })
       : 'To be confirmed'
 
-    //console.log('[webhook] Generating PDF...')
     let pdfBuffer
     try {
       pdfBuffer = await generateInvoicePDF(order, customer)
-      //console.log('[webhook] PDF generated, buffer size:', pdfBuffer?.length)
     } catch (pdfErr) {
-      //console.error('[webhook] PDF generation failed:', pdfErr.message)
-      //console.error('[webhook] PDF error stack:', pdfErr.stack)
+      // PDF failed — email will still send without the attachment
     }
 
     // 6. Send the order confirmation email via Resend.
-    // If a PDF was generated it is attached; otherwise the email sends without it.
-    // Email failures are logged but never block the response
-    //Stripe must receive a 200 ok or it will keep retrying the webhook.
-
-    //console.log('[webhook] Attempting to send email to:', customer.email)
-    //console.log('[webhook] PDF attached:', !!pdfBuffer)
-    try {
-      const emailPayload = {
-        from: 'Goodwood Quality Meats <orders@mail.goodwoodqualitymeats.com.au>',
-        to: customer.email,
-        subject: `Order confirmed — ${invoiceNumber} — pickup ${pickupDate}`,
-        html: orderConfirmationHtml({
-          customer,
-          order,
-          invoiceNumber,
-          pickupDate,
-        }),
-      }
-
-      if (pdfBuffer) {
-        emailPayload.attachments = [
-          {
-            filename: `${invoiceNumber}.pdf`,
-            content: pdfBuffer.toString('base64'),
-            contentType: 'application/pdf',
-          },
-        ]
-      }
-
-      const result = await resend.emails.send(emailPayload)
-      //console.log('[webhook] Resend result:', JSON.stringify(result))
-
-    // 5. Send confirmation email (with optional PDF attachment)
+    // Email failures are logged but never block the response —
+    // Stripe must receive a 200 ok or it will keep retrying the webhook.
     try {
       const result = await sendOrderConfirmationEmail({
         customer,
@@ -156,8 +112,7 @@ export async function POST(req) {
       })
       console.log('[webhook] Email sent:', JSON.stringify(result))
     } catch (emailErr) {
-      //console.error('[webhook] Email send failed:', emailErr.message)
-      //console.error('[webhook] Email error details:', JSON.stringify(emailErr))
+      // console.error('[webhook] Email send failed:', emailErr.message)
     }
   }
 
