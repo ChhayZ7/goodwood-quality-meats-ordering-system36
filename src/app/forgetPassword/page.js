@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react"; // useState is a React hook used to store and update values like email, loading, error, etc.
 import { createClient } from "@/lib/supabase-browser"; // This imports your Supabase browser client so this page can talk to Supabase authentication.
+import logo from '@/assets/logoWithoutBrand.png'
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState(""); // Stores the email typed by the user.
@@ -56,9 +57,11 @@ export default function ForgotPassword() {
           {/* LOGO */}
           <div className="flex flex-col items-center mb-6">
             <div className="flex items-center gap-4">
-              <div className="bg-red-800 text-white px-4 py-2 rounded-lg font-bold text-lg">
-                G
-              </div>
+              <img
+                  src={logo.src}
+                  alt="Goodwood Quality Meats"
+                  style={{ height: '90px', width: 'auto' }}
+              />
 
               <div>
                 <h1
