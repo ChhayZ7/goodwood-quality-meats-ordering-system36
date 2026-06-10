@@ -3,9 +3,9 @@
 // whether all weight-based items have actual weights saved.
 //
 // Confirmation Invoice  — estimated totals, shown immediately after checkout
-// and for any order still being prepared.
-// Final Invoice — actual weights, exact subtotals, shown once the
-// order is READY or COMPLETED and all weights are entered.
+//                         and for any order still being prepared.
+// Final Invoice         — actual weights, exact subtotals, shown once the
+//                         order is READY or COMPLETED and all weights are entered.
 
 import {
   Document,
@@ -26,7 +26,14 @@ function formatCents(cents) {
 // Decide whether this order qualifies as a Final Invoice.
 // Requires: every weight-based item has actual_weight_kg set, AND
 // the order status is READY or COMPLETED.
-function isFinalInvoice(order) {
+//
+// forceFinal overrides the status check — used by saveActualWeights() when
+// generating the PDF immediately after saving weights. At that point the
+// weights are confirmed but the status is still IN_PROGRESS (READY is set
+// afterward), so the status check would incorrectly return false without this.
+function isFinalInvoice(order, forceFinal = false) {
+  if (forceFinal) return true // caller guarantees all weights are set
+
   const finalStatuses = ['READY', 'COMPLETED']
   if (!finalStatuses.includes(order.status)) return false
 
@@ -216,6 +223,16 @@ const styles = StyleSheet.create({
     color: '#2D6A2D',
     fontFamily: 'Helvetica-Bold',
   },
+  paidInFullLabel: {
+    fontSize: 12,
+    fontFamily: 'Helvetica-Bold',
+    color: '#2D6A2D', // green — order is fully settled
+  },
+  paidInFullValue: {
+    fontSize: 12,
+    fontFamily: 'Helvetica-Bold',
+    color: '#2D6A2D', // green — matches label
+  },
 
   // Estimate disclaimer (shown on confirmation invoices only)
   disclaimer: {
@@ -290,9 +307,9 @@ const styles = StyleSheet.create({
 
 // ─── Document component ───────────────────────────────────────────────────────
 
-function InvoiceDocument({ order, customer }) {
+function InvoiceDocument({ order, customer, forceFinal = false }) {
   const invoiceNumber = `GW-${order.id.slice(0, 8).toUpperCase()}`
-  const final = isFinalInvoice(order)
+  const final = isFinalInvoice(order, forceFinal) // forceFinal bypasses status check when called from saveActualWeights()
 
   const issueDate = new Date().toLocaleDateString('en-AU', {
     day: '2-digit', month: 'long', year: 'numeric',
@@ -439,45 +456,70 @@ function InvoiceDocument({ order, customer }) {
         })}
 
         {/* ── Totals ── */}
-        <View style={styles.totalsBlock}>
-          <View style={styles.totalRow}>
-            <Text style={styles.totalLabel}>
-              {final ? 'Total' : 'Estimated total'}
-            </Text>
-            <Text style={styles.totalValue}>
-              {formatCents(order.total_cents ?? 0)}
-            </Text>
-          </View>
+        {(() => {
+          // isCompleted drives the balance line — COMPLETED means the customer
+          // has collected and paid in full; balance due should show as $0.00 / paid.
+          const isCompleted   = order.status === 'COMPLETED'
+          const totalCents    = order.total_cents        ?? 0
+          const depositCents  = order.deposit_paid_cents ?? 2000
+          const balanceCents  = Math.max(0, totalCents - depositCents)
 
-          <View style={styles.totalDivider} />
+          return (
+            <View style={styles.totalsBlock}>
 
-          <View style={styles.totalRow}>
-            <Text style={styles.depositLabel}>Deposit paid</Text>
-            <Text style={styles.depositValue}>
-              {formatCents(order.deposit_paid_cents ?? 2000)}
-            </Text>
-          </View>
+              {/* Total row — "Estimated total" for confirmation, "Total" for final */}
+              <View style={styles.totalRow}>
+                <Text style={styles.totalLabel}>
+                  {final ? 'Total' : 'Estimated total'}
+                </Text>
+                <Text style={styles.totalValue}>
+                  {formatCents(totalCents)}
+                </Text>
+              </View>
 
-          <View style={styles.totalRow}>
-            <Text style={styles.grandTotalLabel}>
-              Balance due at pickup
-            </Text>
-            <Text style={styles.grandTotalValue}>
-              {formatCents(
-                (order.total_cents ?? 0) - (order.deposit_paid_cents ?? 2000)
-              )}
-            </Text>
-          </View>
-        </View>
+              <View style={styles.totalDivider} />
+
+              {/* Deposit row — always shown */}
+              <View style={styles.totalRow}>
+                <Text style={styles.depositLabel}>Deposit paid</Text>
+                <Text style={styles.depositValue}>
+                  {formatCents(depositCents)}
+                </Text>
+              </View>
+
+              {/* Balance row — switches to "Paid in full" when COMPLETED */}
+              <View style={styles.totalRow}>
+                {isCompleted ? (
+                  <>
+                    <Text style={styles.paidInFullLabel}>Paid in full</Text>
+                    <Text style={styles.paidInFullValue}>{formatCents(0)}</Text>
+                  </>
+                ) : (
+                  <>
+                    <Text style={styles.grandTotalLabel}>Balance due at pickup</Text>
+                    <Text style={styles.grandTotalValue}>
+                      {formatCents(balanceCents)}
+                    </Text>
+                  </>
+                )}
+              </View>
+
+            </View>
+          )
+        })()}
 
         {/* ── Disclaimer / info box ── */}
         {final ? (
           <View style={styles.confirmedBox}>
-            <Text style={styles.confirmedTitle}>Ready for pickup</Text>
+            {/* Label and body switch based on status — COMPLETED = collected and paid */}
+            <Text style={styles.confirmedTitle}>
+              {order.status === 'COMPLETED' ? 'Order complete — thank you!' : 'Ready for pickup'}
+            </Text>
             <Text style={styles.confirmedText}>
-              Your order has been weighed and prepared. Please pay the balance via
-              EFTPOS in store at the time of collection. If you have any questions,
-              call us on 08 8271 4183.
+              {order.status === 'COMPLETED'
+                ? 'This order has been collected and paid in full. Thank you for choosing Goodwood Quality Meats.'
+                : 'Your order has been weighed and prepared. Please pay the balance via EFTPOS in store at the time of collection. If you have any questions, call us on 08 8271 4183.'
+              }
             </Text>
           </View>
         ) : (
@@ -514,7 +556,9 @@ function InvoiceDocument({ order, customer }) {
   )
 }
 
-// Returns a Buffer — ready to attach to an email or save to storage
-export async function generateInvoicePDF(order, customer) {
-  return renderToBuffer(<InvoiceDocument order={order} customer={customer} />)
+// Returns a Buffer — ready to attach to an email or save to storage.
+// Pass forceFinal = true when calling from saveActualWeights() so the PDF
+// renders as a Final Invoice even though the order status is still IN_PROGRESS.
+export async function generateInvoicePDF(order, customer, forceFinal = false) {
+  return renderToBuffer(<InvoiceDocument order={order} customer={customer} forceFinal={forceFinal} />)
 }

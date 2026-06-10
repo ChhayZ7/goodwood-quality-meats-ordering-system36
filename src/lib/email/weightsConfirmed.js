@@ -2,6 +2,8 @@
 // Sent to the customer once staff have saved actual weights and the
 // confirmed balance due is known. Fires from saveActualWeights() in
 // the admin orders PATCH route — only when at least one weight changed.
+// Includes the Final Invoice PDF as an attachment so the customer has a
+// record of the exact weights and confirmed total before pickup.
 
 import { resend } from '@/lib/resend'
 
@@ -57,7 +59,8 @@ function html({ firstName, invoiceNumber, pickupDate, totalCents, depositPaidCen
                 <p style="font-size:14px;color:#555;line-height:1.8;margin:0 0 24px;">
                   Great news — our team has weighed and prepared your Christmas order
                   <strong style="color:#7B1A1A;">${invoiceNumber}</strong>.
-                  Your confirmed balance is now available below.
+                  Your confirmed balance is now available below, and your
+                  <strong>Final Invoice is attached</strong> to this email.
                 </p>
 
                 <!-- Order summary box -->
@@ -145,7 +148,7 @@ function html({ firstName, invoiceNumber, pickupDate, totalCents, depositPaidCen
                   </tr>
                 </table>
 
-                <!-- CTA — view final invoice -->
+                <!-- CTA — view final invoice in portal -->
                 <table width="100%" cellpadding="0" cellspacing="0"
                   style="margin-bottom:28px;">
                   <tr>
@@ -225,6 +228,20 @@ function html({ firstName, invoiceNumber, pickupDate, totalCents, depositPaidCen
 
 // ─── Main export ──────────────────────────────────────────────────────────────
 
+/**
+ * Sends the weights confirmed email with the Final Invoice PDF attached.
+ *
+ * @param {object} params
+ * @param {string}  params.customerEmail
+ * @param {string}  params.customerFirstName
+ * @param {string}  params.orderId
+ * @param {string}  params.pickupDate       - Formatted date string
+ * @param {number}  params.totalCents       - Confirmed order total after weighing
+ * @param {number}  params.depositPaidCents
+ * @param {Buffer} [params.pdfBuffer]       - Final Invoice PDF; attached if provided.
+ *                                            Email still sends without it if PDF
+ *                                            generation failed.
+ */
 export async function sendWeightsConfirmedEmail({
   customerEmail,
   customerFirstName,
@@ -232,23 +249,31 @@ export async function sendWeightsConfirmedEmail({
   pickupDate,
   totalCents,
   depositPaidCents,
+  pdfBuffer,
 }) {
   const invoiceNumber = `GW-${orderId.slice(0, 8).toUpperCase()}`
   const firstName     = customerFirstName ?? 'there'
+  const balanceDue    = Math.max(0, (totalCents ?? 0) - (depositPaidCents ?? 0))
 
-  await resend.emails.send({
+  const payload = {
     from:    FROM,
     to:      customerEmail,
-    subject: `Your order ${invoiceNumber} has been weighed — balance due ${
-      `$${(Math.max(0, (totalCents ?? 0) - (depositPaidCents ?? 0)) / 100).toFixed(2)}`
-    }`,
-    html: html({
-      firstName,
-      invoiceNumber,
-      pickupDate,
-      totalCents,
-      depositPaidCents,
-      orderId,
-    }),
-  })
+    subject: `Your order ${invoiceNumber} has been weighed — balance due $${(balanceDue / 100).toFixed(2)}`,
+    html:    html({ firstName, invoiceNumber, pickupDate, totalCents, depositPaidCents, orderId }),
+  }
+
+  // Attach the Final Invoice PDF if the caller was able to generate it.
+  // If pdfBuffer is undefined (generation failed), the email still sends
+  // without the attachment — the customer can still download it from the portal.
+  if (pdfBuffer) {
+    payload.attachments = [
+      {
+        filename:    `${invoiceNumber}-final-invoice.pdf`,
+        content:     pdfBuffer.toString('base64'),
+        contentType: 'application/pdf',
+      },
+    ]
+  }
+
+  await resend.emails.send(payload)
 }

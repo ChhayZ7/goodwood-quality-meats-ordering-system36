@@ -390,14 +390,14 @@ export default function OrderDetailPage({ role }) {
               ))}
             </div>
 
-            {/* Item rows */}
-            {(order.order_items ?? []).map((item, i) => {
-              const isWeightBased = item.product?.product_type === 'WEIGHT_RANGE'
-              const weightRange = item.weight_option
-                ? `${item.weight_option.min_weight_kg}–${item.weight_option.max_weight_kg} kg`
-                : item.weight_preference ?? '—'
-              const pricePerKg = item.product?.price_per_kg_cents ?? 0
-              const fixedPrice = item.unit_price_cents ?? 0
+        {/* Item rows */}
+        {(order.order_items ?? []).map((item, i) => {
+          const isWeightBased  = item.product?.product_type === 'WEIGHT_RANGE'
+          const weightRange    = item.weight_option
+            ? `${item.weight_option.label}`
+            : item.weight_preference ?? '—'
+          const pricePerKg = item.product?.price_per_kg_cents ?? 0
+          const fixedPrice = item.unit_price_cents ?? 0
 
               // Live subtotal recalculates from the typed actual weight.
               // This lets staff/admin check the subtotal before saving.
