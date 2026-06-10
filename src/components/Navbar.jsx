@@ -85,19 +85,20 @@ export default function Navbar() {
             `}</style>
 
             <nav className="w-full bg-white border-b" style={{ borderColor: '#e5e5e5' }}>
-                <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
+                {/* Row 1: Logo + Icons */}
+                <div className="max-w-7xl mx-auto px-4 md:px-6 py-3 flex items-center justify-between">
 
                     {/* Logo */}
-                    <Link href="/" className="flex items-center">
+                    <Link href="/" className="flex items-center flex-shrink-0">
                         <img
                             src="https://www.goodwoodqualitymeats.com.au/wp-content/uploads/2020/01/Goodwood-Quality-Meats-Logo-Vertical-3-Colour-Transparent-Background.png"
                             alt="Goodwood Quality Meats"
-                            className="h-20 w-auto object-contain"
+                            className="h-14 md:h-20 w-auto object-contain"
                         />
                     </Link>
 
-                    {/* Nav Links */}
-                    <div className="flex items-center gap-30">
+                    {/* Nav Links — desktop only (md+) */}
+                    <div className="hidden md:flex items-center gap-30">
                         <Link href="/products" className="text-sm tracking-wide transition-opacity hover:opacity-70" style={{ color: '#060606' }}>
                             PRODUCTS
                         </Link>
@@ -110,7 +111,7 @@ export default function Navbar() {
                     </div>
 
                     {/* Icons */}
-                    <div className="flex items-center gap-16">
+                    <div className="flex items-center gap-4 md:gap-16">
                         <Link href="/cart" className='relative'>
                             <ShoppingCartIcon className="w-6 h-6" style={{ color: '#060606' }} />
                             {mounted && itemCount > 0 && (
@@ -210,6 +211,20 @@ export default function Navbar() {
                     </div>
 
                 </div>
+
+                {/* Row 2: Mobile-only nav links */}
+                <div className="flex md:hidden border-t" style={{ borderColor: '#e5e5e5' }}>
+                    <Link href="/products" className="flex-1 text-center py-2 text-xs tracking-wide transition-opacity hover:opacity-70" style={{ color: '#060606' }}>
+                        PRODUCTS
+                    </Link>
+                    <Link href="/recipes" className="flex-1 text-center py-2 text-xs tracking-wide transition-opacity hover:opacity-70" style={{ color: '#060606' }}>
+                        RECIPES
+                    </Link>
+                    <Link href="/contact" className="flex-1 text-center py-2 text-xs tracking-wide transition-opacity hover:opacity-70" style={{ color: '#060606' }}>
+                        CONTACT US
+                    </Link>
+                </div>
+
             </nav>
         </>
     )

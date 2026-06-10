@@ -227,9 +227,9 @@ export default function ProfilePage() {
         style={{
           maxWidth: '1180px',
           margin: '0 auto',
-          padding: '48px 40px 80px',
           fontFamily: '"Lato", sans-serif',
         }}
+        className="px-4 pt-6 pb-10 sm:px-10 sm:pt-12 sm:pb-20"
       >
         <style>{hideNativePasswordEye}</style>
 
@@ -268,7 +268,7 @@ export default function ProfilePage() {
           <div className="bg-white rounded-xl border border-[#E5DCC8] p-8 mb-6">
             <div className="h-6 w-40 bg-[#EFE6D1] rounded mb-6" />
 
-            <div className="flex gap-4 mb-5">
+            <div className="flex flex-col sm:flex-row gap-4 mb-5">
               <div className="flex-1 h-12 bg-[#EFE6D1] rounded-lg" />
               <div className="flex-1 h-12 bg-[#EFE6D1] rounded-lg" />
             </div>
@@ -294,9 +294,9 @@ export default function ProfilePage() {
       style={{
         maxWidth: '1180px',
         margin: '0 auto',
-        padding: '48px 40px 80px',
         fontFamily: '"Lato", sans-serif',
       }}
+      className="px-4 pt-6 pb-10 sm:px-10 sm:pt-12 sm:pb-20"
     >
       <style>{hideNativePasswordEye}</style>
 
@@ -349,7 +349,7 @@ export default function ProfilePage() {
         )}
 
         <form onSubmit={handleSave} className="space-y-5">
-          <div className="flex gap-4">
+          <div className="flex flex-col sm:flex-row gap-4">
             <div className="flex-1">
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 First Name

@@ -1,69 +1,108 @@
 //src/components/dashboard/orders/OrderDetailsPage.jsx
-// Same as before but with actual weight saving fully wired up.
+// Shared order detail page for both Admin and Staff dashboards
 
 'use client'
+// This page needs to be a Client Component because it uses state, effects,
+// route parameters, router navigation, input changes, button clicks, and browser APIs
+// Reference - https://nextjs.org/docs/app/api-reference/directives/use-client
 
 import { useState, useEffect, useCallback } from 'react'
+// useState stores values that change on the page.
+// useEffect loads the order when the page opens.
+// useCallback keeps loadOrder stable so it can safely be used inside useEffect
+// References used:
+// https://react.dev/reference/react/useState
+// https://react.dev/reference/react/useEffect
+// https://react.dev/reference/react/useCallback
+
 import { useParams, useRouter } from 'next/navigation'
+// useParams gets the order id from the dynamic route.
+// useRouter is used to redirect the user to login if they are not authenticated.
+// References used:
+// https://nextjs.org/docs/app/api-reference/functions/use-params
+// https://nextjs.org/docs/app/api-reference/functions/use-router
+
 import Link from 'next/link'
+// Link is used for internal navigation back to the orders page
+// Reference - https://nextjs.org/docs/app/api-reference/components/link
+
 import StatusBadge, { STATUS_CONFIG } from '@/components/dashboard/StatusBadge'
 import PageWrapper from '@/components/dashboard/PageWrapper'
 
+// Staff/admin can update to these statuses from this page.
+// CANCELLED is not included here because cancellation has its own flow and reason field.
 const ORDER_STATUSES = ['CONFIRMED', 'IN_PROGRESS', 'READY', 'COMPLETED']
 
-const formatDate  = d => new Date(d).toLocaleDateString('en-AU', { day: '2-digit', month: '2-digit', year: 'numeric' })
-const formatSmall = d => new Date(d).toLocaleString('en-AU', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })
-const formatCents = c => c != null ? `$${(c / 100).toFixed(2)}` : '—'
-const shortNum    = id => id ? `GW${id.slice(0, 8).toUpperCase()}` : '—'
+// Format dates for display in the order page.
+// AI was used to help keep date formatting short and consistent
+// Reference - https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toLocaleDateString
+const formatDate = d => new Date(d).toLocaleDateString('en-AU', { day: '2-digit', month: '2-digit', year: 'numeric' })
 
+// Format date and time for the audit log
+const formatSmall = d => new Date(d).toLocaleString('en-AU', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+const formatCents = c => c != null ? `$${(c / 100).toFixed(2)}` : '—' //Convert cents into a dollar string. If the value is missing, show a dash instead of crashing.
+
+// Make a short order number from the order id.
+// Example: an id starting with abc12345 becomes GWABC12345.
+const shortNum = id => id ? `GW${id.slice(0, 8).toUpperCase()}` : '—'
+
+// Small reusable skeleton block used while the order is loading. This avoids repeating the same placeholder div many times.
 function SkeletonBlock({ width, height, radius = '4px', style = {} }) {
   return <div style={{ width, height, background: '#F0E8D0', borderRadius: radius, ...style }} />
 }
 
 export default function OrderDetailPage({ role }) {
-  const { id }    = useParams()
-  const router    = useRouter()
-  const isAdmin   = role === 'ADMIN'
-  const basePath  = isAdmin ? '/admin/orders' : '/staff/orders'
+  const { id } = useParams() // Get the order id from the URL
+  const router = useRouter() // Router is used for redirecting unauthenticated users
 
-  // ── Core order state ───────────────────────────────────────────────────────
-  const [order,        setOrder]        = useState(null)
-  const [loading,      setLoading]      = useState(true)
-  const [fetchError,   setFetchError]   = useState(null)
+  // Role controls which dashboard path and actions are available
+  const isAdmin = role === 'ADMIN'
+  const basePath = isAdmin ? '/admin/orders' : '/staff/orders'
 
-  // ── Status update state ────────────────────────────────────────────────────
+  // Core order state 
+  const [order, setOrder] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [fetchError, setFetchError] = useState(null)
+
+  // Status update state
   const [selectedStatus, setSelectedStatus] = useState('')
-  const [saving,         setSaving]         = useState(false)
-  const [saved,          setSaved]          = useState(false)
-  const [saveError,      setSaveError]      = useState(null)
+  const [saving, setSaving] = useState(false)
+  const [saved, setSaved] = useState(false)
+  const [saveError, setSaveError] = useState(null)
 
-  // ── Actual weight state ────────────────────────────────────────────────────
+  // Actual weight state
   // { [order_item_id]: string }  — string so the input doesn't jump to "0"
-  const [weights,        setWeights]        = useState({})
-  const [weightSaving,   setWeightSaving]   = useState(false)
-  const [weightSaved,    setWeightSaved]    = useState(false)
-  const [weightError,    setWeightError]    = useState(null)
+  const [weights, setWeights] = useState({})
+  const [weightSaving, setWeightSaving] = useState(false)
+  const [weightSaved, setWeightSaved] = useState(false)
+  const [weightError, setWeightError] = useState(null)
 
-  // ── Cancel state ──────────────────────────────────────────────────────────
-  const [showCancelForm,   setShowCancelForm]   = useState(false)
-  const [cancelReason,     setCancelReason]     = useState('')
-  const [cancelReasonErr,  setCancelReasonErr]  = useState(false)
-  const [cancelling,       setCancelling]       = useState(false)
-  const [cancelError,      setCancelError]      = useState(null)
+  // Cancel state
+  const [showCancelForm, setShowCancelForm] = useState(false)
+  const [cancelReason, setCancelReason] = useState('')
+  const [cancelReasonErr, setCancelReasonErr] = useState(false)
+  const [cancelling, setCancelling] = useState(false)
+  const [cancelError, setCancelError] = useState(null)
 
-  // ── Load order ─────────────────────────────────────────────────────────────
+  // Load the order from the API.
+  // AI was used to help structure the async fetch, try/catch, and refresh pattern
+  // References used:
+  // https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch
+  // https://react.dev/reference/react/useCallback
   const loadOrder = useCallback(async () => {
     setLoading(true)
     setFetchError(null)
     try {
-      const res  = await fetch(`/api/admin/orders/${id}`)
+      const res = await fetch(`/api/admin/orders/${id}`)
+
+      // If the API says the user is not logged in, send them to login.
       if (res.status === 401) { router.replace('/login'); return }
       const data = await res.json()
       if (!res.ok) throw new Error(data.error ?? 'Failed to load order')
       setOrder(data.order)
       setSelectedStatus(data.order.status)
 
-      // Pre-populate weight inputs from saved actual_weight_kg values
+      // Pre-fill weight inputs from saved actual_weight_kg values. AI was used here to help avoid blank/null input issues.
       const saved = {}
       for (const item of data.order.order_items ?? []) {
         if (item.product?.product_type === 'WEIGHT_RANGE') {
@@ -80,29 +119,35 @@ export default function OrderDetailPage({ role }) {
     }
   }, [id, router])
 
+  // Load the order when the page first opens, or when the order id changes
   useEffect(() => { loadOrder() }, [loadOrder])
 
-  // ── Derived flags ──────────────────────────────────────────────────────────
+  // Derived flags
   const isCancelled = order?.status === 'CANCELLED'
-  // Weights are locked once READY or COMPLETED — the customer has been
-  // notified of the balance so it must not change.
+  // Weights are locked once READY or COMPLETED — the customer has been notified of the balance so it will not change.
   const weightsLocked = ['READY', 'COMPLETED'].includes(order?.status ?? '')
 
-  // Has the user typed any weight value that differs from what's in the DB?
+  // Checks if the user typed any weight value that differs from the saved database value.
+  // AI was used to help compare typed weights against stored weights.
+  // Reference - https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/some
   const hasWeightChanges = (order?.order_items ?? []).some(item => {
     if (item.product?.product_type !== 'WEIGHT_RANGE') return false
-    const typed  = weights[item.id]
+    const typed = weights[item.id]
     const stored = item.actual_weight_kg != null ? String(item.actual_weight_kg) : ''
     return typed !== undefined && typed !== '' && typed !== stored
   })
 
-  // ── Status update ──────────────────────────────────────────────────────────
+  // Save a status update
   async function handleUpdateStatus() {
+
+    // Do not call the API if the status has not changed
     if (!order || selectedStatus === order.status) return
     setSaving(true)
     setSaveError(null)
     try {
-      const res  = await fetch(`/api/admin/orders/${id}`, {
+      const res = await fetch(`/api/admin/orders/${id}`, {
+        // PATCH is used because only part of the order is being updated
+        // Reference - https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Methods/PATCH
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: selectedStatus }),
@@ -110,8 +155,11 @@ export default function OrderDetailPage({ role }) {
       const data = await res.json()
       if (!res.ok) throw new Error(data.error ?? 'Failed to update status')
       setSaved(true)
+
+      // Hide the saved message after 3 seconds
+      // Reference - https://developer.mozilla.org/en-US/docs/Web/API/Window/setTimeout
       setTimeout(() => setSaved(false), 3000)
-      await loadOrder()
+      await loadOrder() // Reload the order so the status and audit trail are fresh
     } catch (err) {
       setSaveError(err.message)
     } finally {
@@ -119,20 +167,27 @@ export default function OrderDetailPage({ role }) {
     }
   }
 
-  // ── Actual weight save ─────────────────────────────────────────────────────
+  // Save actual weights for weight-based items
   async function handleSaveWeights() {
     setWeightError(null)
 
-    // Build the payload — only include weight-based items that have a value
+    // Build the payload with only weight-based items that have a typed value.
+    // AI was used here to help shape the request body.
+    // References used:
+    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/filter
+    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map
     const payload = (order?.order_items ?? [])
       .filter(item => item.product?.product_type === 'WEIGHT_RANGE')
       .filter(item => weights[item.id] !== undefined && weights[item.id] !== '')
       .map(item => ({
-        order_item_id:    item.id,
+        order_item_id: item.id,
         actual_weight_kg: parseFloat(weights[item.id]),
       }))
 
-    // Client-side validation
+    /// Client-side validation checks that all weights are valid positive numbers.
+    // Reference used:
+    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/parseFloat
+    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/isNaN
     const invalid = payload.filter(e => isNaN(e.actual_weight_kg) || e.actual_weight_kg < 0)
     if (invalid.length > 0) {
       setWeightError('All weights must be valid positive numbers.')
@@ -146,7 +201,7 @@ export default function OrderDetailPage({ role }) {
 
     setWeightSaving(true)
     try {
-      const res  = await fetch(`/api/admin/orders/${id}`, {
+      const res = await fetch(`/api/admin/orders/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ actual_weights: payload }),
@@ -165,14 +220,14 @@ export default function OrderDetailPage({ role }) {
     }
   }
 
-  // ── Cancel order ───────────────────────────────────────────────────────────
+  // Cancel an order. Admin must provide a reason, so cancellation can be recorded properly.
   async function handleCancel() {
     if (!cancelReason.trim()) { setCancelReasonErr(true); return }
     setCancelReasonErr(false)
     setCancelling(true)
     setCancelError(null)
     try {
-      const res  = await fetch(`/api/admin/orders/${id}`, {
+      const res = await fetch(`/api/admin/orders/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: 'CANCELLED', reason: cancelReason.trim() }),
@@ -189,7 +244,7 @@ export default function OrderDetailPage({ role }) {
     }
   }
 
-  // ── Loading skeleton ───────────────────────────────────────────────────────
+  // Loading skeleton. This gives the user a visual placeholder while the real order is loading
   if (loading) {
     return (
       <PageWrapper>
@@ -213,7 +268,7 @@ export default function OrderDetailPage({ role }) {
     )
   }
 
-  // ── Error state ────────────────────────────────────────────────────────────
+  // Error state. This is shown if the API fails or the order does not exist
   if (fetchError || !order) {
     return (
       <PageWrapper>
@@ -227,22 +282,25 @@ export default function OrderDetailPage({ role }) {
     )
   }
 
-  const auditLog         = order.audit_log ?? []
-  const lastStatusEntry  = auditLog.find(e => e.field === 'status')
-  const lastWeightEntry  = auditLog.find(e => e.field === 'actual_weight')
+  // Audit log values
+  const auditLog = order.audit_log ?? []
+  const lastStatusEntry = auditLog.find(e => e.field === 'status')
+  const lastWeightEntry = auditLog.find(e => e.field === 'actual_weight')
 
-  // Weight-based items only (shown with the weight input column)
+  // Weight-based items only. These are the only items that need actual weight entry
   const weightBasedItems = (order.order_items ?? []).filter(
     item => item.product?.product_type === 'WEIGHT_RANGE'
   )
   const hasWeightBasedItems = weightBasedItems.length > 0
 
-  // Mirrors the same logic in the PDF template and invoice API route.
-  // True when the order is READY/COMPLETED AND every weight-based item
-  // has an actual weight recorded — meaning the PDF will be a Final Invoice.
+  // Invoice logic.
+  // This matches the same idea used by the PDF/invoice route:
+  // READY or COMPLETED plus all weights entered means a final invoice
+  // AI was used to help make this condition easier to understand
+  // Reference - https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/every
   const FINAL_STATUSES = ['READY', 'COMPLETED']
   const allWeighed = weightBasedItems.every(item => item.actual_weight_kg != null)
-  const isFinal    = FINAL_STATUSES.includes(order.status) && (weightBasedItems.length === 0 || allWeighed)
+  const isFinal = FINAL_STATUSES.includes(order.status) && (weightBasedItems.length === 0 || allWeighed)
   const invoiceLabel = isFinal ? 'View / Print Final Invoice' : 'View / Print Confirmation Invoice'
 
   return (
@@ -253,9 +311,9 @@ export default function OrderDetailPage({ role }) {
         ← Back to Orders
       </Link>
 
-      {/* ── Header ── */}
+      {/*Header*/}
       <div style={{ marginBottom: '32px' }}>
-        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '32px' }}>
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '32px', flexWrap: 'wrap', gap: '12px' }}>
           <div>
             <h1 style={{ fontSize: '36px', fontWeight: 700, color: '#7B1A1A', margin: '0 0 8px' }}>
               Order #{shortNum(order.id)}
@@ -270,7 +328,7 @@ export default function OrderDetailPage({ role }) {
         <div style={{ height: '2px', background: 'linear-gradient(90deg, #C9A84C, transparent)', borderRadius: '1px' }} />
       </div>
 
-      {/* ── Audit Trail ── */}
+      {/* Audit Trail */}
       <div style={{ background: '#fff', borderRadius: '12px', border: '1px solid #E5E7EB', padding: '24px', marginBottom: '20px' }}>
         <h2 style={{ fontSize: '20px', fontWeight: 700, color: '#1A1A1A', margin: '0 0 16px' }}>Audit Trail</h2>
         {auditLog.length === 0 ? (
@@ -305,17 +363,19 @@ export default function OrderDetailPage({ role }) {
         )}
       </div>
 
-      {/* ── Order Items ── */}
+      {/* Order Items */}
       <div style={{ background: '#fff', borderRadius: '12px', border: '1px solid #E5E7EB', padding: '24px', marginBottom: '20px' }}>
         <h2 style={{ fontSize: '20px', fontWeight: 700, color: '#1A1A1A', margin: '0 0 16px' }}>Order Items</h2>
 
-        {/* Lock notice */}
+        {/* Lock notice shown once weights are no longer editable. */}
         {weightsLocked && (
           <div style={{ background: '#FFFBEB', border: '1px solid #FCD34D', borderRadius: '8px', padding: '12px 16px', marginBottom: '16px', fontSize: '14px', color: '#92400E' }}>
             Weights are locked and cannot be edited for orders marked as <strong>{STATUS_CONFIG[order.status]?.label}</strong>.
           </div>
         )}
 
+                <div style={{ overflowX: 'auto' }}>
+                <div style={{ minWidth: '660px' }}>
         {/* Editable weight notice for IN_PROGRESS */}
         {order.status === 'IN_PROGRESS' && hasWeightBasedItems && !weightsLocked && (
           <div style={{ background: '#F0FDF4', border: '1px solid #86EFAC', borderRadius: '8px', padding: '12px 16px', marginBottom: '16px', fontSize: '14px', color: '#166534' }}>
@@ -336,21 +396,21 @@ export default function OrderDetailPage({ role }) {
           const weightRange    = item.weight_option
             ? `${item.weight_option.label}`
             : item.weight_preference ?? '—'
-          const pricePerKg     = item.product?.price_per_kg_cents ?? 0
-          const fixedPrice     = item.unit_price_cents ?? 0
+          const pricePerKg = item.product?.price_per_kg_cents ?? 0
+          const fixedPrice = item.unit_price_cents ?? 0
 
-          // Live subtotal: recalculate from the current typed weight so staff
-          // can verify the math before hitting Save Weights.
-          // Falls back to the stored subtotal_cents if no weight is typed yet.
-          const typedWeight    = parseFloat(weights[item.id])
-          const liveSubtotal   = isWeightBased
+          // Live subtotal recalculates from the typed actual weight.
+          // This lets staff/admin check the subtotal before saving.
+          // If no weight is typed yet, it falls back to the saved subtotal.
+          // AI was used to help with this calculation and fallback logic
+          const typedWeight = parseFloat(weights[item.id])
+          const liveSubtotal = isWeightBased
             ? (!isNaN(typedWeight) && typedWeight > 0
-                ? Math.round(typedWeight * pricePerKg * item.quantity)
-                : item.subtotal_cents)
+              ? Math.round(typedWeight * pricePerKg * item.quantity)
+              : item.subtotal_cents)
             : fixedPrice * item.quantity
 
-          // Flag whether the live subtotal differs from the saved one
-          // so we can hint to the user that unsaved changes are pending
+          // Flag whether the live subtotal differs from the saved one, so we can hint to the user that unsaved changes are pending
           const subtotalChanged = isWeightBased
             && !isNaN(typedWeight)
             && typedWeight > 0
@@ -387,7 +447,7 @@ export default function OrderDetailPage({ role }) {
                 }
               </span>
 
-              {/* Actual weight input */}
+              {/* Actual weight input only appears for weight-based products*/}
               {isWeightBased ? (
                 <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                   <input
@@ -408,8 +468,8 @@ export default function OrderDetailPage({ role }) {
                       padding: '7px 8px',
                       fontSize: '13px',
                       background: weightsLocked ? '#F9FAFB' : '#fff',
-                      cursor:     weightsLocked ? 'not-allowed' : 'text',
-                      color:      weightsLocked ? '#9CA3AF'    : '#1A1A1A',
+                      cursor: weightsLocked ? 'not-allowed' : 'text',
+                      color: weightsLocked ? '#9CA3AF' : '#1A1A1A',
                     }}
                   />
                   <span style={{ fontSize: '11px', color: '#9CA3AF' }}>kg</span>
@@ -437,8 +497,10 @@ export default function OrderDetailPage({ role }) {
             </div>
           )
         })}
+                </div>
+                </div>
 
-        {/* ── Save Weights section ── */}
+        {/*Save Weights section*/}
         {hasWeightBasedItems && !weightsLocked && (
           <div style={{ marginTop: '20px', paddingTop: '20px', borderTop: '1px solid #E5E7EB' }}>
 
@@ -453,7 +515,7 @@ export default function OrderDetailPage({ role }) {
                 style={{
                   padding: '10px 28px',
                   background: weightSaving || !hasWeightChanges ? '#E5E7EB' : '#7B1A1A',
-                  color:      weightSaving || !hasWeightChanges ? '#9CA3AF' : '#fff',
+                  color: weightSaving || !hasWeightChanges ? '#9CA3AF' : '#fff',
                   border: 'none',
                   borderRadius: '8px',
                   fontSize: '14px',
@@ -505,7 +567,7 @@ export default function OrderDetailPage({ role }) {
         </div>
       </div>
 
-      {/* ── Notes ── */}
+      {/*Notes*/}
       <div style={{ background: '#fff', borderRadius: '12px', border: '1px solid #E5E7EB', padding: '24px', marginBottom: '20px' }}>
         <h2 style={{ fontSize: '20px', fontWeight: 700, color: '#1A1A1A', margin: '0 0 16px' }}>Notes</h2>
         {order.notes
@@ -514,7 +576,7 @@ export default function OrderDetailPage({ role }) {
         }
       </div>
 
-      {/* ── Update Status ── */}
+      {/* Update Status */}
       {!isCancelled && (
         <div style={{ background: '#fff', borderRadius: '12px', border: '1px solid #E5E7EB', padding: '24px', marginBottom: '20px' }}>
           <h2 style={{ fontSize: '20px', fontWeight: 700, color: '#1A1A1A', margin: '0 0 16px' }}>Update Status</h2>
@@ -548,10 +610,11 @@ export default function OrderDetailPage({ role }) {
         </div>
       )}
 
-      {/* ── Order Actions ── */}
+      {/* Order Actions */}
       <div style={{ background: '#fff', borderRadius: '12px', border: '1px solid #E5E7EB', padding: '24px' }}>
         <h2 style={{ fontSize: '20px', fontWeight: 700, color: '#1A1A1A', margin: '0 0 20px' }}>Order Actions</h2>
 
+        {/* Admin-only cancellation form. */}
         {isAdmin && !isCancelled && showCancelForm && (
           <div style={{ marginBottom: '24px' }}>
             <label style={{ display: 'block', fontSize: '15px', fontWeight: 700, color: '#1A1A1A', marginBottom: '10px' }}>
@@ -587,7 +650,7 @@ export default function OrderDetailPage({ role }) {
         {(!showCancelForm || isCancelled) && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
 
-            {/* Invoice status context — tells staff/admin which type of invoice will download */}
+            {/* Invoice status context — tells staff/admin which type of invoice will download/open */}
             <div style={{
               display: 'flex', alignItems: 'center', gap: '8px',
               padding: '10px 14px', borderRadius: '8px',
@@ -600,7 +663,7 @@ export default function OrderDetailPage({ role }) {
                 </svg>
               ) : (
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#854F0B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                  <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
                 </svg>
               )}
               <span style={{ fontSize: '13px', fontWeight: 600, color: isFinal ? '#166534' : '#854F0B' }}>
@@ -615,6 +678,8 @@ export default function OrderDetailPage({ role }) {
 
             <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
               <button
+                // Opens the invoice route in a new browser tab
+                // Reference - https://developer.mozilla.org/en-US/docs/Web/API/Window/open
                 onClick={() => window.open(`/api/orders/${id}/invoice/confirmation`, '_blank')}
                 style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', borderRadius: '8px', border: '1.5px solid #7B1A1A', background: 'transparent', color: '#7B1A1A', fontSize: '14px', fontWeight: 700, cursor: 'pointer', transition: 'all .15s' }}
                 onMouseEnter={e => { e.currentTarget.style.background = '#7B1A1A'; e.currentTarget.style.color = '#fff' }}
@@ -628,6 +693,7 @@ export default function OrderDetailPage({ role }) {
                 {invoiceLabel}
               </button>
 
+              {/* Only admin can cancel an order */}
               {isAdmin && !isCancelled && (
                 <button
                   onClick={() => setShowCancelForm(true)}
@@ -642,6 +708,7 @@ export default function OrderDetailPage({ role }) {
           </div>
         )}
 
+        {/* Final warning if the order is already cancelled. */}
         {isCancelled && (
           <div style={{ marginTop: '12px', padding: '12px 16px', background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: '8px', fontSize: '14px', color: '#B91C1C', fontWeight: 600 }}>
             This order has been cancelled and cannot be updated.

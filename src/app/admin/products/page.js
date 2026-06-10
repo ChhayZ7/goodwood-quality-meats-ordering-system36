@@ -60,10 +60,21 @@ export default function AdminProductsPage() {
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: COLOR.cream, fontFamily: '"Lato", sans-serif' }}>
-      <main style={{ flex: 1, padding: '40px 48px', overflowY: 'auto' }}>
+      <style>{`
+        .products-main { flex: 1; padding: 40px 48px; overflow-y: auto; min-width: 0; }
+        .products-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 32px; gap: 12px; flex-wrap: wrap; }
+        .products-search-wrap { position: relative; width: 400px; max-width: 100%; }
+        .products-table-scroll { overflow-x: auto; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+        .products-table { background: #fff; border-radius: 12px; overflow: hidden; min-width: 560px; }
+        @media (max-width: 768px) {
+          .products-main { padding: 20px 16px; }
+          .products-search-wrap { width: 100%; }
+        }
+      `}</style>
+      <main className="products-main">
 
         {/* Header */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '32px' }}>
+        <div className="products-header">
           <h1 style={{ fontFamily: '"Lato", serif', fontSize: '36px', fontWeight: 700, color: COLOR.red, margin: 0 }}>
             Products &amp; Pricing
           </h1>
@@ -94,7 +105,7 @@ export default function AdminProductsPage() {
 
         {/* Search bar */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '20px' }}>
-          <div style={{ position: 'relative', width: '400px' }}>
+          <div className="products-search-wrap">
             <svg
               style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: '#9CA3AF' }}
               width="15" height="15" viewBox="0 0 24 24" fill="none"
@@ -163,7 +174,8 @@ export default function AdminProductsPage() {
 
         {/* Table */}
         {!fetchError && (
-          <div style={{ background: COLOR.white, borderRadius: '12px', overflow: 'hidden', boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
+          <div className="products-table-scroll">
+          <div className="products-table">
 
             {/* Table header */}
             <div style={{
@@ -307,6 +319,7 @@ export default function AdminProductsPage() {
                 </div>
               </div>
             ))}
+          </div>
           </div>
         )}
       </main>

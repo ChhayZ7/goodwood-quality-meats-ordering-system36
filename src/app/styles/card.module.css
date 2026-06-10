@@ -108,6 +108,14 @@
   flex: 1;
 }
 
+.cardPrice {
+  font-size: 14px;
+  font-weight: 600;
+  color: #7b1a1a;
+  margin: 0 0 12px;
+  flex: 1;
+}
+
 /* linking to product details or recipe details */
 .cardLink {
   font-size: 13px;
