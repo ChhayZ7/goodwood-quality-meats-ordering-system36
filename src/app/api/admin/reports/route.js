@@ -1,3 +1,4 @@
+// src/app/api/admin/reports/route.js
 // GET /api/admin/reports
 
 // Query params: ?month=12&year=2026
@@ -14,7 +15,7 @@ import {
 } from '@/lib/db/reports'
 
 export const GET = withHandler(async (request) => {
-  // Auth check
+  // Verify the session cookie is valid
   const supabase = await createClient()
   const { data: { user }, error: authError } = await supabase.auth.getUser()
 
@@ -25,7 +26,7 @@ export const GET = withHandler(async (request) => {
     )
   }
 
-  // Role check, admin only allowed
+  // Reports contain revenue data — restricted to ADMIN only
   const { data: profile } = await supabaseAdmin
     .from('users')
     .select('role')

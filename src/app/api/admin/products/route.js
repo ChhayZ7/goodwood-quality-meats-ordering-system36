@@ -1,22 +1,31 @@
+// src/app/api/admin/products/route.js
+//
+// GET  /api/admin/products  — list all products (including unavailable ones)
+// POST /api/admin/products  — create a new product with optional weight options
+//
+// Both endpoints are accessible to ADMIN and STAFF.
+// Unlike the public /api/products endpoint, this returns all products
+// regardless of is_available, so staff can see and manage out-of-season items.
+
 import { createClient } from '@/lib/supabase-server'
 import { withHandler } from '@/lib/middleware/withHandler'
 
-// GET /api/admin/products - list all products with weight options
+// ─── GET ──────────────────────────────────────────────────────────────────────
 export const GET = withHandler(async (request) => {
     const supabase = await createClient()
 
-    // Check admin role
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user){
         return Response.json({ error: 'Unauthorised' }, { status: 401 })
     }
     const role = user.app_metadata?.role
-    console.log('User role:', role)
     if (role !== 'ADMIN' && role != 'STAFF'){
         return Response.json({ error: 'Forbidden' }, { status: 403 })
     }
 
+    // Order by created_at ascending so newer products appear at the bottom
+    // of the product management table (consistent with data entry order)
     const { data: products, error } = await supabase
         .from('products')
         .select('*, product_weight_options(*)')
@@ -27,13 +36,11 @@ export const GET = withHandler(async (request) => {
     return Response.json({ products })
 })
 
-// POST /api/admin/products - create a new product
+// ─── POST ─────────────────────────────────────────────────────────────────────
 export const POST = withHandler(async (request) => {
     const supabase = await createClient()
 
-    // Check admin role
     const { data: { user }, error: authError } = await supabase.auth.getUser()
-
     if (authError || !user){
         return Response.json({ error: 'Unauthorised' }, { status: 401 })
     }
@@ -51,7 +58,8 @@ export const POST = withHandler(async (request) => {
         price_cents,
         price_per_kg_cents,
         is_available,
-        weight_options = []
+        image_url,
+        weight_options = [], // optional - pnly relevant for WEIGHT_RANGE [products]
     } = body
 
     // Validate
@@ -61,7 +69,7 @@ export const POST = withHandler(async (request) => {
         })
     }
 
-    // Insert product
+    // Insert the product row first so we have an id to attach weight options to
     const { data: product, error: productError } = await supabase
         .from('products')
         .insert({
@@ -69,16 +77,20 @@ export const POST = withHandler(async (request) => {
             description: description ?? '',
             category, 
             product_type,
+            // Only one price field is relevant depending on product type;
+            // set the other to 0 so neither column is ever NULL
             price_cents: product_type === 'FIXED' ? price_cents: 0,
             price_per_kg_cents: product_type === 'WEIGHT_RANGE' ? price_per_kg_cents : 0,
             is_available: is_available ?? true,
+            image_url: image_url ?? null,
         })
         .select()
         .single()
 
     if (productError) return Response.json({ error: productError.message }, { status: 500})
 
-    // Insert weight options if WEIGHT_RANGE
+    // Insert weight options for WEIGHT_RANGE products.
+    // Fixed-price products don't have weight options so this block is skipped.
     if (product_type === 'WEIGHT_RANGE' && weight_options.length > 0) {
         const rows = weight_options.map(o => ({
             product_id: product.id,
@@ -94,12 +106,12 @@ export const POST = withHandler(async (request) => {
         if (woError) return Response.json({ error: woError.message }, { status: 500 })
     }
 
-    // Fetch full product with weight options to return
+    // Re-fetch the product with its weight options to return a complete object
     const { data: full } = await supabase
         .from('products')
         .select('*, product_weight_options(*)')
         .eq('id', product.id)
         .single()
-
+    // 201 Created
     return Response.json({ product: full}, { status: 201})
 })

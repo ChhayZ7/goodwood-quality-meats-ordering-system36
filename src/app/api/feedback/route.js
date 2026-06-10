@@ -3,14 +3,16 @@ import { withHandler } from '@/lib/middleware/withHandler'
 import { createClient } from '@/lib/supabase-server'
 import { supabaseAdmin } from '@/lib/supabase-admin'
 
+// feedback format
 const feedbackSchema = {
   required: ['order_id', 'score'],
   types: {
-    order_id:      'string',
-    score:         'number',
+    order_id: 'string',
+    score: 'number',
     feedback_text: 'string',
   },
   validators: {
+    // score is integer from 1-5
     score: (val) => {
       if (!Number.isInteger(val) || val < 1 || val > 5)
         return 'Score must be an integer between 1 and 5'
@@ -19,6 +21,7 @@ const feedbackSchema = {
   },
 }
 
+// check user is logged in via supabase auth
 export const POST = withHandler(async (request) => {
   const supabase = await createClient()
   const { data: { user }, error: authError } = await supabase.auth.getUser()
@@ -41,6 +44,7 @@ export const POST = withHandler(async (request) => {
   }
 
   // One feedback per order
+  // prevents order spam
   const { data: existing } = await supabaseAdmin
     .from('feedback')
     .select('id')
