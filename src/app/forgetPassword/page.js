@@ -48,11 +48,10 @@ export default function ForgotPassword() {
   };
 
   return (
-    <div className="h-screen flex bg-[#f4f1ec] overflow-hidden">
-      {/* Main page container. */}
+    <div className="min-h-screen flex bg-[#f4f1ec]">
 
       {/* LEFT SIDE */}
-      <div className="w-[45%] flex items-center justify-center px-20 -mt-20">
+      <div className="w-full md:w-[45%] flex items-center justify-center px-6 md:px-20 py-10 md:-mt-20">
         <div className="w-full max-w-lg">
           {/* LOGO */}
           <div className="flex flex-col items-center mb-6">
@@ -77,9 +76,7 @@ export default function ForgotPassword() {
 
           <div className="w-full h-[4px] bg-yellow-600 mb-10" />
 
-          <h2 className="text-5xl font-bold mb-4 text-black">
-            Forgot Password
-          </h2>
+          <h2 className="text-3xl md:text-5xl font-bold mb-4 text-black">Forgot Password</h2>
 
           {sent ? ( // If sent is true, show the success message instead of the form.
             <div>
@@ -146,13 +143,9 @@ export default function ForgotPassword() {
         </div>
       </div>
 
-      {/* RIGHT SIDE IMAGE */}
-      <div className="w-[55%] relative h-full">
-        <img
-          src="/meat.png"
-          alt="meat"
-          className="w-full h-full object-cover grayscale opacity-80"
-        />
+      {/* RIGHT SIDE IMAGE — hidden on mobile */}
+      <div className="hidden md:block md:w-[55%] relative">
+        <img src="/meat.png" alt="meat" className="w-full h-full object-cover grayscale opacity-80" />
         <div className="absolute inset-0 bg-gradient-to-l from-transparent via-[#f4f1ec]/40 to-[#f4f1ec]" />
       </div>
     </div>

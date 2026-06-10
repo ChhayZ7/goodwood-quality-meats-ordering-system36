@@ -313,7 +313,7 @@ export default function OrderDetailPage({ role }) {
 
       {/*Header*/}
       <div style={{ marginBottom: '32px' }}>
-        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '32px' }}>
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '32px', flexWrap: 'wrap', gap: '12px' }}>
           <div>
             <h1 style={{ fontSize: '36px', fontWeight: 700, color: '#7B1A1A', margin: '0 0 8px' }}>
               Order #{shortNum(order.id)}
@@ -374,7 +374,9 @@ export default function OrderDetailPage({ role }) {
           </div>
         )}
 
-        {/* Helper notice when staff/admin can enter weights */}
+                <div style={{ overflowX: 'auto' }}>
+                <div style={{ minWidth: '660px' }}>
+        {/* Editable weight notice for IN_PROGRESS */}
         {order.status === 'IN_PROGRESS' && hasWeightBasedItems && !weightsLocked && (
           <div style={{ background: '#F0FDF4', border: '1px solid #86EFAC', borderRadius: '8px', padding: '12px 16px', marginBottom: '16px', fontSize: '14px', color: '#166534' }}>
             Enter the actual weight for each item below, then click <strong>Save Weights</strong>. The order total will update automatically.
@@ -495,6 +497,8 @@ export default function OrderDetailPage({ role }) {
             </div>
           )
         })}
+                </div>
+                </div>
 
         {/*Save Weights section*/}
         {hasWeightBasedItems && !weightsLocked && (

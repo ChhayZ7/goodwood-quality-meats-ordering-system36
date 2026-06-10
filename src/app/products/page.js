@@ -86,12 +86,9 @@ function ProductCard({ product }) {
       </div>
 
       <div className={styles.cardContent}>
+        <span className={styles.cardCategory}>{product.category}</span>
         <h3 className={styles.cardTitle}>{product.name}</h3>
-        {/* Shows the calculated price text for this product. */}
-        <p style={{ marginBottom: '12px', fontWeight: 600, color: '#7b1a1a', fontSize: '14px' }}>
-          {priceDisplay}
-        </p>
-        {/* If sold out, do not allow the customer to open details/order flow. */}
+        <p className={styles.cardPrice}>{priceDisplay}</p>
         {soldOut ? (
           <p style={{
             margin: 0, padding: '10px', textAlign: 'center',

@@ -42,17 +42,38 @@ export default function DashboardSidebar({ role }) {
 
 
   return (
-    <aside style={{
-      width: '240px',
-      minWidth: '240px',
-      minHeight: '100vh',
-      background: '#fff',
-      display: 'flex',
-      flexDirection: 'column',
-    }}>
+    <>
+      <style>{`
+        .dash-sidebar {
+          width: 240px; min-width: 240px; min-height: 100vh;
+          background: #fff; display: flex; flex-direction: column;
+        }
+        .dash-sidebar-nav { flex: 1; }
+        @media (max-width: 768px) {
+          .dash-sidebar {
+            width: 100% !important; min-width: unset !important;
+            min-height: auto !important; flex-direction: row !important;
+            border-bottom: 1px solid #e4e4e4;
+            overflow-x: auto; -webkit-overflow-scrolling: touch;
+            scrollbar-width: none; flex-shrink: 0;
+          }
+          .dash-sidebar::-webkit-scrollbar { display: none; }
+          .dash-sidebar-label { display: none !important; }
+          .dash-sidebar-nav {
+            flex: unset !important; display: flex !important;
+            flex-direction: row !important; overflow-x: auto;
+          }
+          .dash-sidebar-nav a { white-space: nowrap; border-bottom: none !important; }
+          .dash-sidebar-logout {
+            border-top: none !important; border-left: 1px solid #E5E7EB !important;
+            white-space: nowrap; flex-shrink: 0;
+          }
+        }
+      `}</style>
+      <aside className="dash-sidebar">
 
       {/* Portal label: changes based on role */}
-      <div style={{
+      <div className="dash-sidebar-label" style={{
         padding: '20px 20px 16px',
         fontFamily: '"Lato", sans-serif',
         fontWeight: 700,
@@ -67,7 +88,7 @@ export default function DashboardSidebar({ role }) {
       </div>
 
 
-      <nav style={{ flex: 1 }}>
+      <nav className="dash-sidebar-nav">
         {visibleNav.map(item => {
           const href = item.href[role]
           const isActive = pathname.startsWith(href)
@@ -101,6 +122,7 @@ export default function DashboardSidebar({ role }) {
       </nav>
 
       <button
+        className="dash-sidebar-logout"
         onClick={handleLogout}
         style={{
           display: 'flex',
@@ -124,5 +146,6 @@ export default function DashboardSidebar({ role }) {
         Log Out
       </button>
     </aside>
+    </>
   )
 }

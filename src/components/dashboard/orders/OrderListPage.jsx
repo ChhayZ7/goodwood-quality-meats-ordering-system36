@@ -151,7 +151,8 @@ export default function OrdersListPage({ role }) {
             )}
 
             {/* Table */}
-            <div style={{ background: '#fff', borderRadius: '12px', border: '1px solid #E5E7EB', overflow: 'hidden' }}>
+            <div style={{ overflowX: 'auto', borderRadius: '12px', border: '1px solid #E5E7EB' }}>
+            <div style={{ background: '#fff', borderRadius: '12px', overflow: 'hidden', minWidth: '700px' }}>
 
                 {/* Header */}
                 <div style={{ display: 'grid', gridTemplateColumns: COLS, padding: '12px 20px', background: '#F9FAFB', borderBottom: '1px solid #E5E7EB' }}>
@@ -234,6 +235,7 @@ export default function OrdersListPage({ role }) {
                     </div>
                 )}
             </div>
-        </PageWrapper>
-    )
+            </div>
+            </PageWrapper>
+            )
 }

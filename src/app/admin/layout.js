@@ -16,16 +16,26 @@ export default async function AdminLayout({ children }) {
   if (role !== 'ADMIN' && role !== 'STAFF') redirect('/')
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', background: '#FAF3E0' }}>
+    <>
+      <style>{`
+        .admin-layout { min-height: 100vh; display: flex; background: #FAF3E0; }
+        .admin-main { flex: 1; background: #FAF3E0; padding: 32px; min-width: 0; }
+        @media (max-width: 768px) {
+          .admin-layout { flex-direction: column; }
+          .admin-main { padding: 16px; }
+        }
+      `}</style>
+      <div className="admin-layout">
 
-      {/* Sidebar - Client Component, receives role as prop */}
-      <DashboardSidebar role={role} />
+        {/* Sidebar - Client Component, receives role as prop */}
+        <DashboardSidebar role={role} />
 
-      {/* Main content */}
-      <main style={{ flex: 1, background: '#FAF3E0', padding: '32px' }}>
-        {children}
-      </main>
+        {/* Main content */}
+        <main className="admin-main">
+          {children}
+        </main>
 
-    </div>
+      </div>
+    </>
   )
 }

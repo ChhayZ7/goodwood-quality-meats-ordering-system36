@@ -64,7 +64,8 @@ function StaffTableSkeleton() {
           100% { background-position: -200% 0; }
         }
       `}</style>
-      <div style={{ background: COLOR.white, borderRadius: '12px', overflow: 'hidden', boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
+      <div style={{ overflowX: 'auto', borderRadius: '12px', boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
+      <div style={{ background: COLOR.white, borderRadius: '12px', overflow: 'hidden', minWidth: '580px' }}>
         <div style={{ display: 'grid', gridTemplateColumns: COLS, padding: '14px 28px', borderBottom: `2px solid ${COLOR.border}` }}>
           {[1, 2, 3, 4, 5].map(item => (
             <SkeletonBox key={item} height={14} width={item === 5 ? '70%' : '60%'} />
@@ -81,6 +82,7 @@ function StaffTableSkeleton() {
             </div>
           </div>
         ))}
+      </div>
       </div>
     </>
   )
@@ -148,7 +150,8 @@ export default function AdminStaffPage() {
 
       {/* Table */}
       {!loading && !fetchError && (
-        <div style={{ background: COLOR.white, borderRadius: '12px', overflow: 'hidden', boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
+        <div style={{ overflowX: 'auto', borderRadius: '12px', boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
+        <div style={{ background: COLOR.white, borderRadius: '12px', overflow: 'hidden', minWidth: '580px' }}>
 
           {/* Table header */}
           <div style={{ display: 'grid', gridTemplateColumns: COLS, padding: '14px 28px', borderBottom: `2px solid ${COLOR.border}` }}>
@@ -208,6 +211,7 @@ export default function AdminStaffPage() {
               </div>
             </div>
           ))}
+        </div>
         </div>
       )}
     </PageWrapper>
