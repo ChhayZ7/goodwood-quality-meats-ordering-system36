@@ -1,6 +1,10 @@
 import Link from 'next/link';
 import HeroImage from '../assets/heroImage.jpg'
 import AwardWinning from '../assets/awardWinning.png'
+
+// Team member data, sourced from the client's existing website
+//However, there photo has to be downloaded and store it in the assets folder just in case the current webpage is down
+// Each member has a name, short bio, and a direct image URL from their site
 const teamMembers = [
   {
     name: 'David Armstrong',
@@ -34,6 +38,8 @@ const teamMembers = [
   },
 ]
 
+//constant to store award data
+//each entry has bold label and description, bold and rest will be render later
 const awards = [
   { bold: '2019', rest: 'SA Best Retail Shop' },
   { bold: '2018', rest: 'SA Award of Excellence, Best Retail Butcher Shop' },
@@ -52,6 +58,8 @@ export default function HomePage() {
     <main>
 
       {/* Hero Image */}
+      {/* full wdth banner image at the top of the page */}
+      {/* fixed height with object cover so the image fill the container without stretching, whatever overflow outside the container is hidden */}
       <div className="w-full h-110 overflow-hidden">
         <img
           src={HeroImage.src}
@@ -64,7 +72,9 @@ export default function HomePage() {
       <div style={{ height: '2.5px', backgroundColor: '#D4AF37' }} />
 
       {/* Welcome Section */}
+      {/* padding top + bottom, set max width to 3xl, margin auto, padding left right */}
       <section className="py-25 text-center max-w-3xl mx-auto px-6">
+        {/*tracking widest for letter spacing, margin bottom*/}
         <p className="text-3xl font-semibold tracking-widest mb-3" style={{ color: '#D4AF37' }}>
           PREMIUM MEATS
         </p>
@@ -75,6 +85,7 @@ export default function HomePage() {
           Make this Christmas unforgettable with our premium selection of locally sourced,
           expertly prepared meats. Pre-order now for guaranteed availability.
         </p>
+        {/*make it behave like a block but stay inline so it does not stretch full width, trans smoothly animates the opacity change on hover, effect */}
         <Link
           href="/products"
           className="inline-block px-8 py-3 rounded-lg text-white transition-opacity hover:opacity-90"
@@ -87,7 +98,12 @@ export default function HomePage() {
       {/* Gold divider */}
       <div style={{ height: '2px', backgroundColor: '#D4AF37' }} />
 
-      {/* How It Works */}
+      {/* How it works
+          3-step process section explaining how to place an order.
+
+          Layout: grid with 1 column on mobile (grid-cols-1), switching to 3 columns
+          on sm screens and above (sm:grid-cols-3). Gap increases on larger screens too
+          sm means apply this style when screen is 640px wide or above */}
       <section className="py-20" style={{ backgroundColor: '#FDF8F0' }}>
         <div className="max-w-7xl mx-auto px-6">
           <h2 className="text-4xl text-center mb-16" style={{ color: '#8B1A1A' }}>
@@ -113,6 +129,9 @@ export default function HomePage() {
                 title: 'Collect & Enjoy',
                 description: 'Pick up your order fresh on your chosen date and enjoy a perfect Christmas feast.',
               },
+              {/* Steps rendered from the array above 
+                 Using .map() keeps the JSX clean and makes it
+              easy to add or reorder steps later */}
             ].map((step) => (
               <div key={step.number} className="text-center">
                 <div
@@ -170,6 +189,8 @@ export default function HomePage() {
           <p className="text-lg mb-12" style={{ color: '#353535' }}>
             Meet our experienced team of master butchers dedicated to providing you with the finest quality meats
           </p>
+          {/* lg:... 3 columns on screens 1024px and above for desktop*/}
+          {/* for each member in teamMembers, display*/}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {teamMembers.map((member) => (
               <div
@@ -212,8 +233,9 @@ export default function HomePage() {
           </p>
           <div className="flex flex-col gap-10 md:flex-row md:gap-16 md:items-center">
 
-               {/*Image on the right ot shows on top first on mobile */}
+            {/*Image on the right ot shows on top first on mobile */}
 
+            {/*md is another Tailwind breakpoint apply this style when the screen is 768px wide or above */}
             <div className="flex justify-center md:order-2 md:w-1/2">
               <img
                 src={AwardWinning.src}
@@ -225,6 +247,8 @@ export default function HomePage() {
             {/*Award List on left */}
 
             <div className="flex flex-col gap-2  md:order-1 md:w-1/2">
+              {/*award is the current item in the array (the object with bold and rest)
+              index is the index number of that item in the array (0, 1, 2, 3...), used as the key prop */}
               {awards.map((award, index) => (
                 <p key={index} className="text-sm" style={{ color: '#2C2C2A' }}>
                   <span className="font-bold">{award.bold}</span>
@@ -234,7 +258,7 @@ export default function HomePage() {
               ))}
             </div>
 
-         
+
 
           </div>
         </div>
